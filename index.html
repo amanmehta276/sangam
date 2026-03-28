@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ================================================
+       SANGAM - Alumni Student Platform
+       Developed by VyomTech
+       ================================================ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF8C00" />
+  <meta name="description" content="Sangam — Connecting alumni and students through knowledge." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sangam" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Sangam</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-wrapper">
+
+    <!-- SIDEBAR OVERLAY -->
+    <div id="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- SIDEBAR / HAMBURGER MENU -->
+    <aside id="sidebar" role="navigation" aria-label="Sidebar Menu">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Sangam</div>
+        <div class="sidebar-subtitle">विद्या नित्यं संयोजयति</div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-text">Crafted with ❤️ by</div>
+        <div class="sidebar-footer-brand">VyomTech · v1.0.0</div>
+      </div>
+    </aside>
+
+    <!-- APP HEADER (sticky) -->
+    <header class="app-header" role="banner">
+      <div class="header-left">
+        <!-- Hamburger always on LEFT -->
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Open Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="header-logo">
+          <img src="favicon.ico" style="width:36px;height:36px;object-fit:contain;padding:4px;border-radius:8px;">
+          <div class="logo-text">
+            <span class="logo-name">Sangam</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESKTOP TOP NAV (only shows on desktop) -->
+      <nav class="desktop-nav" id="desktop-nav" aria-label="Desktop Navigation">
+        <div class="desktop-nav-item active" data-page="home">🏠 Home</div>
+        <div class="desktop-nav-item" data-page="chat">💬 Chat</div>
+        <div class="desktop-nav-item" data-page="activity">📋 Activity</div>
+        <div class="desktop-nav-item" data-page="jobs">💼 Jobs</div>
+        <div class="desktop-nav-item" data-page="card">🪪 Card</div>
+        <div class="desktop-nav-item" data-page="profile">👤 Profile</div>
+      </nav>
+
+      <div class="header-right">
+        <button id="search-btn" class="header-icon-btn" aria-label="Search">🔍</button>
+        <button id="notif-btn" class="header-icon-btn" aria-label="Notifications">
+          🔔
+          <span class="notif-badge" aria-label="3 unread notifications"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" role="main">
+
+      <!-- PAGE: HOME -->
+      <section id="page-home" class="page-view active" aria-label="Home">
+        <div id="home-dynamic"></div>
+      </section>
+
+      <!-- PAGE: ACTIVITY / FEED -->
+      <section id="page-activity" class="page-view" aria-label="Activity Feed">
+        <div class="feed-controls">
+          <div class="tab-switcher" role="tablist">
+            <button class="tab-btn active" data-tab="all" role="tab" aria-selected="true">🌐 All Posts</button>
+            <button class="tab-btn" data-tab="following" role="tab" aria-selected="false">🎓 Alumni Feed</button>
+          </div>
+          <div class="filter-row">
+            <select class="filter-select" id="filter-batch" aria-label="Filter by batch">
+              <option value="all">All Batches</option>
+              <option value="2025">Batch 2025</option>
+              <option value="2024">Batch 2024</option>
+              <option value="2023">Batch 2023</option>
+              <option value="2019">Batch 2019</option>
+              <option value="2018">Batch 2018</option>
+              <option value="2017">Batch 2017</option>
+              <option value="2016">Batch 2016</option>
+              <option value="2015">Batch 2015</option>
+            </select>
+            <select class="filter-select" id="filter-role" aria-label="Filter by role">
+              <option value="all">All Roles</option>
+              <option value="Student">Students</option>
+              <option value="Alumni">Alumni</option>
+            </select>
+          </div>
+        </div>
+        <div class="feed-list" id="feed-list" role="feed" aria-label="Posts feed"></div>
+      </section>
+
+      <!-- PAGE: CHAT -->
+      <section id="page-chat" class="page-view" aria-label="Chat">
+        <div class="chat-search">
+          <div class="search-input-wrap">
+            <span>🔍</span>
+            <input type="search" class="search-input" placeholder="Search conversations..." aria-label="Search chats" />
+          </div>
+        </div>
+        <div class="section" style="padding-bottom:0">
+          <div class="section-title" style="margin-bottom:var(--space-sm)">Online Now</div>
+          <div style="display:flex; gap:var(--space-md); overflow-x:auto; padding-bottom:var(--space-sm); scrollbar-width:none;">
+            <div style="flex-shrink:0; text-align:center; cursor:pointer;" onclick="showToast('💬 Opening chat...')">
+              <div style="position:relative; display:inline-block;">
+                <div style="width:52px;height:52px;border-radius:50%;background:#6c63ff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;border:2px solid rgba(255,255,255,0.15)">PS</div>
+                <span style="position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:#06d6a0;border-radius:50%;border:2px solid var(--bg-app)"></span>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Priya</div>
+            </div>
+            <div style="flex-shrink:0; text-align:center; cursor:pointer;" onclick="showToast('💬 Opening chat...')">
+              <div style="position:relative; display:inline-block;">
+                <div style="width:52px;height:52px;border-radius:50%;background:#4cc9f0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;border:2px solid rgba(255,255,255,0.15)">AC</div>
+                <span style="position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:#06d6a0;border-radius:50%;border:2px solid var(--bg-app)"></span>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Alumni Cell</div>
+            </div>
+            <div style="flex-shrink:0; text-align:center; cursor:pointer;" onclick="showToast('💬 Opening chat...')">
+              <div style="position:relative; display:inline-block;">
+                <div style="width:52px;height:52px;border-radius:50%;background:#7b2d8b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;border:2px solid rgba(255,255,255,0.15)">SP</div>
+                <span style="position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:#06d6a0;border-radius:50%;border:2px solid var(--bg-app)"></span>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Sneha</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-section-label">Messages</div>
+        <div class="chat-list" id="chat-list" role="list" aria-label="Chat conversations"></div>
+      </section>
+
+      <!-- PAGE: JOBS & INTERNSHIPS (NEW) -->
+      <section id="page-jobs" class="page-view" aria-label="Jobs & Internships">
+        <div id="jobs-dynamic"></div>
+      </section>
+
+      <!-- PAGE: CARD (Digital ID) -->
+      <section id="page-card" class="page-view" aria-label="Digital ID Card">
+        <div class="section" style="text-align:center; padding-bottom:0;">
+          <h2 class="section-title" style="justify-content:center; margin-bottom:4px">Digital ID Card</h2>
+          <p style="font-size:12px; color:var(--text-muted)">Your official Sangam identity</p>
+        </div>
+        <div class="card-page-wrap" id="card-container"></div>
+      </section>
+
+      <!-- PAGE: PROFILE -->
+      <section id="page-profile" class="page-view" aria-label="Profile">
+        <div id="profile-dynamic"></div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR (Mobile only) -->
+    <nav class="bottom-nav" role="navigation" aria-label="Main Navigation">
+      <div class="nav-item active" data-page="home" role="button" tabindex="0">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" data-page="chat" role="button" tabindex="0">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chat</span>
+      </div>
+      <div class="nav-item" data-page="activity" role="button" tabindex="0">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Activity</span>
+      </div>
+      <div class="nav-item" data-page="jobs" role="button" tabindex="0">
+        <span class="nav-icon">💼</span>
+        <span class="nav-label">Jobs</span>
+      </div>
+      <div class="nav-item" data-page="card" role="button" tabindex="0">
+        <span class="nav-icon">🪪</span>
+        <span class="nav-label">Card</span>
+      </div>
+      <div class="nav-item" data-page="profile" role="button" tabindex="0">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </div>
+    </nav>
+
+    <!-- FLOATING ACTION BUTTON -->
+    <button id="fab-btn" class="fab" aria-label="Create New Post" style="display:none">➕</button>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" role="alert" aria-live="polite"></div>
+
+    <!-- PWA INSTALL BANNER -->
+    <div id="install-banner" role="complementary" aria-label="Install App Banner">
+      <div class="install-icon">📲</div>
+      <div class="install-text">
+        <div class="install-title">Install Sangam</div>
+        <div class="install-sub">Add to home screen for the best experience</div>
+      </div>
+      <button id="install-btn" class="btn btn-primary btn-sm">Install</button>
+      <button id="install-dismiss" class="install-close" aria-label="Dismiss">✕</button>
+    </div>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
