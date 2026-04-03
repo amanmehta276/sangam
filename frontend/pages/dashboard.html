@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sangam — Dashboard</title>
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/components.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+
+<!-- ── Sidebar ─────────────────────────────────────── -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🔱</div>
+    <div>
+      <div class="sidebar-app-name">Sangam</div>
+      <div class="sidebar-college">CIT Raipur</div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">College</div>
+    <a class="sidebar-item" href="../index.html"><span>🏛️</span>About College</a>
+    <a class="sidebar-item" href="../index.html#association"><span>🔱</span>Association</a>
+    <a class="sidebar-item" href="../index.html#branches"><span>📚</span>Branches</a>
+    <a class="sidebar-item" href="#" onclick="showTab('profile');closeSidebar()"><span>👨‍🏫</span>Teachers</a>
+
+    <div class="sidebar-section-label">Community</div>
+    <a class="sidebar-item" href="#" onclick="showTab('feed');closeSidebar()"><span>📰</span>Activity Feed</a>
+    <a class="sidebar-item" href="#mentorship" onclick="showTab('chat');closeSidebar()"><span>🤝</span>Mentorship</a>
+    <a class="sidebar-item" href="#" onclick="showTab('jobs');closeSidebar()"><span>💼</span>Placement</a>
+    <a class="sidebar-item" href="#" onclick="showScholarship();closeSidebar()"><span>🎓</span>Scholarship</a>
+    <a class="sidebar-item" href="#" onclick="showTab('feed');closeSidebar()"><span>📢</span>Updates</a>
+
+    <div class="sidebar-section-label">Info</div>
+    <a class="sidebar-item" href="../index.html#about-dev"><span>👨‍💻</span>About VyomTech</a>
+    <a class="sidebar-item" href="#" onclick="logout()"><span>🚪</span>Logout</a>
+  </nav>
+  <div class="sidebar-footer">Made with ❤️ by VyomTech</div>
+</aside>
+
+<!-- ── Top Header ──────────────────────────────────── -->
+<header class="top-navbar">
+  <button class="nav-hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-logo">
+    <span class="nav-logo-icon">🔱</span>
+    <span class="nav-logo-text">San<em>gam</em></span>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">🔍</button>
+    <button class="nav-icon-btn" id="notif-btn" onclick="showTab('notifs')" title="Notifications">
+      🔔<span class="notif-dot" id="notif-dot"></span>
+    </button>
+    <div class="user-av-btn" id="header-avatar" onclick="showTab('profile')">A</div>
+  </div>
+</header>
+
+<!-- ── Search Bar (toggle) ─────────────────────────── -->
+<div class="search-bar-wrap hidden" id="search-bar">
+  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…"
+    oninput="handleSearch(this.value)">
+</div>
+
+<!-- ── Main Content ───────────────────────────────── -->
+<main class="dash-main">
+
+  <!-- ════ FEED TAB ════ -->
+  <div class="tab-view active" id="tab-feed">
+    <!-- Stories -->
+    <div class="stories-strip" id="stories-strip">
+      <div class="story" onclick="showToast('Add your story')">
+        <div class="story-ring add"><span class="story-add">＋</span></div>
+        <div class="story-name">Your Story</div>
+      </div>
+      <!-- JS will inject more stories -->
+    </div>
+
+    <!-- Compose -->
+    <div class="compose-row" onclick="openPostModal()">
+      <div class="compose-av" id="compose-av">A</div>
+      <div class="compose-ph">Share with your college network…</div>
+      <div class="compose-btns">
+        <div class="cpbtn">💼</div>
+        <div class="cpbtn">🏆</div>
+        <div class="cpbtn">💡</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="chips-row">
+      <div class="chip on" onclick="filterFeed('all',this)">All</div>
+      <div class="chip" onclick="filterFeed('job',this)">Jobs</div>
+      <div class="chip" onclick="filterFeed('question',this)">Questions</div>
+      <div class="chip" onclick="filterFeed('win',this)">Achievements</div>
+      <div class="chip" onclick="filterFeed('event',this)">Events</div>
+      <div class="chip" onclick="filterFeed('tip',this)">Tips</div>
+    </div>
+
+    <div class="sec-label">Latest from your network</div>
+    <div id="feed-list">
+      <!-- Populated by JS -->
+      <div class="feed-loading">Loading posts…</div>
+    </div>
+  </div>
+
+  <!-- ════ ALUMNI TAB ════ -->
+  <div class="tab-view" id="tab-alumni">
+    <div class="search-hero">
+      <div class="search-hero-title">Find <em>Alumni</em></div>
+      <div class="search-box">
+        <span>🔍</span>
+        <input placeholder="Search by name, company, batch…" oninput="searchAlumni(this.value)">
+      </div>
+    </div>
+
+    <div class="filter-grid">
+      <div class="fcard" onclick="filterAlumniBy('branch','CSE')"><span class="fi">💻</span><span class="fl">CSE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','EEE')"><span class="fi">⚡</span><span class="fl">EEE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','ECE')"><span class="fi">📡</span><span class="fl">ECE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('role','alumni')"><span class="fi">🎓</span><span class="fl">Alumni</span></div>
+      <div class="fcard" onclick="filterAlumniBy('role','teacher')"><span class="fi">👨‍🏫</span><span class="fl">Teachers</span></div>
+      <div class="fcard" onclick="filterAlumniBy('company','FAANG')"><span class="fi">🌐</span><span class="fl">FAANG</span></div>
+      <div class="fcard" onclick="filterAlumniBy('mentors','1')"><span class="fi">🤝</span><span class="fl">Mentors</span></div>
+      <div class="fcard" onclick="filterAlumniBy('referral','1')"><span class="fi">📋</span><span class="fl">Referrals</span></div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip on" onclick="chipSel(this)">All</div>
+      <div class="chip" onclick="chipSel(this)">Offering Referrals</div>
+      <div class="chip" onclick="chipSel(this)">Open to Mentor</div>
+      <div class="chip" onclick="chipSel(this)">Batch 2015–20</div>
+      <div class="chip" onclick="chipSel(this)">Batch 2020+</div>
+    </div>
+
+    <div class="sec-label">Alumni Directory</div>
+    <div id="alumni-list">
+      <div class="feed-loading">Loading alumni…</div>
+    </div>
+  </div>
+
+  <!-- ════ JOBS TAB ════ -->
+  <div class="tab-view" id="tab-jobs">
+    <div class="search-hero">
+      <div class="search-hero-title">Jobs & <em>Internships</em></div>
+      <div class="search-box">
+        <span>🔍</span>
+        <input placeholder="Role, company, skills…">
+      </div>
+    </div>
+    <div class="chips-row">
+      <div class="chip on" onclick="chipSel(this)">All</div>
+      <div class="chip" onclick="chipSel(this)">With Referral</div>
+      <div class="chip" onclick="chipSel(this)">Internship</div>
+      <div class="chip" onclick="chipSel(this)">Full-Time</div>
+      <div class="chip" onclick="chipSel(this)">Remote</div>
+      <div class="chip" onclick="chipSel(this)">Scholarship</div>
+    </div>
+    <!-- Post job button (visible to alumni/teacher/admin) -->
+    <div id="post-job-btn-wrap" class="hidden" style="padding:10px 14px 0">
+      <button class="btn-primary w-full" onclick="openJobModal()">+ Post a Job / Referral</button>
+    </div>
+    <div class="sec-label">Active Openings</div>
+    <div id="jobs-list">
+      <div class="feed-loading">Loading jobs…</div>
+    </div>
+  </div>
+
+  <!-- ════ CHAT TAB ════ -->
+  <div class="tab-view" id="tab-chat">
+    <div class="chat-hero">
+      <div class="chat-title-row">
+        <span class="chat-screen-title">Mess<em>ages</em></span>
+        <button class="icon-btn-sm" onclick="showToast('New group coming soon')">＋</button>
+      </div>
+      <div class="search-box">
+        <span style="opacity:.5">🔍</span>
+        <input placeholder="Search messages, groups…">
+      </div>
+      <div class="chat-tabs">
+        <div class="ctab on" id="ctab-dm" onclick="chatTabSwitch('dm')">Direct Messages</div>
+        <div class="ctab" id="ctab-grp" onclick="chatTabSwitch('grp')">Groups</div>
+      </div>
+    </div>
+
+    <div id="chat-dm-list">
+      <!-- Populated by JS -->
+      <div class="feed-loading">Loading chats…</div>
+    </div>
+    <div id="chat-grp-list" class="hidden">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- ════ PROFILE TAB ════ -->
+  <div class="tab-view" id="tab-profile">
+    <div class="profile-cover">
+      <div class="cover-geo"></div>
+      <div class="cover-logos">
+        <div class="cover-logo-slot" title="Association">🔱</div>
+        <div class="cover-logo-slot" title="College">🏛️</div>
+      </div>
+      <div class="prof-av-wrap">
+        <div class="prof-av" id="profile-av">A</div>
+      </div>
+    </div>
+    <div class="prof-info">
+      <div class="prof-edit-row">
+        <button class="btn-outline-sm" onclick="toggleEditProfile()">✏️ Edit Profile</button>
+      </div>
+      <h2 class="prof-name" id="prof-name">Loading…</h2>
+      <div class="prof-role" id="prof-role"></div>
+      <div class="prof-badges" id="prof-badges"></div>
+
+      <div class="stats-row" id="prof-stats">
+        <div class="stat"><div class="stat-n" id="stat-posts">0</div><div class="stat-l">Posts</div></div>
+        <div class="stat"><div class="stat-n" id="stat-connections">0</div><div class="stat-l">Connections</div></div>
+        <div class="stat"><div class="stat-n" id="stat-refs">0</div><div class="stat-l">Referrals</div></div>
+        <div class="stat"><div class="stat-n" id="stat-views">0</div><div class="stat-l">Views</div></div>
+      </div>
+
+      <!-- Trust level -->
+      <div class="prof-section">
+        <div class="ps-title">🔐 Trust Level</div>
+        <div class="trust-bar-bg"><div class="trust-bar-fg" id="trust-bar"></div></div>
+        <div class="trust-bar-meta"><span id="trust-label">50%</span><span id="trust-boost" onclick="showToast('Add LinkedIn to boost trust!')" style="cursor:pointer;color:var(--purple)">Boost ↗</span></div>
+      </div>
+
+      <!-- Bio -->
+      <div class="prof-section">
+        <div class="ps-title">About</div>
+        <p class="prof-bio" id="prof-bio">No bio yet.</p>
+        <textarea class="finput hidden" id="bio-edit" rows="3" placeholder="Write something about yourself…"></textarea>
+      </div>
+
+      <!-- Skills -->
+      <div class="prof-section">
+        <div class="ps-title">Skills</div>
+        <div id="skills-list"></div>
+      </div>
+
+      <!-- Edit form (hidden by default) -->
+      <div class="prof-section hidden" id="edit-form">
+        <div class="ps-title">Edit Profile</div>
+        <div class="fgrp"><label class="flabel-light">Email</label><input type="email" class="finput-light" id="edit-email" placeholder="yourname@college.edu"></div>
+        <div class="fgrp"><label class="flabel-light">Company / Position</label><input type="text" class="finput-light" id="edit-company" placeholder="Google · SDE-2"></div>
+        <div class="fgrp"><label class="flabel-light">LinkedIn URL</label><input type="url" class="finput-light" id="edit-linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+        <div class="fgrp"><label class="flabel-light">GitHub URL</label><input type="url" class="finput-light" id="edit-github" placeholder="https://github.com/yourname"></div>
+        <div class="fgrp"><label class="flabel-light">Skills (comma separated)</label><input type="text" class="finput-light" id="edit-skills" placeholder="Python, React, DSA"></div>
+        <button class="btn-primary w-full" onclick="saveProfile()">💾 Save Changes</button>
+      </div>
+
+      <!-- Links -->
+      <div class="prof-section">
+        <div class="ps-title">Links</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="prof-links"></div>
+      </div>
+
+      <button class="btn-danger w-full" onclick="logout()" style="margin:8px 0 24px">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- ════ NOTIFICATIONS TAB ════ -->
+  <div class="tab-view" id="tab-notifs">
+    <div class="search-hero">
+      <div class="search-hero-title">Notif<em>ications</em></div>
+    </div>
+    <div class="chips-row">
+      <div class="chip on" onclick="chipSel(this)">All</div>
+      <div class="chip" onclick="chipSel(this)">Jobs</div>
+      <div class="chip" onclick="chipSel(this)">Messages</div>
+      <div class="chip" onclick="chipSel(this)">System</div>
+    </div>
+    <div id="notifs-list">
+      <div class="feed-loading">Loading notifications…</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Bottom Navigation ───────────────────────────── -->
+<nav class="bottom-nav" id="dash-bottom-nav">
+  <div class="bnav-item active" data-tab="feed" onclick="showTab('feed')">
+    <span class="bnav-icon">🏠</span><span class="bnav-label">Feed</span>
+  </div>
+  <div class="bnav-item" data-tab="alumni" onclick="showTab('alumni')">
+    <span class="bnav-icon">🔍</span><span class="bnav-label">Alumni</span>
+  </div>
+  <div class="bnav-item" data-tab="jobs" onclick="showTab('jobs')">
+    <span class="bnav-icon">💼</span><span class="bnav-label">Jobs</span>
+  </div>
+  <div class="bnav-item" data-tab="chat" onclick="showTab('chat')">
+    <span class="bnav-icon">💬</span><span class="bnav-label">Chat</span>
+    <span class="nav-pip hidden" id="chat-pip">4</span>
+  </div>
+  <div class="bnav-item" data-tab="profile" onclick="showTab('profile')">
+    <span class="bnav-icon">👤</span><span class="bnav-label">Profile</span>
+  </div>
+</nav>
+
+<!-- ── FAB (compose) ──────────────────────────────── -->
+<button class="fab" onclick="openPostModal()" id="fab-btn">✍️</button>
+
+<!-- ── Post Compose Modal ─────────────────────────── -->
+<div class="overlay hidden" id="post-modal" onclick="modalBgClose(event,'post-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">What's happening?</div>
+      <div class="post-types">
+        <div class="pt-btn sel" onclick="ptSel(this)" data-type="update"><span class="pt-icon">💬</span><span class="pt-label">Update</span></div>
+        <div class="pt-btn" onclick="ptSel(this)" data-type="job"><span class="pt-icon">💼</span><span class="pt-label">Job/Ref</span></div>
+        <div class="pt-btn" onclick="ptSel(this)" data-type="question"><span class="pt-icon">🙋</span><span class="pt-label">Question</span></div>
+        <div class="pt-btn" onclick="ptSel(this)" data-type="win"><span class="pt-icon">🏆</span><span class="pt-label">Win</span></div>
+        <div class="pt-btn" onclick="ptSel(this)" data-type="event"><span class="pt-icon">📢</span><span class="pt-label">Event</span></div>
+        <div class="pt-btn" onclick="ptSel(this)" data-type="tip"><span class="pt-icon">💡</span><span class="pt-label">Tip</span></div>
+      </div>
+      <textarea class="post-ta" id="post-content" placeholder="Share something with your college network…" rows="4"></textarea>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('post-modal')">Cancel</button>
+        <button class="btn-submit" onclick="submitPost()">Post to Sangam 🔱</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Job Post Modal ──────────────────────────────── -->
+<div class="overlay hidden" id="job-modal" onclick="modalBgClose(event,'job-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Post a Job / Referral</div>
+      <div class="fgrp"><label class="flabel-light">Job Title</label><input class="finput-light" id="jm-title" placeholder="Software Engineer Intern"></div>
+      <div class="fgrp"><label class="flabel-light">Company</label><input class="finput-light" id="jm-company" placeholder="Google"></div>
+      <div class="frow">
+        <div class="fgrp"><label class="flabel-light">Location</label><input class="finput-light" id="jm-location" placeholder="Bangalore"></div>
+        <div class="fgrp"><label class="flabel-light">Salary</label><input class="finput-light" id="jm-salary" placeholder="₹80k/mo"></div>
+      </div>
+      <div class="fgrp"><label class="flabel-light">Type</label>
+        <select class="fselect-light" id="jm-type">
+          <option value="internship">Internship</option>
+          <option value="fulltime">Full-Time</option>
+          <option value="parttime">Part-Time</option>
+        </select>
+      </div>
+      <div class="fgrp"><label class="flabel-light">Skills Required (comma separated)</label><input class="finput-light" id="jm-skills" placeholder="DSA, System Design, Python"></div>
+      <div class="fgrp"><label class="flabel-light">Description</label><textarea class="finput-light" id="jm-desc" rows="3" placeholder="Brief description…"></textarea></div>
+      <div class="fgrp" style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="jm-referral" style="width:18px;height:18px;accent-color:var(--purple)">
+        <label for="jm-referral" style="font-size:13px;color:var(--text-2)">I can provide a referral</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('job-modal')">Cancel</button>
+        <button class="btn-submit" onclick="submitJob()">Post Job 💼</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="../js/dashboard.js"></script>
+</body>
+</html>
