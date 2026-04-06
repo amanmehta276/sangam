@@ -21,7 +21,10 @@ def create_app():
     os.makedirs(app.config.get("UPLOAD_FOLDER", "uploads"), exist_ok=True)
 
     CORS(app, origins=[
-        "https://cgitsangam.netlify.app/","https://sangam-z93f.onrender.com"
+         "http://127.0.0.1:5500",
+         "http://localhost:5500",
+        "https://cgitsangam.netlify.app/",
+        "https://sangam-z93f.onrender.com"
     ], supports_credentials=True)
 
     init_db(app)
