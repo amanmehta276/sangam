@@ -23,7 +23,7 @@ def create_app():
     CORS(app, origins=[
          "http://127.0.0.1:5500",
          "http://localhost:5500",
-        "https://cgitsangam.netlify.app/",
+        "https://cgitsangam.netlify.app",
         "https://sangam-z93f.onrender.com"
     ], supports_credentials=True)
 
