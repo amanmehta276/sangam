@@ -2,13 +2,767 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sangam — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sangam</title>
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/components.css">
 <link rel="stylesheet" href="../css/dashboard.css">
+<link rel="icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════
+   CRITICAL FIX: Layout must not collapse
+   The body, html, and all wrapper heights must be
+   explicitly set to prevent overlapping
+═══════════════════════════════════════════════ */
+html, body { height: 100%; overflow: hidden; }
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  padding: 0;
+  background: var(--s2);
+}
+
+/* Fixed top bar */
+.top-navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--top-nav-h);
+  z-index: 500;
+  flex-shrink: 0;
+}
+
+/* Fixed bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  z-index: 400;
+}
+
+/* Main area fills between top and bottom nav */
+.dash-main {
+  position: fixed;
+  top: var(--top-nav-h);
+  bottom: var(--nav-h);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+/* Each tab fills dash-main completely */
+.tab-view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity .22s ease, transform .22s ease;
+  -webkit-overflow-scrolling: touch;
+  background: var(--s2);
+}
+.tab-view.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* ── Bottom Nav with image icons ── */
+.bnav-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  transition: transform .2s, filter .2s;
+  filter: grayscale(1) opacity(0.55);
+}
+.bnav-item.active .bnav-icon {
+  filter: none;
+  transform: scale(1.12);
+}
+.bnav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-3);
+  transition: color .2s;
+}
+.bnav-item.active .bnav-label { color: var(--purple); font-weight: 700; }
+
+/* ════ CHAT TAB — WhatsApp style ════ */
+#tab-chat {
+  display: flex;
+  flex-direction: column;
+  background: var(--ink);
+  overflow: hidden;
+}
+#tab-chat.active { overflow: hidden; }
+
+/* Chat split: sidebar + main panel */
+.chat-layout {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Left sidebar — room list */
+.chat-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--ink-2);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .chat-sidebar { width: 100%; }
+  .chat-sidebar.hidden-mobile { display: none; }
+  .chat-panel { display: none !important; }
+  .chat-panel.visible-mobile { display: flex !important; }
+}
+
+.chat-sidebar-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.chat-sidebar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.chat-sidebar-title em { color: var(--purple-2); font-style: italic; }
+
+.chat-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+.chat-search-box input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  flex: 1;
+  font-family: 'Outfit', sans-serif;
+}
+.chat-search-box input::placeholder { color: rgba(255,255,255,0.28); }
+
+.chat-rooms-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.room-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  padding: 12px 16px 4px;
+}
+
+.room-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background .15s;
+  position: relative;
+}
+.room-item:hover { background: rgba(255,255,255,0.05); }
+.room-item.active { background: rgba(15,76,129,0.25); }
+.room-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--purple-2);
+  border-radius: 0 2px 2px 0;
+}
+
+.room-av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 700;
+  background: var(--purple);
+}
+.room-av img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.room-info { flex: 1; min-width: 0; }
+.room-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.room-last {
+  font-size: 11px;
+  color: rgba(255,255,255,0.38);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.room-time {
+  font-size: 10px;
+  color: rgba(255,255,255,0.28);
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* Right panel — actual chat */
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0d1b2a;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(15,76,129,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(255,122,24,0.04) 0%, transparent 50%);
+}
+
+.chat-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--ink-2);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.chat-back-btn {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+@media (max-width: 600px) { .chat-back-btn { display: flex; } }
+.chat-panel-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.chat-panel-name { font-size: 15px; font-weight: 600; color: #fff; }
+.chat-panel-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+.chat-panel-actions { margin-left: auto; display: flex; gap: 8px; }
+.chat-panel-action-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  transition: background .2s;
+}
+.chat-panel-action-btn:hover { background: rgba(255,255,255,0.15); }
+
+/* Messages area */
+.chat-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* Date divider */
+.msg-date-divider {
+  text-align: center;
+  margin: 12px 0 6px;
+}
+.msg-date-divider span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.07);
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+/* Message bubbles */
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  max-width: 80%;
+}
+.msg-row.mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.msg-row.theirs { align-self: flex-start; }
+
+.msg-av-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.msg-bubble {
+  padding: 9px 13px;
+  border-radius: 18px;
+  max-width: 100%;
+  word-break: break-word;
+  position: relative;
+}
+.msg-row.mine .msg-bubble {
+  background: var(--purple);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.msg-row.theirs .msg-bubble {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-bottom-left-radius: 4px;
+}
+.msg-sender-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--purple-2);
+  margin-bottom: 3px;
+  display: block;
+}
+.msg-text { font-size: 14px; line-height: 1.5; }
+.msg-time {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  text-align: right;
+  margin-top: 3px;
+}
+.msg-row.mine .msg-time { color: rgba(255,255,255,0.55); }
+
+/* Media in chat */
+.msg-img { max-width: 220px; border-radius: 12px; margin-bottom: 4px; cursor: pointer; }
+.msg-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* System messages */
+.msg-system {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin: 6px 0;
+}
+
+/* Chat input row */
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  padding: 10px 12px;
+  background: var(--ink-2);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.chat-attach-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.09);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255,255,255,0.6);
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: background .2s;
+}
+.chat-attach-btn:hover { background: rgba(255,255,255,0.18); }
+
+.chat-text-input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 22px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  resize: none;
+  font-family: 'Outfit', sans-serif;
+  max-height: 110px;
+  line-height: 1.5;
+  transition: border-color .2s;
+}
+.chat-text-input:focus { border-color: var(--purple-2); }
+.chat-text-input::placeholder { color: rgba(255,255,255,0.28); }
+
+.chat-send-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .2s;
+  box-shadow: 0 4px 14px rgba(15,76,129,0.4);
+}
+.chat-send-btn:hover { background: var(--purple-2); transform: scale(1.05); }
+.chat-send-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* File input hidden */
+#chat-file-input { display: none; }
+
+/* Empty / placeholder state */
+.chat-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.3);
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+}
+.chat-empty-state .ce-icon { font-size: 48px; opacity: 0.4; }
+.chat-empty-state p { font-size: 14px; line-height: 1.65; }
+
+/* New group btn */
+.new-group-btn {
+  margin: 10px 16px;
+  background: rgba(255,122,24,0.12);
+  border: 1px solid rgba(255,122,24,0.25);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background .2s;
+  color: var(--purple-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+.new-group-btn:hover { background: rgba(255,122,24,0.2); }
+
+/* ── Feed loading state ── */
+.feed-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+/* ── Search bar ── */
+.search-bar-wrap {
+  position: fixed;
+  top: var(--top-nav-h);
+  left: 0;
+  right: 0;
+  z-index: 490;
+  background: var(--ink);
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ── FAB ── */
+.fab-btn {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  right: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(15,76,129,0.5);
+  cursor: pointer;
+  z-index: 300;
+  transition: all .2s;
+}
+.fab-btn:hover { background: var(--purple-2); transform: scale(1.05); }
+
+/* ── Profile tab fixes ── */
+.profile-wrap { padding: 16px; }
+.profile-hero {
+  background: linear-gradient(135deg, var(--ink), var(--ink-2));
+  border-radius: var(--r);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.profile-av-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--purple);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  border: 3px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+  overflow: hidden;
+}
+.profile-av-large img { width: 100%; height: 100%; object-fit: cover; }
+.profile-name { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.profile-meta { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+.profile-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(22,163,74,0.15);
+  border: 1px solid rgba(22,163,74,0.3);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #6ee7b7;
+  font-weight: 600;
+}
+.profile-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.profile-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+.profile-field { margin-bottom: 12px; }
+.profile-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  margin-bottom: 5px;
+}
+.profile-input {
+  width: 100%;
+  background: var(--s2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 13px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+  transition: border-color .2s;
+}
+.profile-input:focus { border-color: var(--purple); }
+.profile-save-btn {
+  width: 100%;
+  background: var(--purple);
+  color: #fff;
+  border-radius: var(--r-sm);
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+}
+.profile-save-btn:hover { background: var(--purple-2); }
+.skills-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.skill-chip {
+  background: var(--purple-light);
+  color: var(--purple);
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.skill-chip:hover { background: var(--purple); color: #fff; }
+
+/* ── Notification tab ── */
+.notif-wrap { padding: 12px; }
+.notif-item {
+  display: flex;
+  gap: 11px;
+  padding: 12px;
+  background: var(--white);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  align-items: flex-start;
+}
+.notif-item.unread { background: var(--purple-light); border-color: var(--border-2); }
+.notif-icon { font-size: 22px; flex-shrink: 0; }
+.notif-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+.notif-time { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+/* ── Post card ── */
+.post-card {
+  background: var(--white);
+  border-radius: var(--r);
+  margin: 0 10px 10px;
+  border: 1px solid var(--border);
+  box-shadow: var(--sh);
+  overflow: hidden;
+}
+.post-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 14px 8px;
+}
+.post-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.post-meta { flex: 1; min-width: 0; }
+.post-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.post-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.post-type-chip {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--s3);
+  color: var(--text-2);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.post-body { padding: 6px 14px 10px; font-size: 14px; color: var(--text-2); line-height: 1.65; }
+.post-divider { height: 1px; background: var(--border); margin: 0 14px; }
+.post-actions { display: flex; padding: 6px 8px; }
+.pact {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all .18s;
+}
+.pact:hover { background: var(--s2); color: var(--text); }
+.pact svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+.pact.liked { color: #e91e63; }
+.pact.liked svg { fill: #e91e63; stroke: #e91e63; }
+
+.vbadge { font-size: 10px; padding: 1px 7px; border-radius: 999px; font-weight: 600; }
+.vb-g { background: #ECFDF5; color: #16A34A; }
+.vb-b { background: #EFF6FF; color: #1D6FD4; }
+.vb-y { background: #FFFBEB; color: #D97706; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.ptag { font-size: 11px; border-radius: 999px; padding: 2px 9px; font-weight: 500; }
+.ptag-pu { background: var(--purple-light); color: var(--purple); border: 1px solid var(--border-2); }
+</style>
 </head>
 <body class="dashboard-page">
 
@@ -16,32 +770,38 @@
 <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 <aside id="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-logo">🔱</div>
+    <img src="../favicon.ico" alt="" class="sidebar-logo" style="width:28px;height:28px;border-radius:6px">
     <div>
       <div class="sidebar-app-name">Sangam</div>
-      <div class="sidebar-college">CIT Raipur</div>
+      <div class="sidebar-college">CGIT Raipur</div>
     </div>
     <button class="sidebar-close" onclick="closeSidebar()">✕</button>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">College</div>
-    <a class="sidebar-item" href="../index.html"><span>🏛️</span>About College</a>
-    <a class="sidebar-item" href="../index.html#association"><span>🔱</span>Association</a>
-    <a class="sidebar-item" href="../index.html#branches"><span>📚</span>Branches</a>
-    <a class="sidebar-item" href="#" onclick="showTab('profile');closeSidebar()"><span>👨‍🏫</span>Teachers</a>
-
-    <div class="sidebar-section-label">Community</div>
-    <a class="sidebar-item" href="#" onclick="showTab('feed');closeSidebar()"><span>📰</span>Activity Feed</a>
-    <a class="sidebar-item" href="#mentorship" onclick="showTab('chat');closeSidebar()"><span>🤝</span>Mentorship</a>
-    <a class="sidebar-item" href="#" onclick="showTab('jobs');closeSidebar()"><span>💼</span>Placement</a>
-    <a class="sidebar-item" href="#" onclick="showScholarship();closeSidebar()"><span>🎓</span>Scholarship</a>
-    <a class="sidebar-item" href="#" onclick="showTab('feed');closeSidebar()"><span>📢</span>Updates</a>
-
-    <div class="sidebar-section-label">Info</div>
-    <a class="sidebar-item" href="../index.html#about-dev"><span>👨‍💻</span>About VyomTech</a>
-    <a class="sidebar-item" href="#" onclick="logout()"><span>🚪</span>Logout</a>
+    <a class="sidebar-item" href="../index.html">
+      <img src="../icons/home.png" onerror="this.outerHTML='<span>🏛</span>'" style="width:18px;height:18px;object-fit:contain">
+      About College
+    </a>
+    <a class="sidebar-item" href="#" onclick="showTab('alumni');closeSidebar()">
+      <img src="../icons/alumni.png" onerror="this.outerHTML='<span>🎓</span>'" style="width:18px;height:18px;object-fit:contain">
+      Alumni Network
+    </a>
+    <a class="sidebar-item" href="#" onclick="showTab('jobs');closeSidebar()">
+      <img src="../icons/job.png" onerror="this.outerHTML='<span>💼</span>'" style="width:18px;height:18px;object-fit:contain">
+      Placements & Jobs
+    </a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="sidebar-item" href="#" onclick="showTab('profile');closeSidebar()">
+      <img src="../icons/profile.png" onerror="this.outerHTML='<span>👤</span>'" style="width:18px;height:18px;object-fit:contain">
+      My Profile
+    </a>
+    <a class="sidebar-item" href="#" onclick="logout()">
+      <span style="font-size:18px;width:24px;text-align:center">🚪</span>
+      Logout
+    </a>
   </nav>
-  <div class="sidebar-footer">Made with ❤️ by VyomTech</div>
+  <div class="sidebar-footer">Made with ♥ by VyomTech</div>
 </aside>
 
 <!-- ── Top Header ──────────────────────────────────── -->
@@ -50,22 +810,24 @@
     <span></span><span></span><span></span>
   </button>
   <div class="nav-logo">
-    <span class="nav-logo-icon">🔱</span>
+    <img src="../favicon.ico" alt="" style="width:26px;height:26px;border-radius:5px">
     <span class="nav-logo-text">San<em>gam</em></span>
   </div>
   <div class="nav-actions">
-    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">🔍</button>
+    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
     <button class="nav-icon-btn" id="notif-btn" onclick="showTab('notifs')" title="Notifications">
-      🔔<span class="notif-dot" id="notif-dot"></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot" id="notif-dot" style="display:none"></span>
     </button>
     <div class="user-av-btn" id="header-avatar" onclick="showTab('profile')">A</div>
   </div>
 </header>
 
-<!-- ── Search Bar (toggle) ─────────────────────────── -->
+<!-- ── Search Bar ──────────────────────────────────── -->
 <div class="search-bar-wrap hidden" id="search-bar">
-  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…"
-    oninput="handleSearch(this.value)">
+  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…" oninput="handleSearch(this.value)">
 </div>
 
 <!-- ── Main Content ───────────────────────────────── -->
@@ -73,41 +835,32 @@
 
   <!-- ════ FEED TAB ════ -->
   <div class="tab-view active" id="tab-feed">
-    <!-- Stories -->
     <div class="stories-strip" id="stories-strip">
       <div class="story" onclick="showToast('Add your story')">
         <div class="story-ring add"><span class="story-add">＋</span></div>
         <div class="story-name">Your Story</div>
       </div>
-      <!-- JS will inject more stories -->
     </div>
-
-    <!-- Compose -->
     <div class="compose-row" onclick="openPostModal()">
       <div class="compose-av" id="compose-av">A</div>
       <div class="compose-ph">Share with your college network…</div>
       <div class="compose-btns">
-        <div class="cpbtn">💼</div>
+        <div class="cpbtn">📷</div>
         <div class="cpbtn">🏆</div>
         <div class="cpbtn">💡</div>
       </div>
     </div>
-
-    <!-- Filters -->
     <div class="chips-row">
-      <div class="chip on" onclick="filterFeed('all',this)">All</div>
+      <div class="chip on" onclick="filterFeed(null,this)">All</div>
       <div class="chip" onclick="filterFeed('job',this)">Jobs</div>
       <div class="chip" onclick="filterFeed('question',this)">Questions</div>
-      <div class="chip" onclick="filterFeed('win',this)">Achievements</div>
+      <div class="chip" onclick="filterFeed('win',this)">Wins</div>
       <div class="chip" onclick="filterFeed('event',this)">Events</div>
       <div class="chip" onclick="filterFeed('tip',this)">Tips</div>
     </div>
-
     <div class="sec-label">Latest from your network</div>
-    <div id="feed-list">
-      <!-- Populated by JS -->
-      <div class="feed-loading">Loading posts…</div>
-    </div>
+    <div id="feed-list"><div class="feed-loading">Loading posts…</div></div>
+    <div style="height:16px"></div>
   </div>
 
   <!-- ════ ALUMNI TAB ════ -->
@@ -115,34 +868,23 @@
     <div class="search-hero">
       <div class="search-hero-title">Find <em>Alumni</em></div>
       <div class="search-box">
-        <span>🔍</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input placeholder="Search by name, company, batch…" oninput="searchAlumni(this.value)">
       </div>
     </div>
-
     <div class="filter-grid">
       <div class="fcard" onclick="filterAlumniBy('branch','CSE')"><span class="fi">💻</span><span class="fl">CSE</span></div>
       <div class="fcard" onclick="filterAlumniBy('branch','EEE')"><span class="fi">⚡</span><span class="fl">EEE</span></div>
       <div class="fcard" onclick="filterAlumniBy('branch','ECE')"><span class="fi">📡</span><span class="fl">ECE</span></div>
       <div class="fcard" onclick="filterAlumniBy('role','alumni')"><span class="fi">🎓</span><span class="fl">Alumni</span></div>
       <div class="fcard" onclick="filterAlumniBy('role','teacher')"><span class="fi">👨‍🏫</span><span class="fl">Teachers</span></div>
-      <div class="fcard" onclick="filterAlumniBy('company','FAANG')"><span class="fi">🌐</span><span class="fl">FAANG</span></div>
-      <div class="fcard" onclick="filterAlumniBy('mentors','1')"><span class="fi">🤝</span><span class="fl">Mentors</span></div>
       <div class="fcard" onclick="filterAlumniBy('referral','1')"><span class="fi">📋</span><span class="fl">Referrals</span></div>
+      <div class="fcard" onclick="filterAlumniBy('mentors','1')"><span class="fi">🤝</span><span class="fl">Mentors</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','ME')"><span class="fi">⚙️</span><span class="fl">ME</span></div>
     </div>
-
-    <div class="chips-row">
-      <div class="chip on" onclick="chipSel(this)">All</div>
-      <div class="chip" onclick="chipSel(this)">Offering Referrals</div>
-      <div class="chip" onclick="chipSel(this)">Open to Mentor</div>
-      <div class="chip" onclick="chipSel(this)">Batch 2015–20</div>
-      <div class="chip" onclick="chipSel(this)">Batch 2020+</div>
-    </div>
-
-    <div class="sec-label">Alumni Directory</div>
-    <div id="alumni-list">
-      <div class="feed-loading">Loading alumni…</div>
-    </div>
+    <div class="sec-label" style="margin-top:8px">Alumni Directory</div>
+    <div id="alumni-list"><div class="feed-loading">Loading alumni…</div></div>
+    <div style="height:16px"></div>
   </div>
 
   <!-- ════ JOBS TAB ════ -->
@@ -150,8 +892,8 @@
     <div class="search-hero">
       <div class="search-hero-title">Jobs & <em>Internships</em></div>
       <div class="search-box">
-        <span>🔍</span>
-        <input placeholder="Role, company, skills…">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input placeholder="Role, company, skills…" oninput="searchJobs(this.value)">
       </div>
     </div>
     <div class="chips-row">
@@ -160,211 +902,218 @@
       <div class="chip" onclick="chipSel(this)">Internship</div>
       <div class="chip" onclick="chipSel(this)">Full-Time</div>
       <div class="chip" onclick="chipSel(this)">Remote</div>
-      <div class="chip" onclick="chipSel(this)">Scholarship</div>
     </div>
-    <!-- Post job button (visible to alumni/teacher/admin) -->
-    <div id="post-job-btn-wrap" class="hidden" style="padding:10px 14px 0">
-      <button class="btn-primary w-full" onclick="openJobModal()">+ Post a Job / Referral</button>
+    <div id="post-job-btn-wrap" class="hidden" style="padding:8px 12px 0">
+      <button class="btn-primary w-full" onclick="openJobModal()">+ Post a Job / Internship</button>
     </div>
-    <div class="sec-label">Active Openings</div>
-    <div id="jobs-list">
-      <div class="feed-loading">Loading jobs…</div>
-    </div>
+    <div class="sec-label" style="margin-top:8px">Latest Opportunities</div>
+    <div id="jobs-list"><div class="feed-loading">Loading jobs…</div></div>
+    <div style="height:16px"></div>
   </div>
 
-  <!-- ════ CHAT TAB ════ -->
+  <!-- ════ CHAT TAB — WhatsApp style ════ -->
   <div class="tab-view" id="tab-chat">
-    <div class="chat-hero">
-      <div class="chat-title-row">
-        <span class="chat-screen-title">Mess<em>ages</em></span>
-        <button class="icon-btn-sm" onclick="showToast('New group coming soon')">＋</button>
-      </div>
-      <div class="search-box">
-        <span style="opacity:.5">🔍</span>
-        <input placeholder="Search messages, groups…">
-      </div>
-      <div class="chat-tabs">
-        <div class="ctab on" id="ctab-dm" onclick="chatTabSwitch('dm')">Direct Messages</div>
-        <div class="ctab" id="ctab-grp" onclick="chatTabSwitch('grp')">Groups</div>
-      </div>
-    </div>
+    <div class="chat-layout">
 
-    <div id="chat-dm-list">
-      <!-- Populated by JS -->
-      <div class="feed-loading">Loading chats…</div>
-    </div>
-    <div id="chat-grp-list" class="hidden">
-      <!-- Populated by JS -->
+      <!-- Left: room list -->
+      <div class="chat-sidebar" id="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <div class="chat-sidebar-title">Mes<em>sages</em></div>
+          <div class="chat-search-box">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input placeholder="Search chats…" oninput="filterChatRooms(this.value)" id="chat-search-input">
+          </div>
+        </div>
+
+        <!-- New group button -->
+        <div class="new-group-btn" onclick="openNewGroupModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          New Group
+        </div>
+
+        <div class="chat-rooms-list" id="chat-rooms-list">
+          <div class="feed-loading">Loading chats…</div>
+        </div>
+      </div>
+
+      <!-- Right: chat panel -->
+      <div class="chat-panel" id="chat-panel">
+        <!-- Default: no chat selected -->
+        <div class="chat-empty-state" id="chat-empty-state">
+          <div class="ce-icon">
+            <img src="../icons/chat.png" onerror="this.outerHTML='💬'" style="width:56px;height:56px;opacity:0.4;object-fit:contain">
+          </div>
+          <div style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.5)">Select a conversation</div>
+          <p>Pick a room from the left or start a new DM by searching for a user</p>
+          <button onclick="openDMSearch()" style="margin-top:8px;background:var(--purple);color:#fff;border:none;border-radius:999px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">
+            Start a DM
+          </button>
+        </div>
+
+        <!-- Active chat (hidden until room selected) -->
+        <div id="active-chat" style="display:none;flex-direction:column;height:100%">
+          <div class="chat-panel-header">
+            <button class="chat-back-btn" onclick="backToRoomList()">←</button>
+            <div class="chat-panel-av" id="cp-avatar">G</div>
+            <div>
+              <div class="chat-panel-name" id="cp-name">Global Chat</div>
+              <div class="chat-panel-sub" id="cp-sub">Community group</div>
+            </div>
+            <div class="chat-panel-actions">
+              <div class="chat-panel-action-btn" onclick="showToast('Search in chat coming soon!')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+              <div class="chat-panel-action-btn" onclick="showToast('Chat info coming soon!')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-messages-area" id="chat-messages-area">
+            <!-- Messages injected by JS -->
+          </div>
+
+          <div class="chat-input-row">
+            <div class="chat-attach-btn" onclick="document.getElementById('chat-file-input').click()" title="Attach file">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </div>
+            <input type="file" id="chat-file-input" accept="image/*,video/*,.pdf,.doc,.docx" onchange="handleFileAttach(this)">
+            <textarea class="chat-text-input" id="chat-input" placeholder="Type a message…" rows="1"
+              oninput="autoGrow(this)"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+            <div class="chat-send-btn" onclick="sendChatMessage()">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <!-- ════ PROFILE TAB ════ -->
   <div class="tab-view" id="tab-profile">
-    <div class="profile-cover">
-      <div class="cover-geo"></div>
-      <div class="cover-logos">
-        <div class="cover-logo-slot" title="Association">🔱</div>
-        <div class="cover-logo-slot" title="College">🏛️</div>
-      </div>
-      <div class="prof-av-wrap">
-        <div class="prof-av" id="profile-av">A</div>
-      </div>
-    </div>
-    <div class="prof-info">
-      <div class="prof-edit-row">
-        <button class="btn-outline-sm" onclick="toggleEditProfile()">✏️ Edit Profile</button>
-      </div>
-      <h2 class="prof-name" id="prof-name">Loading…</h2>
-      <div class="prof-role" id="prof-role"></div>
-      <div class="prof-badges" id="prof-badges"></div>
-
-      <div class="stats-row" id="prof-stats">
-        <div class="stat"><div class="stat-n" id="stat-posts">0</div><div class="stat-l">Posts</div></div>
-        <div class="stat"><div class="stat-n" id="stat-connections">0</div><div class="stat-l">Connections</div></div>
-        <div class="stat"><div class="stat-n" id="stat-refs">0</div><div class="stat-l">Referrals</div></div>
-        <div class="stat"><div class="stat-n" id="stat-views">0</div><div class="stat-l">Views</div></div>
+    <div class="profile-wrap">
+      <div class="profile-hero">
+        <div class="profile-av-large" id="profile-avatar-btn" onclick="document.getElementById('avatar-input').click()">
+          <span id="profile-av-initial">A</span>
+          <img id="profile-av-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        <div class="profile-name" id="profile-name-display">Loading…</div>
+        <div class="profile-meta" id="profile-meta-display">—</div>
+        <div class="profile-trust" id="profile-trust-display">⬤ Verified</div>
       </div>
 
-      <!-- Trust level -->
-      <div class="prof-section">
-        <div class="ps-title">🔐 Trust Level</div>
-        <div class="trust-bar-bg"><div class="trust-bar-fg" id="trust-bar"></div></div>
-        <div class="trust-bar-meta"><span id="trust-label">50%</span><span id="trust-boost" onclick="showToast('Add LinkedIn to boost trust!')" style="cursor:pointer;color:var(--purple)">Boost ↗</span></div>
+      <!-- Edit form -->
+      <div class="profile-section">
+        <div class="profile-section-title">Edit Profile</div>
+        <div class="profile-field">
+          <label>Bio</label>
+          <textarea class="profile-input" id="pe-bio" rows="3" placeholder="Tell your story…" style="resize:vertical"></textarea>
+        </div>
+        <div class="profile-field">
+          <label>Company / Current Role</label>
+          <input class="profile-input" id="pe-company" type="text" placeholder="Google · SWE Intern">
+        </div>
+        <div class="profile-field">
+          <label>LinkedIn URL</label>
+          <input class="profile-input" id="pe-linkedin" type="url" placeholder="https://linkedin.com/in/…">
+        </div>
+        <div class="profile-field">
+          <label>GitHub URL</label>
+          <input class="profile-input" id="pe-github" type="url" placeholder="https://github.com/…">
+        </div>
+        <div class="profile-field">
+          <label>Skills (comma separated)</label>
+          <input class="profile-input" id="pe-skills" type="text" placeholder="Python, React, DSA, ML…">
+          <div class="skills-wrap" id="pe-skills-preview"></div>
+        </div>
+        <div class="profile-field">
+          <label>Email</label>
+          <input class="profile-input" id="pe-email" type="email" placeholder="your@email.com">
+        </div>
+        <button class="profile-save-btn" onclick="saveProfile()">Save Changes</button>
       </div>
 
-      <!-- Bio -->
-      <div class="prof-section">
-        <div class="ps-title">About</div>
-        <p class="prof-bio" id="prof-bio">No bio yet.</p>
-        <textarea class="finput hidden" id="bio-edit" rows="3" placeholder="Write something about yourself…"></textarea>
+      <!-- Info card -->
+      <div class="profile-section">
+        <div class="profile-section-title">Account Info</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">Roll Number</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)" id="info-roll">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">Branch</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)" id="info-branch">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">Batch</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)" id="info-batch">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">Role</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)" id="info-role">—</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Skills -->
-      <div class="prof-section">
-        <div class="ps-title">Skills</div>
-        <div id="skills-list"></div>
-      </div>
-
-      <!-- Edit form (hidden by default) -->
-      <div class="prof-section hidden" id="edit-form">
-        <div class="ps-title">Edit Profile</div>
-        <div class="fgrp"><label class="flabel-light">Email</label><input type="email" class="finput-light" id="edit-email" placeholder="yourname@college.edu"></div>
-        <div class="fgrp"><label class="flabel-light">Company / Position</label><input type="text" class="finput-light" id="edit-company" placeholder="Google · SDE-2"></div>
-        <div class="fgrp"><label class="flabel-light">LinkedIn URL</label><input type="url" class="finput-light" id="edit-linkedin" placeholder="https://linkedin.com/in/yourname"></div>
-        <div class="fgrp"><label class="flabel-light">GitHub URL</label><input type="url" class="finput-light" id="edit-github" placeholder="https://github.com/yourname"></div>
-        <div class="fgrp"><label class="flabel-light">Skills (comma separated)</label><input type="text" class="finput-light" id="edit-skills" placeholder="Python, React, DSA"></div>
-        <button class="btn-primary w-full" onclick="saveProfile()">💾 Save Changes</button>
-      </div>
-
-      <!-- Links -->
-      <div class="prof-section">
-        <div class="ps-title">Links</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="prof-links"></div>
-      </div>
-
-      <button class="btn-danger w-full" onclick="logout()" style="margin:8px 0 24px">🚪 Logout</button>
+      <button class="btn-danger w-full" onclick="logout()" style="margin-bottom:16px">Sign Out</button>
+      <div style="height:8px"></div>
     </div>
   </div>
 
   <!-- ════ NOTIFICATIONS TAB ════ -->
   <div class="tab-view" id="tab-notifs">
-    <div class="search-hero">
-      <div class="search-hero-title">Notif<em>ications</em></div>
-    </div>
-    <div class="chips-row">
-      <div class="chip on" onclick="chipSel(this)">All</div>
-      <div class="chip" onclick="chipSel(this)">Jobs</div>
-      <div class="chip" onclick="chipSel(this)">Messages</div>
-      <div class="chip" onclick="chipSel(this)">System</div>
-    </div>
-    <div id="notifs-list">
-      <div class="feed-loading">Loading notifications…</div>
+    <div class="notif-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Notifications</div>
+        <button onclick="markAllRead()" style="font-size:12px;color:var(--purple);cursor:pointer;background:none;border:none">Mark all read</button>
+      </div>
+      <div id="notifs-list"><div class="feed-loading">Loading…</div></div>
     </div>
   </div>
 
 </main>
 
-<!-- ── Bottom Navigation ───────────────────────────── -->
-<nav class="bottom-nav" id="dash-bottom-nav">
+<!-- ── Bottom Nav with image icons ── -->
+<nav class="bottom-nav">
   <div class="bnav-item active" data-tab="feed" onclick="showTab('feed')">
-    <span class="bnav-icon">🏠</span><span class="bnav-label">Feed</span>
+    <img src="../icons/home.png" class="bnav-icon" alt="Feed"
+      onerror="this.outerHTML='<span class=bnav-icon style=font-size:22px>🏠</span>'">
+    <span class="bnav-label">Feed</span>
   </div>
   <div class="bnav-item" data-tab="alumni" onclick="showTab('alumni')">
-    <span class="bnav-icon">🔍</span><span class="bnav-label">Alumni</span>
-  </div>
-  <div class="bnav-item" data-tab="jobs" onclick="showTab('jobs')">
-    <span class="bnav-icon">💼</span><span class="bnav-label">Jobs</span>
+    <img src="../icons/alumni.png" class="bnav-icon" alt="Alumni"
+      onerror="this.outerHTML='<span class=bnav-icon style=font-size:22px>🎓</span>'">
+    <span class="bnav-label">Alumni</span>
   </div>
   <div class="bnav-item" data-tab="chat" onclick="showTab('chat')">
-    <span class="bnav-icon">💬</span><span class="bnav-label">Chat</span>
-    <span class="nav-pip hidden" id="chat-pip">4</span>
+    <img src="../icons/chat.png" class="bnav-icon" alt="Chat"
+      onerror="this.outerHTML='<span class=bnav-icon style=font-size:22px>💬</span>'">
+    <span class="bnav-label">Chat</span>
+  </div>
+  <div class="bnav-item" data-tab="jobs" onclick="showTab('jobs')">
+    <img src="../icons/jobs.png" class="bnav-icon" alt="Jobs"
+      onerror="this.outerHTML='<span class=bnav-icon style=font-size:22px>💼</span>'">
+    <span class="bnav-label">Jobs</span>
   </div>
   <div class="bnav-item" data-tab="profile" onclick="showTab('profile')">
-    <span class="bnav-icon">👤</span><span class="bnav-label">Profile</span>
+    <img src="../icons/profile.png" class="bnav-icon" alt="Profile"
+      onerror="this.outerHTML='<span class=bnav-icon style=font-size:22px>👤</span>'">
+    <span class="bnav-label">Profile</span>
   </div>
 </nav>
 
-<!-- ── FAB (compose) ──────────────────────────────── -->
-<button class="fab" onclick="openPostModal()" id="fab-btn">✍️</button>
+<!-- ── FAB ── -->
+<div class="fab-btn" id="fab-btn" onclick="openPostModal()">＋</div>
 
-<!-- ── Post Compose Modal ─────────────────────────── -->
-<div class="overlay hidden" id="post-modal" onclick="modalBgClose(event,'post-modal')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-inner">
-      <div class="modal-title">What's happening?</div>
-      <div class="post-types">
-        <div class="pt-btn sel" onclick="ptSel(this)" data-type="update"><span class="pt-icon">💬</span><span class="pt-label">Update</span></div>
-        <div class="pt-btn" onclick="ptSel(this)" data-type="job"><span class="pt-icon">💼</span><span class="pt-label">Job/Ref</span></div>
-        <div class="pt-btn" onclick="ptSel(this)" data-type="question"><span class="pt-icon">🙋</span><span class="pt-label">Question</span></div>
-        <div class="pt-btn" onclick="ptSel(this)" data-type="win"><span class="pt-icon">🏆</span><span class="pt-label">Win</span></div>
-        <div class="pt-btn" onclick="ptSel(this)" data-type="event"><span class="pt-icon">📢</span><span class="pt-label">Event</span></div>
-        <div class="pt-btn" onclick="ptSel(this)" data-type="tip"><span class="pt-icon">💡</span><span class="pt-label">Tip</span></div>
-      </div>
-      <textarea class="post-ta" id="post-content" placeholder="Share something with your college network…" rows="4"></textarea>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal('post-modal')">Cancel</button>
-        <button class="btn-submit" onclick="submitPost()">Post to Sangam 🔱</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Job Post Modal ──────────────────────────────── -->
-<div class="overlay hidden" id="job-modal" onclick="modalBgClose(event,'job-modal')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-inner">
-      <div class="modal-title">Post a Job / Referral</div>
-      <div class="fgrp"><label class="flabel-light">Job Title</label><input class="finput-light" id="jm-title" placeholder="Software Engineer Intern"></div>
-      <div class="fgrp"><label class="flabel-light">Company</label><input class="finput-light" id="jm-company" placeholder="Google"></div>
-      <div class="frow">
-        <div class="fgrp"><label class="flabel-light">Location</label><input class="finput-light" id="jm-location" placeholder="Bangalore"></div>
-        <div class="fgrp"><label class="flabel-light">Salary</label><input class="finput-light" id="jm-salary" placeholder="₹80k/mo"></div>
-      </div>
-      <div class="fgrp"><label class="flabel-light">Type</label>
-        <select class="fselect-light" id="jm-type">
-          <option value="internship">Internship</option>
-          <option value="fulltime">Full-Time</option>
-          <option value="parttime">Part-Time</option>
-        </select>
-      </div>
-      <div class="fgrp"><label class="flabel-light">Skills Required (comma separated)</label><input class="finput-light" id="jm-skills" placeholder="DSA, System Design, Python"></div>
-      <div class="fgrp"><label class="flabel-light">Description</label><textarea class="finput-light" id="jm-desc" rows="3" placeholder="Brief description…"></textarea></div>
-      <div class="fgrp" style="display:flex;align-items:center;gap:10px">
-        <input type="checkbox" id="jm-referral" style="width:18px;height:18px;accent-color:var(--purple)">
-        <label for="jm-referral" style="font-size:13px;color:var(--text-2)">I can provide a referral</label>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal('job-modal')">Cancel</button>
-        <button class="btn-submit" onclick="submitJob()">Post Job 💼</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Modals placeholder -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;backdrop-filter:blur(4px)" onclick="closeModal()"></div>
+<div id="modal-content" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:910;background:var(--white);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px;max-height:85vh;overflow-y:auto"></div>
 
 <script src="../js/api.js"></script>
 <script src="../js/sidebar.js"></script>

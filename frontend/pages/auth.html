@@ -3,12 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sangam — Sign In / Sign Up</title>
+<title>Sangam — Sign In</title>
+<link rel="icon" href="../favicon.ico">
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/components.css">
 <link rel="stylesheet" href="../css/auth.css">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* ── Extra styles needed for auth flow ── */
+.btn-auth{
+  width:100%;background:var(--purple);color:#fff;
+  border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;
+  margin-top:8px;cursor:pointer;border:none;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-auth:hover{background:var(--ink-2);transform:translateY(-1px)}
+.btn-auth:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.auth-divider{text-align:center;margin:16px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.1)}
+.auth-divider span{background:var(--ink);padding:0 12px;font-size:12px;color:rgba(255,255,255,0.3);position:relative}
+.auth-footer-link{text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-top:12px}
+.auth-footer-link a{color:var(--purple-2);cursor:pointer;font-weight:600}
+.error-msg{background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);color:#fca5a5;border-radius:var(--r-sm);padding:10px 14px;font-size:13px;margin-top:10px}
+.prefill-strip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:16px}
+.prefill-av{width:40px;height:40px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0}
+.prefill-name{font-size:15px;font-weight:600;color:#fff}
+.prefill-meta{font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px}
+.mobile-info{font-size:12px;color:rgba(255,255,255,0.4);margin-top:6px;font-style:italic}
+.otp-row{display:flex;gap:8px;justify-content:center;margin:18px 0}
+.otp-cell{
+  width:44px;height:52px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);
+  color:#fff;font-size:20px;font-weight:700;text-align:center;outline:none;
+  transition:border-color .2s;caret-color:var(--purple-2);
+}
+.otp-cell:focus{border-color:var(--purple-2);background:rgba(124,58,237,0.1)}
+.otp-cell.filled{border-color:var(--green)}
+.otp-info{text-align:center;font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:8px}
+.otp-resend{text-align:center;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.4)}
+.otp-resend span{color:var(--purple-2);cursor:pointer;font-weight:600}
+.notfound-box{text-align:center;padding:24px;background:rgba(255,122,24,0.08);border:1px solid rgba(255,122,24,0.2);border-radius:var(--r);margin-top:12px}
+.notfound-icon{font-size:32px;margin-bottom:8px}
+.notfound-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
+.notfound-box p{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:14px;line-height:1.6}
+.dev-otp-banner{background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:#6ee7b7;text-align:center;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+</style>
 </head>
 <body class="auth-page">
 
@@ -20,16 +60,15 @@
       <div class="splash-ring"></div>
       <div class="splash-ring"></div>
       <div class="splash-ring"></div>
-
       <div class="logo-lockup">
         <div class="college-logos">
           <div class="logo-slot">
-            <div class="logo-box"><img src="../../assets/college-logo.png" onerror="this.outerHTML='<span style=font-size:28px>🏛️</span>'" alt="CIT"></div>
-            <span class="logo-box-label">CIT Raipur</span>
+            <div class="logo-box"><img src="../cgitlogo.jpg" onerror="this.outerHTML='<span style=font-size:28px>🏛</span>'" alt="CIT"></div>
+            <span class="logo-box-label">CGIT Raipur</span>
           </div>
           <div class="logo-divider"></div>
           <div class="logo-slot">
-            <div class="logo-box"><img src="../../assets/sangam-logo.png" onerror="this.outerHTML='<span style=font-size:28px>🔱</span>'" alt="Sangam"></div>
+            <div class="logo-box"><img src="../sangam.jpeg" onerror="this.outerHTML='<span style=font-size:28px>⚡</span>'" alt="Sangam"></div>
             <span class="logo-box-label">Sangam</span>
           </div>
         </div>
@@ -38,15 +77,9 @@
           <span class="wm-main">San<em>gam</em></span>
           <span class="wm-sub">विद्या नित्यं संयोजयति</span>
         </div>
-        <div class="project-tag"><span></span>Official College Network</div>
-        <div class="trust-row">
-          <span class="t-badge"><span class="dot dot-y"></span>New User</span>
-          <span class="t-badge"><span class="dot dot-b"></span>Partially Verified</span>
-          <span class="t-badge"><span class="dot dot-g"></span>Verified Alumni</span>
-        </div>
+        <div class="project-tag"><span>◆</span>Official College Network</div>
       </div>
     </div>
-
     <div class="splash-bottom">
       <p class="splash-tagline">Students. Alumni. Opportunities.<br>One trusted college network.</p>
       <button class="btn-cta" onclick="showScreen('s-login')">Sign In to Sangam →</button>
@@ -57,175 +90,182 @@
     </div>
   </div>
 
-  <!-- ══════ LOGIN ══════ -->
+  <!-- ══════ LOGIN — Step 1: Roll + Name ══════ -->
   <div class="auth-screen" id="s-login">
     <div class="auth-header">
       <button class="back-btn" onclick="showScreen('s-splash')">←</button>
       <div class="auth-title">Welcome <span>Back</span></div>
+      <div class="auth-step-badge">STEP 1 / 2</div>
     </div>
     <div class="auth-scroll">
       <div class="auth-body">
         <div class="auth-college-strip">
-          <div class="auth-logo-mini">🏛️</div>
+          <div class="auth-logo-mini">🏛</div>
           <div class="auth-college-name">Chhattisgarh Institute of Technology</div>
         </div>
 
-        <!-- Step 1: Roll number check -->
-        <div id="login-step1">
-          <div class="fgrp">
-            <label class="flabel">Roll Number</label>
-            <input type="text" class="finput" id="login-roll"
-              placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
-            <div class="roll-hint">Format: BRANCH + YEAR + ROLL (e.g. CSE22101)</div>
-          </div>
-          <button class="btn-auth" onclick="checkRollForLogin()">Continue →</button>
-
-          <div class="auth-divider"><span>or</span></div>
-          <div class="auth-footer-link">
-            First time here? <a onclick="showScreen('s-signup')">Sign Up</a>
-          </div>
+        <div class="fgrp">
+          <label class="flabel">Roll Number</label>
+          <!-- BUG FIX: id="login-roll" matches what auth.js reads -->
+          <input type="text" class="finput" id="login-roll"
+            placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
+          <div class="roll-hint">Format: BRANCH + YEAR + ROLL (e.g. CSE22101)</div>
+        </div>
+        <div class="fgrp">
+          <label class="flabel">Full Name</label>
+          <!-- BUG FIX: id="login-name" matches auth.js -->
+          <input type="text" class="finput" id="login-name" placeholder="Your full name as on college ID">
         </div>
 
-        <!-- Step 2: Password (shown after roll check) -->
-        <div id="login-step2" class="hidden">
-          <div class="prefill-strip" id="login-prefill">
-            <div class="prefill-av" id="login-av">A</div>
-            <div>
-              <div class="prefill-name" id="login-name">Loading...</div>
-              <div class="prefill-meta" id="login-meta"></div>
-            </div>
-          </div>
-          <div class="fgrp">
-            <label class="flabel">Password</label>
-            <div class="pass-wrap">
-              <input type="password" class="finput" id="login-pass" placeholder="Your password">
-              <button class="pass-eye" onclick="togglePass('login-pass',this)">👁</button>
-            </div>
-          </div>
-          <button class="btn-auth" onclick="doLogin()">Sign In →</button>
-          <div class="auth-footer-link" style="margin-top:10px">
-            Forgot password? <a onclick="showToast('Contact admin: admin@cit.ac.in')">Reset</a>
-          </div>
+        <!-- BUG FIX: onclick="doCheckRoll()" not verifyCredentialsForLogin() -->
+        <button class="btn-auth" id="btn-check-roll" onclick="doCheckRoll()">Continue →</button>
+
+        <div class="error-msg hidden" id="login-error"></div>
+
+        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-footer-link">
+          First time here? <a onclick="showScreen('s-signup')">Sign Up</a>
         </div>
 
-        <!-- Not found state -->
+        <!-- Not registered state -->
         <div id="login-notfound" class="hidden">
           <div class="notfound-box">
             <div class="notfound-icon">🔍</div>
-            <div class="notfound-title">First time here?</div>
-            <p>Your roll number is in our database but you haven't registered yet.</p>
-            <button class="btn-auth" onclick="prefillSignup()">Create Account →</button>
+            <div class="notfound-title">Not registered yet</div>
+            <p>Your roll number exists in our database but you haven't created an account.</p>
+            <button class="btn-auth" onclick="showScreen('s-signup')">Create Account →</button>
           </div>
         </div>
-
-        <div class="error-msg hidden" id="login-error"></div>
       </div>
     </div>
   </div>
 
-  <!-- ══════ SIGN UP ══════ -->
+  <!-- ══════ LOGIN — Step 2: OTP ══════ -->
+  <div class="auth-screen" id="s-login-otp">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-login')">←</button>
+      <div class="auth-title">Enter <span>OTP</span></div>
+      <div class="auth-step-badge">STEP 2 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="otp-info">
+          OTP sent to <strong id="login-mobile-masked">XXXXXXX****</strong>
+        </div>
+        <div id="login-dev-otp-banner" class="dev-otp-banner hidden"></div>
+        <!-- BUG FIX: class="login-otp-cell" matches auth.js getOtpValue("login-otp-cell") -->
+        <div class="otp-row">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,0,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,1,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,2,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,3,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,4,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,5,'login')" onkeydown="otpBack(this,event)">
+        </div>
+        <button class="btn-auth" id="btn-login-verify" onclick="doLoginVerify()">Verify & Sign In →</button>
+        <div class="error-msg hidden" id="login-otp-error"></div>
+        <div class="otp-resend">Didn't get it? <span onclick="resendOtp('login')">Resend OTP</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SIGNUP — Step 1: Roll + Name ══════ -->
   <div class="auth-screen" id="s-signup">
     <div class="auth-header">
       <button class="back-btn" onclick="showScreen('s-splash')">←</button>
       <div class="auth-title">Create <span>Account</span></div>
-      <div class="auth-step-badge" id="signup-step-label">STEP 1 / 3</div>
+      <div class="auth-step-badge">STEP 1 / 2</div>
     </div>
     <div class="auth-scroll">
       <div class="auth-body">
         <div class="auth-college-strip">
-          <div class="auth-logo-mini">🏛️</div>
-          <div class="auth-college-name">Chhattisgarh Institute of Technology — Official Network</div>
+          <div class="auth-logo-mini">🏛</div>
+          <div class="auth-college-name">CGIT — Only for registered students</div>
         </div>
 
-        <!-- Step 1: Roll number -->
-        <div id="signup-s1">
-          <div class="fgrp">
-            <label class="flabel">Roll Number</label>
-            <input type="text" class="finput" id="su-roll"
-              placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
-            <div class="roll-hint">Format: BRANCH + YEAR + ROLL  e.g. CSE22101</div>
-          </div>
-          <button class="btn-auth" onclick="checkRollForSignup()">Verify Roll Number →</button>
-          <div class="auth-footer-link">Already registered? <a onclick="showScreen('s-login')">Sign In</a></div>
+        <div class="fgrp">
+          <label class="flabel">Roll Number</label>
+          <!-- BUG FIX: id="signup-roll" matches auth.js (was "su-roll") -->
+          <input type="text" class="finput" id="signup-roll"
+            placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
+          <div class="roll-hint">Format: BRANCH + YEAR + ROLL e.g. CSE22101</div>
+        </div>
+        <div class="fgrp">
+          <label class="flabel">Full Name</label>
+          <!-- BUG FIX: id="signup-name" matches auth.js (was "su-name") -->
+          <input type="text" class="finput" id="signup-name" placeholder="Your name as on college ID">
+        </div>
+        <div class="fgrp">
+          <label class="flabel">Mobile Number <span style="color:rgba(255,255,255,0.3);font-weight:400">(optional if in DB)</span></label>
+          <!-- BUG FIX: id="signup-mobile" matches auth.js (was "su-contact") -->
+          <input type="tel" class="finput" id="signup-mobile" placeholder="10-digit mobile number">
         </div>
 
-        <!-- Step 2: Fill details (pre-filled from DB) -->
-        <div id="signup-s2" class="hidden">
-          <div class="prefill-strip success-strip">
-            <span>✅</span>
-            <span id="su-found-msg">Roll number verified!</span>
-          </div>
-
-          <div class="fgrp">
-            <label class="flabel">Full Name</label>
-            <input type="text" class="finput" id="su-name" placeholder="Your name">
-          </div>
-          <div class="frow">
-            <div class="fgrp">
-              <label class="flabel">Branch</label>
-              <input type="text" class="finput" id="su-branch" placeholder="CSE" readonly>
-            </div>
-            <div class="fgrp">
-              <label class="flabel">Batch</label>
-              <input type="text" class="finput" id="su-batch" placeholder="2022" readonly>
-            </div>
-          </div>
-          <div class="fgrp">
-            <label class="flabel">Email (optional)</label>
-            <input type="email" class="finput" id="su-email" placeholder="yourname@college.edu">
-          </div>
-          <div class="fgrp">
-            <label class="flabel">I am a…</label>
-            <select class="fselect" id="su-role">
-              <option value="student">Current Student</option>
-              <option value="alumni">Alumni</option>
-            </select>
-          </div>
-          <div class="fgrp">
-            <label class="flabel">Password</label>
-            <div class="pass-wrap">
-              <input type="password" class="finput" id="su-pass" placeholder="Create a strong password">
-              <button class="pass-eye" onclick="togglePass('su-pass',this)">👁</button>
-            </div>
-          </div>
-          <button class="btn-auth" onclick="goToOtp()">Send OTP to Email →</button>
-        </div>
-
-        <!-- Step 3: OTP -->
-        <div id="signup-s3" class="hidden">
-          <p class="otp-desc">We sent a 6-digit code to<br><strong id="otp-email-display">your email</strong></p>
-          <div class="otp-grid">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,0)" inputmode="numeric">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,1)" inputmode="numeric">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,2)" inputmode="numeric">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,3)" inputmode="numeric">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,4)" inputmode="numeric">
-            <input class="otp-cell" maxlength="1" oninput="otpNext(this,5)" inputmode="numeric">
-          </div>
-          <div class="resend-row">Didn't receive? <span onclick="showToast('OTP resent!')">Resend OTP</span></div>
-          <button class="btn-auth mt12" onclick="doSignup()">Verify & Create Account →</button>
-
-          <div class="trust-progress mt12">
-            <div class="trust-prog-title">🔐 Trust Level Progress</div>
-            <div class="trust-step"><div class="ts-icon ts-done">✓</div><div class="ts-text">Roll number verified in college DB</div></div>
-            <div class="trust-step"><div class="ts-icon ts-done">✓</div><div class="ts-text">Account details filled</div></div>
-            <div class="trust-step"><div class="ts-icon ts-pending">○</div><div class="ts-text">Email OTP verified</div></div>
-            <div class="trust-step"><div class="ts-icon ts-pending">○</div><div class="ts-text">Add LinkedIn → 🟢 Verified</div></div>
-            <div class="trust-bar-wrap"><div class="trust-bar-fill" style="width:50%"></div></div>
-            <div class="trust-level-text">50% — 🔵 Partially Verified</div>
-          </div>
-        </div>
-
+        <!-- BUG FIX: onclick="doVerifyRoll()" not "verifyCredentialsForSignup()" -->
+        <button class="btn-auth" id="btn-verify-roll" onclick="doVerifyRoll()">Verify & Continue →</button>
         <div class="error-msg hidden" id="signup-error"></div>
+
+        <div class="auth-footer-link">Already registered? <a onclick="showScreen('s-login')">Sign In</a></div>
       </div>
     </div>
   </div>
 
-</div><!-- /#auth-frame -->
+  <!-- ══════ SIGNUP — Step 2: OTP ══════ -->
+  <div class="auth-screen" id="s-signup-otp">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-signup')">←</button>
+      <div class="auth-title">Verify <span>Mobile</span></div>
+      <div class="auth-step-badge">STEP 2 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="prefill-strip" id="signup-info-strip">
+          <div class="prefill-av" id="signup-av">A</div>
+          <div>
+            <div class="prefill-name" id="signup-display-name">Loading…</div>
+            <div class="prefill-meta" id="signup-student-info"></div>
+          </div>
+        </div>
 
-<!-- Toast -->
+        <div class="otp-info">
+          OTP sent to <strong id="signup-mobile-masked">XXXXXXX****</strong>
+        </div>
+        <div id="signup-dev-otp-banner" class="dev-otp-banner hidden"></div>
+
+        <!-- BUG FIX: class="signup-otp-cell" matches auth.js getOtpValue("signup-otp-cell") -->
+        <div class="otp-row">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,0,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,1,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,2,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,3,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,4,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,5,'signup')" onkeydown="otpBack(this,event)">
+        </div>
+
+        <button class="btn-auth" id="btn-signup" onclick="doSignup()">Create Account →</button>
+        <div class="error-msg hidden" id="signup-otp-error"></div>
+        <div class="otp-resend">Didn't get it? <span onclick="resendOtp('signup')">Resend OTP</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #auth-frame -->
+
 <div class="toast" id="toast"></div>
 
+<!-- BUG FIX: Load api.js BEFORE auth.js so AuthAPI is defined when auth.js runs -->
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
 </body>

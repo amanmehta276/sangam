@@ -1,81 +1,96 @@
 # config/database.py
-# ============================================================
-#  Database initialisation.
-#
-#  RIGHT NOW   → SQLite  (works instantly, no setup)
-#  YOUR REAL DB → swap the engine URL below (see comments)
-# ============================================================
-
-from flask_sqlalchemy import SQLAlchemy
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 import os
 
-db = SQLAlchemy()   # shared instance — import this everywhere
+_client = None
+_db     = None
+
+def get_db():
+    global _db
+    if _db is None:
+        raise RuntimeError("Database not initialised. Call init_db(app) first.")
+    return _db
 
 def init_db(app):
-    """Attach SQLAlchemy to the Flask app."""
+    global _client, _db
 
-    db_type = app.config.get("DATABASE_TYPE", "sqlite")
+    uri = app.config.get("MONGO_URI", "mongodb://localhost:27017/sangam")
 
-    if db_type == "sqlite":
-        # ── EXAMPLE: SQLite ──────────────────────────────────
-        #  Great for development / demo. File stored locally.
-        path = app.config["SQLITE_PATH"]
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{path}"
+    try:
+        _client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        _client.admin.command("ping")
 
-    elif db_type == "postgres":
-        # ── PRODUCTION: PostgreSQL ───────────────────────────
-        #  1. pip install psycopg2-binary
-        #  2. Set env var:  DATABASE_URL=postgresql://user:pw@host/dbname
-        app.config["SQLALCHEMY_DATABASE_URI"] = app.config["POSTGRES_URL"]
+        # FIX BUG 2: get_default_database() crashes if URI has no /dbname
+        # Always use explicit db name as fallback
+        try:
+            _db = _client.get_default_database()
+        except Exception:
+            _db = _client["sangam"]
 
-    elif db_type == "mysql":
-        # ── PRODUCTION: MySQL ────────────────────────────────
-        #  1. pip install PyMySQL
-        #  2. Set env var:  MYSQL_URL=mysql+pymysql://user:pw@host/dbname
-        app.config["SQLALCHEMY_DATABASE_URI"] = app.config["MYSQL_URL"]
+        print(f"✅ MongoDB connected → {_db.name}")
 
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    # FIX BUG 13: ServerSelectionTimeoutError is NOT a subclass of ConnectionFailure
+    except (ConnectionFailure, ServerSelectionTimeoutError, Exception) as e:
+        print(f"❌ MongoDB connection failed: {e}")
+        print("   Falling back to: mongodb://localhost:27017/sangam")
+        _client = MongoClient("mongodb://localhost:27017/sangam",
+                              serverSelectionTimeoutMS=3000)
+        _db = _client["sangam"]
 
-    db.init_app(app)
+    # Indexes
+    _db.users.create_index("roll_number", unique=True)
+    _db.users.create_index("mobile")
+    _db.messages.create_index([("room", 1), ("created_at", 1)])
+    _db.messages.create_index("created_at")
+    _db.posts.create_index("created_at")
+    _db.groups.create_index("members")
 
-    # Auto-create tables on first run
-    with app.app_context():
-        from models import user, post, job, chat, notification  # noqa
-        db.create_all()
-        _seed_example_data()   # loads example students
-
-    return db
+    _seed_data(_db)
+    return _db
 
 
-# ── Seed example data ─────────────────────────────────────────
-def _seed_example_data():
-    """
-    Inserts a small example dataset so the app works immediately.
-    In production this is replaced by your real student CSV/DB.
-    """
-    from models.user import User
+def _seed_data(db):
+    if db.users.count_documents({}) > 0:
+        return
 
-    if User.query.count() > 0:
-        return   # already seeded
+    print("🌱 Seeding from students.csv …")
+    import csv, os as _os
+    from werkzeug.security import generate_password_hash
+    from datetime import datetime
 
-    examples = [
-        {"name": "Arjun Sharma",   "roll": "CSE22101", "branch": "CSE", "batch": 2022, "role": "student"},
-        {"name": "Priya Singh",    "roll": "EEE22045", "branch": "EEE", "batch": 2022, "role": "student"},
-        {"name": "Rahul Verma",    "roll": "CSE20011", "branch": "CSE", "batch": 2020, "role": "alumni"},
-        {"name": "Kiran Mehta",    "roll": "ME19032",  "branch": "ME",  "batch": 2019, "role": "alumni"},
-        {"name": "Dr. S. Tiwari",  "roll": "TCH001",   "branch": "CSE", "batch": 2005, "role": "teacher"},
-        {"name": "Admin",          "roll": "ADMIN001",  "branch": "",    "batch": 0,    "role": "admin"},
-    ]
+    csv_path = _os.path.join(_os.path.dirname(__file__), "..", "data", "students.csv")
+    if not _os.path.exists(csv_path):
+        print("⚠️  students.csv not found, skipping seed")
+        return
 
-    for e in examples:
-        u = User(
-            name=e["name"], roll_number=e["roll"],
-            branch=e["branch"], batch_year=e["batch"],
-            role=e["role"],
-            trust_level="verified" if e["role"] in ("alumni","teacher","admin") else "new"
-        )
-        u.set_password("password123")   # default demo password
-        db.session.add(u)
+    docs = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            roll = row.get("roll_number", "").strip().upper()
+            if not roll:
+                continue
+            role = ("admin"   if "ADMIN"  in roll else
+                    "teacher" if "TCH"    in roll else
+                    "alumni"  if "ALUMNI" in roll else "student")
+            docs.append({
+                "roll_number":     roll,
+                "name":   (row.get("name") or "").strip(),
+                "mobile": (row.get("mobile") or "").strip(),
+                "email":  (row.get("email") or "").strip() or None,
+                "branch": (row.get("branch") or "").strip(),
+                "mobile_verified": False,
+                "password_hash":   generate_password_hash("password123"),
+                "batch_year":      int(row.get("batch_year", 0) or 0),
+                "semester":        int(row.get("semester", 0) or 0),
+                "role":            role,
+                "trust_level":     "verified" if role in ("teacher","alumni","admin") else "new",
+                "bio": None, "avatar_url": None, "linkedin_url": None,
+                "github_url": None, "company": None, "skills": [],
+                "created_at": datetime.utcnow(),
+                "last_seen":  datetime.utcnow(),
+            })
 
-    db.session.commit()
-    print("✅  Sangam: example data seeded.")
+    if docs:
+        db.users.insert_many(docs)
+        print(f"✅ Seeded {len(docs)} users from CSV")

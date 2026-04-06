@@ -9,7 +9,7 @@
   background:var(--ink);
   display:flex;align-items:center;
   padding:0 14px;gap:10px;
-  border-bottom:1px solid rgba(124,58,237,0.15);
+  border-bottom:1px solid rgba(15,76,129,0.18);
 }
 .nav-hamburger{
   width:38px;height:38px;border-radius:var(--r-sm);
@@ -32,6 +32,14 @@
 }
 .nav-logo-text em{color:var(--purple-2);font-style:italic}
 .nav-actions{display:flex;align-items:center;gap:8px}
+.sangam-brand-logo{
+  width:38px;height:38px;border-radius:50%;
+  display:inline-grid;place-items:center;
+  background:linear-gradient(135deg, var(--purple), var(--purple-2));
+  color:#fff;font-weight:800;font-size:18px;
+  box-shadow:0 8px 24px rgba(15,41,77,0.16);
+  border:1px solid rgba(255,255,255,0.16);
+}
 .nav-icon-btn{
   width:34px;height:34px;border-radius:50%;
   background:rgba(255,255,255,0.07);
@@ -81,9 +89,9 @@
 #sidebar.open{transform:translateX(0)}
 .sidebar-header{
   padding:20px 16px;
-  background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(157,95,245,0.12));
+  background:linear-gradient(135deg,rgba(15,76,129,0.20),rgba(255,122,24,0.14));
   display:flex;align-items:center;gap:12px;
-  border-bottom:1px solid rgba(124,58,237,0.15);
+  border-bottom:1px solid rgba(15,76,129,0.15);
   flex-shrink:0;
 }
 .sidebar-logo{font-size:28px}
@@ -109,7 +117,7 @@
 }
 .sidebar-item span:first-child{font-size:18px;width:24px;text-align:center}
 .sidebar-item:hover,.sidebar-item.active{
-  background:rgba(124,58,237,0.14);
+  background:rgba(15,76,129,0.14);
   color:#fff;
 }
 .sidebar-footer{

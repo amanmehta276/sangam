@@ -1,24 +1,25 @@
 # models/post.py
-from config.database import db
+
 from datetime import datetime
 
-class Post(db.Model):
-    __tablename__ = "posts"
-    id         = db.Column(db.Integer, primary_key=True)
-    author_id  = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    post_type  = db.Column(db.String(20), default="update")  # update|job|question|win|event|tip
-    content    = db.Column(db.Text, nullable=False)
-    tags       = db.Column(db.Text, nullable=True)           # CSV
-    likes      = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def to_dict(self):
+class Post:
+    def __init__(self, data):
+        self.id         = str(data.get("_id"))
+        self.author_id  = str(data.get("author_id"))
+        self.post_type  = data.get("post_type", "update")
+        self.content    = data.get("content")
+        self.tags       = data.get("tags", [])
+        self.likes      = data.get("likes", 0)
+        self.created_at = data.get("created_at", datetime.utcnow())
+
+    def to_dict(self, author_data=None):
         return {
-            "id":        self.id,
-            "author":    self.author.to_dict() if self.author else None,
+            "id": self.id,
+            "author": author_data,  # route se bhejna
             "post_type": self.post_type,
-            "content":   self.content,
-            "tags":      self.tags.split(",") if self.tags else [],
-            "likes":     self.likes,
-            "created_at":self.created_at.isoformat(),
+            "content": self.content,
+            "tags": self.tags,
+            "likes": self.likes,
+            "created_at": self.created_at.isoformat() if self.created_at else None
         }

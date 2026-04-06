@@ -3,18 +3,18 @@
    ============================================================ */
 :root {
   /* ── Brand ──────────────────────────────────────────── */
-  --purple:       #7C3AED;
-  --purple-2:     #9D5FF5;
-  --purple-3:     #C4B5FD;
-  --purple-dk:    #5B21B6;
-  --purple-glow:  rgba(124,58,237,0.14);
-  --purple-light: #F5F3FF;
-  --purple-light2:#EDE9FE;
+  --purple:       #0F4C81;
+  --purple-2:     #FF7A18;
+  --purple-3:     #BFDFFF;
+  --purple-dk:    #082546;
+  --purple-glow:  rgba(255,122,24,0.18);
+  --purple-light: #EFF6FF;
+  --purple-light2:#DBECFF;
 
-  /* ── Ink (dark surfaces) ─────────────────────────────── */
-  --ink:      #0F0A1E;
-  --ink-2:    #1A1135;
-  --ink-3:    #251A50;
+  /* ── Ink (dark surfaces) ─────────────────────────────────── */
+  --ink:      #071624;
+  --ink-2:    #102E56;
+  --ink-3:    #173D69;
 
   /* ── White surfaces ──────────────────────────────────── */
   --white:    #FFFFFF;

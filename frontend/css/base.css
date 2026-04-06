@@ -63,13 +63,18 @@ img{max-width:100%;display:block}
 .toast{
   position:fixed;bottom:calc(var(--nav-h) + 16px);
   left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--ink);color:#fff;
-  border-radius:999px;padding:10px 22px;
-  font-size:13px;font-weight:500;
+  background:linear-gradient(135deg, var(--ink), var(--ink-2));
+  color:#fff;border-radius:25px;padding:12px 24px;
+  font-size:14px;font-weight:500;
   white-space:nowrap;opacity:0;
-  transition:all .3s ease;z-index:9999;
+  transition:all .4s ease;z-index:9999;
   pointer-events:none;
-  box-shadow:0 8px 24px rgba(0,0,0,0.3);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
   max-width:90vw;text-align:center;
+  backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:linear-gradient(135deg, #10b981, #059669);color:#fff}
+.toast.error{background:linear-gradient(135deg, #ef4444, #dc2626);color:#fff}
+.toast.warning{background:linear-gradient(135deg, #f59e0b, #d97706);color:#fff}
+.toast.info{background:linear-gradient(135deg, var(--purple), var(--purple-2));color:#fff}

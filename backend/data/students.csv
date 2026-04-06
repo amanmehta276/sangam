@@ -1,17 +1,51 @@
-roll_number,name,branch,batch_year
-CSE22101,Arjun Sharma,CSE,2022
-CSE22102,Priya Gupta,CSE,2022
-CSE22103,Ravi Kumar,CSE,2022
-EEE22045,Priya Singh,EEE,2022
-EEE22046,Suresh Yadav,EEE,2022
-ME21030,Ankit Patel,ME,2021
-ME21031,Divya Nair,ME,2021
-CE20015,Vikram Das,CE,2020
-IT22088,Sneha Verma,IT,2022
-IT22089,Mohit Soni,IT,2022
-CSE20011,Rahul Verma,CSE,2020
-CSE19032,Kiran Mehta,CSE,2019
-ECE21055,Meera Joshi,ECE,2021
-TCH001,Dr. S. Tiwari,CSE,2005
-TCH002,Prof. R. Mishra,EEE,2008
-ADMIN001,Admin,,,
+roll_number,name,branch,batch_year,semester,mobile,email
+CSE22101,Aman Sharma,CSE,2022,6,9770240528,aman.sharma@cit.edu
+CSE22102,Priya Singh,CSE,2022,6,9876543211,priya.singh@cit.edu
+CSE22103,Ravi Kumar,CSE,2022,6,9876543212,ravi.kumar@cit.edu
+CSE22104,Anjali Gupta,CSE,2022,6,9876543213,anjali.gupta@cit.edu
+CSE22105,Vikash Yadav,CSE,2022,6,9876543214,vikash.yadav@cit.edu
+CSE22106,Neha Patel,CSE,2022,6,9876543215,neha.patel@cit.edu
+CSE22107,Suresh Tiwari,CSE,2022,6,9876543216,suresh.tiwari@cit.edu
+CSE22108,Pooja Verma,CSE,2022,6,9876543217,pooja.verma@cit.edu
+CSE22109,Deepak Soni,CSE,2022,6,9876543218,deepak.soni@cit.edu
+CSE22110,Kavita Joshi,CSE,2022,6,9876543219,kavita.joshi@cit.edu
+EEE22201,Rahul Verma,EEE,2022,6,9876543220,rahul.verma@cit.edu
+EEE22202,Sunita Mishra,EEE,2022,6,9876543221,sunita.mishra@cit.edu
+EEE22203,Aakash Dubey,EEE,2022,6,9876543222,aakash.dubey@cit.edu
+EEE22204,Rekha Nair,EEE,2022,6,9876543223,rekha.nair@cit.edu
+EEE22205,Mohit Saxena,EEE,2022,6,9876543224,mohit.saxena@cit.edu
+ECE21301,Sneha Agarwal,ECE,2021,8,9876543225,sneha.agarwal@cit.edu
+ECE21302,Arjun Mehta,ECE,2021,8,9876543226,arjun.mehta@cit.edu
+ECE21303,Divya Shukla,ECE,2021,8,9876543227,divya.shukla@cit.edu
+ECE21304,Rohan Pandey,ECE,2021,8,9876543228,rohan.pandey@cit.edu
+ME22401,Amit Singh,ME,2022,6,9876543229,amit.singh@cit.edu
+ME22402,Geeta Pal,ME,2022,6,9876543230,geeta.pal@cit.edu
+ME22403,Sumit Thakur,ME,2022,6,9876543231,sumit.thakur@cit.edu
+CE21501,Ritika Chaudhary,CE,2021,8,9876543232,ritika.chaudhary@cit.edu
+CE21502,Hemant Bajaj,CE,2021,8,9876543233,hemant.bajaj@cit.edu
+IT22601,Anita Rawat,IT,2022,6,9876543234,anita.rawat@cit.edu
+IT22602,Kiran Bose,IT,2022,6,9876543235,kiran.bose@cit.edu
+IT22603,Sachin Garg,IT,2022,6,9876543236,sachin.garg@cit.edu
+CSE21101,Manish Dixit,CSE,2021,8,9876543237,manish.dixit@cit.edu
+CSE21102,Shruti Kapoor,CSE,2021,8,9876543238,shruti.kapoor@cit.edu
+CSE21103,Gaurav Tripathi,CSE,2021,8,9876543239,gaurav.tripathi@cit.edu
+CSE21104,Nisha Rani,CSE,2021,8,9876543240,nisha.rani@cit.edu
+CSE20101,Akash Pandey,CSE,2020,10,9876543241,akash.pandey@cit.edu
+CSE20102,Meera Joshi,CSE,2020,10,9876543242,meera.joshi@cit.edu
+EEE20201,Sunil Kurmi,EEE,2020,10,9876543243,sunil.kurmi@cit.edu
+ME20401,Dinesh Sahu,ME,2020,10,9876543244,dinesh.sahu@cit.edu
+CSE23101,Harsh Sharma,CSE,2023,4,9876543245,harsh.sharma@cit.edu
+CSE23102,Pallavi Misra,CSE,2023,4,9876543246,pallavi.misra@cit.edu
+CSE23103,Rahul Srivastava,CSE,2023,4,9876543247,rahul.srivastava@cit.edu
+EEE23201,Shivani Yadav,EEE,2023,4,9876543248,shivani.yadav@cit.edu
+ECE23301,Tushar Singh,ECE,2023,4,9876543249,tushar.singh@cit.edu
+TCH001,Dr. R.K. Sharma,CSE,2000,0,9876540001,rk.sharma@cit.edu
+TCH002,Prof. S.P. Tiwari,EEE,2002,0,9876540002,sp.tiwari@cit.edu
+TCH003,Dr. Anupama Gupta,ECE,2005,0,9876540003,anupama.gupta@cit.edu
+TCH004,Prof. M.L. Verma,ME,1998,0,9876540004,ml.verma@cit.edu
+TCH005,Dr. K.P. Soni,IT,2010,0,9876540005,kp.soni@cit.edu
+ALUMNI001,Vikram Das,CSE,2018,0,9876541001,vikram.das@alumni.cit.edu
+ALUMNI002,Kiran Mehta,ME,2019,0,9876541002,kiran.mehta@alumni.cit.edu
+ALUMNI003,Sneha Patel,CSE,2017,0,9876541003,sneha.patel@alumni.cit.edu
+ALUMNI004,Rahul Gupta,EEE,2016,0,9876541004,rahul.gupta@alumni.cit.edu
+ADMIN001,Admin CIT,ADMIN,2000,0,9876540000,admin@cit.edu

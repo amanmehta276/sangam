@@ -1,42 +1,30 @@
 # config/settings.py
-# ============================================================
-#  All app configuration in one place.
-#  In production, load secrets from environment variables.
-# ============================================================
-
 import os
+from dotenv import load_dotenv
+load_dotenv()  # MUST be before Config class — reads .env into os.getenv
 
 class Config:
-    # ── JWT ──────────────────────────────────────────────────
-    SECRET_KEY = os.getenv("SECRET_KEY", "sangam-dev-secret-change-in-prod")
+    SECRET_KEY       = os.getenv("SECRET_KEY", "sangam-dev-secret")
     JWT_EXPIRY_HOURS = 24
 
-    # ── Database ─────────────────────────────────────────────
-    #
-    #  EXAMPLE DATABASE  →  uses SQLite so you can run with zero setup.
-    #  YOUR REAL DATABASE →  see HOW_TO_CONNECT.md  (generated below)
-    #
-    DATABASE_TYPE = os.getenv("DB_TYPE", "sqlite")   # "sqlite" | "postgres" | "mysql"
+    # ── Database: mongo ────────────────────────────────────────
+    DB_TYPE   = os.getenv("DB_TYPE", "mongo")
+    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/sangam")
 
-    # SQLite (example — file-based, no install needed)
-    SQLITE_PATH = os.getenv("SQLITE_PATH", "sangam_example.db")
-
-    # PostgreSQL (your production DB)
-    POSTGRES_URL = os.getenv(
-        "DATABASE_URL",
-        "postgresql://user:password@localhost:5432/sangam_db"
-    )
-
-    # MySQL
-    MYSQL_URL = os.getenv(
-        "MYSQL_URL",
-        "mysql+pymysql://user:password@localhost:3306/sangam_db"
-    )
-
-    # ── Roll-number DB (YOUR COLLEGE DATA) ───────────────────
-    #  Point this to your Excel / CSV / separate DB of students
+    # ── Student CSV (college DB crosscheck on signup) ──────────
     ROLL_DB_PATH = os.getenv("ROLL_DB_PATH", "data/students.csv")
 
-    # ── College info ─────────────────────────────────────────
+    # ── OTP ───────────────────────────────────────────────────
+    OTP_MODE     = os.getenv("OTP_MODE", "console")
+    OTP_EXPIRY   = int(os.getenv("OTP_EXPIRY", "300"))
+    TWILIO_SID   = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_FROM  = os.getenv("TWILIO_FROM_NUMBER", "")
+
+    # ── File uploads ──────────────────────────────────────────
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
+    MAX_FILE_MB   = int(os.getenv("MAX_FILE_MB", "10"))
+    ALLOWED_EXT   = {"png","jpg","jpeg","gif","webp","mp4","mov","pdf","doc","docx","xlsx","zip"}
+
     COLLEGE_NAME  = "Chhattisgarh Institute of Technology"
-    COLLEGE_SHORT = "CIT"
+    COLLEGE_SHORT = "CGIT"

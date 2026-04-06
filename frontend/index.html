@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sangam — Chhattisgarh Institute of Technology</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text y='.9em' font-size='70' x='10'>🔱</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
@@ -311,11 +312,10 @@
         .logo-box-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
         .logo-box{
           width:64px;height:64px;border-radius:var(--r-sm);
-          border:1.5px dashed rgba(255,255,255,0.2);
           display:flex;align-items:center;justify-content:center;
-          background:rgba(255,255,255,0.05);overflow:hidden;
+          overflow:hidden;
         }
-        .logo-box img{width:100%;height:100%;object-fit:contain;padding:6px}
+        .logo-box img{width:100%;height:100%;object-fit:cover}
         .logo-label{font-size:9px;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:1.2px;font-weight:500}
         .logo-divider{width:1px;height:48px;background:rgba(255,255,255,0.12)}
         .hero-pre{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
@@ -443,6 +443,113 @@
         .footer-links a{font-size:13px;color:rgba(255,255,255,0.4);transition:color .2s}
         .footer-links a:hover{color:var(--purple-2)}
         .footer-copy{font-size:11px;color:rgba(255,255,255,0.2)}
+        .dev-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  max-width: 1100px;
+  margin: auto;
+  flex-wrap: wrap;
+}
+
+/* LEFT SIDE */
+.dev-left {
+  flex: 1;
+  min-width: 300px;
+}
+
+.section-tag {
+  background: rgba(124,58,237,0.2);
+  color: #c4b5fd;
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.dev-desc {
+  color: rgba(255,255,255,0.6);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  max-width: 450px;
+}
+
+/* RIGHT SIDE */
+.dev-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* CARD */
+.leader-card {
+  background: rgba(255,255,255,0.05);
+  padding: 25px;
+  border-radius: 16px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  width: 260px;
+  transition: 0.3s ease;
+}
+
+.leader-card:hover {
+  transform: translateY(-5px);
+}
+
+/* IMAGE FIX (FOCUS EFFECT 🔥) */
+.leader-avatar {
+  width: 100px;
+  height: 100px;
+  margin: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.leader-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top; /* FACE FOCUS */
+  transform: scale(1.2); /* ZOOM */
+}
+
+/* TEXT */
+.leader-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.leader-title {
+  color: #a78bfa;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.leader-msg {
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .dev-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dev-desc {
+    margin: auto;
+  }
+}
     </style>
 </head>
 <body class="public-page">
@@ -451,17 +558,18 @@
 <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 <aside id="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-logo">🔱</div>
+    <!-- <div class="sidebar-logo">🔱</div> -->
+    <img src="favicon.ico" onerror="this.outerHTML='🏛️'" alt="Sangam">
     <div>
       <div class="sidebar-app-name">Sangam</div>
-      <div class="sidebar-college">CIT Raipur</div>
+      <div class="sidebar-college">CGIT Raipur</div>
     </div>
     <button class="sidebar-close" onclick="closeSidebar()">✕</button>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">College</div>
     <a class="sidebar-item active" href="index.html"><span>🏛️</span>About College</a>
-    <a class="sidebar-item" href="#association"><span>🔱</span>Association</a>
+    <a class="sidebar-item" href="#association"><span><img src="favicon.ico" onerror="this.outerHTML='🏛️'" alt="Association"></span>Association</a>
     <a class="sidebar-item" href="#branches"><span>📚</span>Branches</a>
     <a class="sidebar-item" href="#teachers"><span>👨‍🏫</span>Teachers</a>
     <a class="sidebar-item" href="#events"><span>📅</span>Events</a>
@@ -485,7 +593,7 @@
     <span></span><span></span><span></span>
   </button>
   <div class="nav-logo" onclick="location.href='index.html'">
-    <span class="nav-logo-icon">🔱</span>
+    <span class="nav-logo-icon"><img src="favicon.ico" onerror="this.outerHTML='🏛️'" alt="Sangam"></span>
     <span class="nav-logo-text">San<em>gam</em></span>
   </div>
   <div class="nav-actions">
@@ -505,12 +613,12 @@
   <div class="hero-content">
     <div class="hero-logos">
       <div class="logo-box-wrap">
-        <div class="logo-box"><img src="../assets/college-logo.png" onerror="this.outerHTML='🏛️'" alt="CIT"></div>
-        <span class="logo-label">CIT Raipur</span>
+        <div class="logo-box"><img src="cgitlogo.jpg" onerror="this.outerHTML='🏛️'" alt="CIT"></div>
+        <span class="logo-label">CGIT Raipur</span>
       </div>
       <div class="logo-divider"></div>
       <div class="logo-box-wrap">
-        <div class="logo-box"><img src="../assets/college-logo.png" onerror="this.outerHTML='🔱'" alt="CIT"></div>
+        <div class="logo-box"><img src="sangam.jpeg" onerror="this.outerHTML='🔱'" alt="CIT"></div>
         <span class="logo-label">Sangam</span>
       </div>
     </div>
@@ -541,21 +649,21 @@
     <h2 class="section-title">Message from Our <em>Leaders</em></h2>
     <div class="leader-grid">
       <div class="leader-card">
-        <div class="leader-avatar"><img src="https://via.placeholder.com/64?text=CM" alt="Vishnu Deo Sai"></div>
+        <div class="leader-avatar"><img src="cm.jpg" alt="Vishnu Deo Sai"></div>
         <div class="leader-name">Shri Vishnu Deo Sai</div>
         <div class="leader-title">Chief Minister, Chhattisgarh</div>
         <p class="leader-msg">"Education is the foundation of a progressive society. Sangam bridges the gap between knowledge and opportunity for our youth."</p>
       </div>
       <div class="leader-card">
-        <div class="leader-avatar"><img src="https://via.placeholder.com/64?text=HM" alt="Brijmohan Agrawal"></div>
-        <div class="leader-name">Shri Brijmohan Agrawal</div>
-        <div class="leader-title">Higher Education Minister</div>
+        <div class="leader-avatar"><img src="tm.jpg" alt="Guru Khushwant Saheb"></div>
+        <div class="leader-name">Shri Guru Khushwant Saheb</div>
+        <div class="leader-title">Technical Education Minister</div>
         <p class="leader-msg">"We are committed to building world-class institutions and empowering students with the resources they need to excel."</p>
       </div>
       <div class="leader-card">
-        <div class="leader-avatar"><img src="https://via.placeholder.com/64?text=PR" alt="Dr. M.R. Khan"></div>
+        <div class="leader-avatar"><img src="principal.jpg" alt="Dr. M.R. Khan"></div>
         <div class="leader-name">Dr.M.R. Khan</div>
-        <div class="leader-title">Principal, CIT Raipur</div>
+        <div class="leader-title">Principal, CGIT Raipur</div>
         <p class="leader-msg">"Sangam is our effort to keep our alumni and students forever connected. Knowledge truly connects us all."</p>
       </div>
     </div>
@@ -568,8 +676,8 @@
     <div class="section-tag">🏛️ About</div>
     <h2 class="section-title">Chhattisgarh Institute<br>of <em>Technology</em></h2>
     <p class="section-desc">
-      Established in 1999, CIT Raipur is a premier engineering institution in Chhattisgarh,
-      affiliated to CSVTU. With over 5,000 students across 8 branches, we are committed
+      Chhattigarh Institute of Technology formarly known as Government Engineering College Raipur, Established in 1999, CIT Raipur is a premier engineering institution in Chhattisgarh,
+      affiliated to CSVTU. With over 5,000 students across 5 branches, we are committed
       to excellence in technical education, research, and holistic development.
     </p>
 
@@ -686,21 +794,46 @@
 
 <!-- ═══════════════ ABOUT VYOMTECH ═══════════════ -->
 <section class="section section-dark" id="about-dev">
-  <div class="section-inner" style="text-align:center">
-    <div class="section-tag" style="background:rgba(124,58,237,0.2);color:#c4b5fd;margin:0 auto 16px">👨‍💻 Developers</div>
-    <h2 class="section-title" style="color:#fff">Built by <em>VyomTech</em></h2>
-    <p style="color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto 24px;line-height:1.7">
-      VyomTech is a student-led development company founded by Aman Mehta from CIT Raipur, building open-source tools
-      for the college community. Sangam is our flagship project — open to contributions.
-    </p>
-    <a href="https://github.com/amanmehta276" class="btn-primary" style="display:inline-flex">🐙 View on GitHub</a>
+  <div class="section-inner dev-container">
+
+    <!-- LEFT SIDE -->
+    <div class="dev-left">
+      <div class="section-tag">👨‍💻 Developers</div>
+
+      <h2 class="section-title">Built by <em>VyomTech</em></h2>
+
+      <p class="dev-desc">
+        VyomTech is a student-led development company founded by Aman Mehta from CGIT Raipur, 
+        building open-source tools for the college community. Sangam is our flagship project — 
+        open to contributions.
+      </p>
+
+      <a href="https://github.com/amanmehta276" class="btn-primary">
+        🐙 View on GitHub
+      </a>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="dev-right">
+      <div class="leader-card">
+        <div class="leader-avatar">
+          <img src="aman.jpg" alt="Aman Mehta">
+        </div>
+        <div class="leader-name">Aman Mehta</div>
+        <div class="leader-title">Developer, Sangam</div>
+        <p class="leader-msg">
+          "Sangam is a platform that brings together the alumni and students of CGIT, fostering a community of learning and growth."
+        </p>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <!-- ═══════════════ FOOTER ═══════════════ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <div class="footer-logo">🔱 Sangam</div>
+    <div class="footer-logo">Sangam</div>
     <div class="footer-links">
       <a href="#about">About</a>
       <a href="#branches">Branches</a>
