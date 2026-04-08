@@ -762,6 +762,7 @@ html, body { height: 100%; overflow: hidden; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
 .ptag { font-size: 11px; border-radius: 999px; padding: 2px 9px; font-weight: 500; }
 .ptag-pu { background: var(--purple-light); color: var(--purple); border: 1px solid var(--border-2); }
+
 </style>
 </head>
 <body class="dashboard-page">
@@ -800,6 +801,11 @@ html, body { height: 100%; overflow: hidden; }
       <span style="font-size:18px;width:24px;text-align:center">🚪</span>
       Logout
     </a>
+    <!-- <div class="sidebar-section-label">Devs</div> -->
+    <!-- <a class="sidebar-item" href="#" onclick="showTab('VyomTech');closeSidebar()">
+      <img src="../icons/profile.png" onerror="this.outerHTML='<span>👤</span>'" style="width:18px;height:18px;object-fit:contain">
+      VyomTech
+    </a> -->
   </nav>
   <div class="sidebar-footer">Made with ♥ by VyomTech</div>
 </aside>
@@ -835,12 +841,12 @@ html, body { height: 100%; overflow: hidden; }
 
   <!-- ════ FEED TAB ════ -->
   <div class="tab-view active" id="tab-feed">
-    <div class="stories-strip" id="stories-strip">
+    <!-- <div class="stories-strip" id="stories-strip">
       <div class="story" onclick="showToast('Add your story')">
         <div class="story-ring add"><span class="story-add">＋</span></div>
         <div class="story-name">Your Story</div>
       </div>
-    </div>
+    </div> -->
     <div class="compose-row" onclick="openPostModal()">
       <div class="compose-av" id="compose-av">A</div>
       <div class="compose-ph">Share with your college network…</div>
@@ -1063,6 +1069,7 @@ html, body { height: 100%; overflow: hidden; }
       <div style="height:8px"></div>
     </div>
   </div>
+
 
   <!-- ════ NOTIFICATIONS TAB ════ -->
   <div class="tab-view" id="tab-notifs">
