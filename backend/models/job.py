@@ -1,35 +1,35 @@
-# models/job.py
+from flask import Blueprint, jsonify
+import requests
+from models.job import Job
 
-from datetime import datetime
+jobs_bp = Blueprint("jobs", __name__)
 
+@jobs_bp.route("/api/jobs", methods=["GET"])
+def get_jobs():
+    url = "https://jsearch.p.rapidapi.com/search?query=internship%20india"
+    
+    headers = {
+        "X-RapidAPI-Key": "YOUR_KEY",
+        "X-RapidAPI-Host": "jsearch.p.rapidapi.com"
+    }
 
-class Job:
-    def __init__(self, data):
-        self.id          = str(data.get("_id"))
-        self.poster_id   = str(data.get("poster_id"))
-        self.title       = data.get("title")
-        self.company     = data.get("company")
-        self.location    = data.get("location")
-        self.job_type    = data.get("job_type")
-        self.description = data.get("description")
-        self.salary      = data.get("salary")
-        self.referral    = data.get("referral", False)
-        self.skills_req  = data.get("skills_req", [])
-        self.deadline    = data.get("deadline")
-        self.created_at  = data.get("created_at", datetime.utcnow())
+    res = requests.get(url, headers=headers)
+    data = res.json()
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "poster_id": self.poster_id,
-            "title": self.title,
-            "company": self.company,
-            "location": self.location,
-            "job_type": self.job_type,
-            "description": self.description,
-            "salary": self.salary,
-            "referral": self.referral,
-            "skills_req": self.skills_req,
-            "deadline": self.deadline,
-            "created_at": self.created_at.isoformat() if self.created_at else None
-        }
+    jobs = []
+    for item in data.get("data", []):
+        job = Job({
+            "_id": item.get("job_id"),
+            "poster_id": "external",
+            "title": item.get("job_title"),
+            "company": item.get("employer_name"),
+            "location": item.get("job_city"),
+            "job_type": item.get("job_employment_type"),
+            "description": item.get("job_description"),
+            "salary": item.get("job_salary"),
+            "referral": False,
+            "skills_req": []
+        })
+        jobs.append(job.to_dict())
+
+    return jsonify(jobs)
