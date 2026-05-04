@@ -114,6 +114,61 @@ async function loadFeed(filter = null) {
   const posts = filter ? allPosts.filter(p => p.post_type === filter) : allPosts;
   el.innerHTML = posts.length ? posts.map(renderPost).join("") : `<div class="feed-loading">No posts yet.</div>`;
   loadStories();
+  if (!filter) loadExternalFeed(); // only on "All" tab
+}
+
+/* ── External RSS feed (appended below local posts) ──────── */
+async function loadExternalFeed() {
+  try {
+    const res   = await fetch(`${API_BASE}/feed/external`);
+    const posts = await res.json();
+    if (!Array.isArray(posts) || !posts.length) return;
+
+    const el = document.getElementById("feed-list");
+    if (!el) return;
+
+    el.insertAdjacentHTML("beforeend", `
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 12px 4px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3)">From the Web</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>`);
+
+    posts.forEach(p => el.insertAdjacentHTML("beforeend", renderExternalPost(p)));
+  } catch (err) {
+    console.warn("[Feed] RSS fetch failed:", err);
+  }
+}
+
+function renderExternalPost(p) {
+  const a         = p.author || {};
+  const typeLabel = { job:"Job", update:"Update", tip:"Tip" }[p.post_type] || "Update";
+  const content   = escHtml(p.content || "").replace(/\n/g, "<br>");
+  const source    = escHtml(a.name || "External");
+  return `
+  <div class="post-card" style="opacity:0.92">
+    <div class="post-head">
+      <div class="post-av" style="background:#334155;font-size:11px">🌐</div>
+      <div class="post-meta">
+        <div class="post-name">${source} <span class="vbadge vb-y">External</span></div>
+        <div class="post-sub">${formatTime(p.created_at)}</div>
+      </div>
+      <div class="post-type-chip">${typeLabel}</div>
+    </div>
+    <div class="post-body">${content}…</div>
+    <div class="post-divider"></div>
+    <div class="post-actions">
+      <div class="pact" onclick="showToast('Shared!')">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </div>
+      ${p.source_url ? `
+      <div class="pact" onclick="window.open('${escHtml(p.source_url)}','_blank')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Read More ↗
+      </div>` : ""}
+    </div>
+  </div>`;
 }
 
 function renderPost(p) {

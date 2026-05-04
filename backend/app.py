@@ -9,6 +9,7 @@ from routes.posts  import posts_bp
 from routes.jobs   import jobs_bp
 from routes.chat   import chat_bp
 from routes.notifs import notifs_bp
+from routes.feed_external import feed_bp   # ← NEW
 import jwt, os
 
 socketio = SocketIO()
@@ -33,6 +34,7 @@ def create_app():
         (auth_bp,   "/api/auth"),   (users_bp, "/api/users"),
         (posts_bp,  "/api/posts"),  (jobs_bp,  "/api/jobs"),
         (chat_bp,   "/api/chat"),   (notifs_bp,"/api/notifications"),
+        (feed_bp,   "/api/feed/external"),     # ← NEW
     ]:
         app.register_blueprint(bp, url_prefix=prefix)
 
@@ -50,10 +52,6 @@ def create_app():
 
 
 def _get_user(token: str, secret: str):
-    """
-    FIX BUG 4: Accept secret as parameter instead of using os.getenv()
-    so it always matches what Flask loaded from .env via Config.
-    """
     from config.database import get_db
     from bson import ObjectId
     try:
@@ -111,7 +109,6 @@ def _socket_events(app):
                 return
 
             db = get_db()
-            # FIX BUG 3: Save timestamp ONCE — same value in DB and WebSocket event
             now = datetime.utcnow()
             msg = {
                 "sender_id":   u["_id"],
@@ -127,7 +124,6 @@ def _socket_events(app):
             msg_id = str(res.inserted_id)
             now_iso = now.isoformat()
 
-        # emit() outside the with block is fine — variables still in scope
         emit("new_message", {
             "id":          msg_id,
             "sender_name": u.get("name", ""),
@@ -137,7 +133,7 @@ def _socket_events(app):
             "content":     content,
             "media_type":  media_type,
             "media_url":   media_url,
-            "created_at":  now_iso,  # same timestamp as DB
+            "created_at":  now_iso,
         }, to=room)
 
 
