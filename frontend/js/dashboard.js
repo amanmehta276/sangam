@@ -114,59 +114,92 @@ async function loadFeed(filter = null) {
   const posts = filter ? allPosts.filter(p => p.post_type === filter) : allPosts;
   el.innerHTML = posts.length ? posts.map(renderPost).join("") : `<div class="feed-loading">No posts yet.</div>`;
   loadStories();
-  if (!filter) loadExternalFeed(); // only on "All" tab
 }
 
-/* ── External RSS feed (appended below local posts) ──────── */
-async function loadExternalFeed() {
+/* ── External RSS Jobs (shown in Jobs tab) ───────────────── */
+async function loadExternalJobs() {
   try {
     const res   = await fetch(`${API_BASE}/feed/external`);
     const posts = await res.json();
     if (!Array.isArray(posts) || !posts.length) return;
 
-    const el = document.getElementById("feed-list");
+    const el = document.getElementById("jobs-list");
     if (!el) return;
+
+    // only show job-type posts
+    const jobs = posts.filter(p => p.post_type === "job");
+    if (!jobs.length) return;
 
     el.insertAdjacentHTML("beforeend", `
       <div style="display:flex;align-items:center;gap:10px;margin:8px 12px 4px">
         <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3)">From the Web</span>
+        <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3)">🌐 From the Web</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>`);
 
-    posts.forEach(p => el.insertAdjacentHTML("beforeend", renderExternalPost(p)));
+    jobs.forEach(p => el.insertAdjacentHTML("beforeend", renderExternalJob(p)));
   } catch (err) {
-    console.warn("[Feed] RSS fetch failed:", err);
+    console.warn("[Jobs] RSS fetch failed:", err);
   }
 }
 
-function renderExternalPost(p) {
-  const a         = p.author || {};
-  const typeLabel = { job:"Job", update:"Update", tip:"Tip" }[p.post_type] || "Update";
-  const content   = escHtml(p.content || "").replace(/\n/g, "<br>");
-  const source    = escHtml(a.name || "External");
+/* Company logo via Clearbit (free, no key needed) */
+function companyLogo(name) {
+  if (!name) return null;
+  const slug = name.toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/(inc|ltd|llc|corp|technologies|tech|solutions|services|pvt)$/g,"");
+  return `https://logo.clearbit.com/${slug}.com`;
+}
+
+function renderExternalJob(p) {
+  const source  = escHtml((p.author && p.author.name) || "External");
+  const content = escHtml(p.content || "").replace(/\n/g, "<br>");
+  const logo    = companyLogo(source);
+  const time    = formatTime(p.created_at);
+
   return `
-  <div class="post-card" style="opacity:0.92">
-    <div class="post-head">
-      <div class="post-av" style="background:#334155;font-size:11px">🌐</div>
-      <div class="post-meta">
-        <div class="post-name">${source} <span class="vbadge vb-y">External</span></div>
-        <div class="post-sub">${formatTime(p.created_at)}</div>
+  <div class="job-card" style="border-radius:14px;margin:0 10px 12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:1px solid var(--border);background:var(--white)">
+    <!-- Accent bar -->
+    <div style="height:3px;background:linear-gradient(90deg,var(--purple),#6366f1)"></div>
+
+    <div style="padding:14px 14px 0">
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:46px;height:46px;border-radius:10px;background:var(--s2);border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">
+          ${logo
+            ? `<img src="${logo}" alt="" style="width:100%;height:100%;object-fit:contain"
+                onerror="this.parentElement.innerHTML='💼'">`
+            : "💼"}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${source}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px">
+            <span style="background:var(--purple-light);color:var(--purple);border-radius:999px;padding:2px 8px;font-weight:600;font-size:10px">External</span>
+            &nbsp;·&nbsp;${time}
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:700;background:#EFF6FF;color:#1D6FD4;border-radius:999px;padding:3px 10px;flex-shrink:0">Job</span>
       </div>
-      <div class="post-type-chip">${typeLabel}</div>
+
+      <!-- Content -->
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px">${content}…</div>
     </div>
-    <div class="post-body">${content}…</div>
-    <div class="post-divider"></div>
-    <div class="post-actions">
-      <div class="pact" onclick="showToast('Shared!')">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        Share
+
+    <!-- Footer -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${time}
       </div>
       ${p.source_url ? `
-      <div class="pact" onclick="window.open('${escHtml(p.source_url)}','_blank')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Read More ↗
-      </div>` : ""}
+      <a href="${escHtml(p.source_url)}" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:5px;background:var(--purple);color:#fff;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(124,58,237,0.3)"
+         onmouseover="this.style.background='var(--purple-2)'"
+         onmouseout="this.style.background='var(--purple)'">
+        Read More
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>` : ""}
     </div>
   </div>`;
 }
@@ -306,6 +339,7 @@ async function loadJobs(params = {}) {
   try { jobs = await JobsAPI.list(params); }
   catch { jobs = DEMO_JOBS; }
   el.innerHTML = jobs.length ? jobs.map(renderJob).join("") : `<div class="feed-loading">No jobs found.</div>`;
+  loadExternalJobs();
 }
 
 function renderJob(j) {
