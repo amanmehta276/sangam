@@ -322,10 +322,13 @@ function renderJob(j) {
       </div>
       ${j.salary ? `<div style="font-size:13px;font-weight:700;color:var(--green);flex-shrink:0">${escHtml(j.salary)}</div>` : ""}
     </div>
+    ${j.description ? `<div class="post-body" style="font-size:13px;padding:6px 14px">${escHtml(j.description).slice(0,200)}...</div>` : ""}
     <div class="jc-tags">${skills}</div>
     <div class="jc-foot">
       ${j.referral ? `<div class="ref-badge">Has Referral</div>` : `<div></div>`}
-      <button class="apply-btn" onclick="showToast('Contact the poster via DM!')">Apply</button>
+      ${j.apply_link
+        ? `<a href="${escHtml(j.apply_link)}" target="_blank" class="apply-btn" style="text-decoration:none">Apply ↗</a>`
+        : `<button class="apply-btn" onclick="showToast('Contact the poster via DM!')">Apply</button>`}
     </div>
   </div>`;
 }
