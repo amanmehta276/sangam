@@ -73,6 +73,10 @@ html, body { height: 100%; overflow: hidden; }
   pointer-events: all;
   transform: translateY(0);
 }
+/* Chat tab must NOT scroll — it manages its own internal scroll */
+#tab-chat {
+  overflow: hidden !important;
+}
 
 /* ── Bottom Nav with image icons ── */
 .bnav-icon {
@@ -105,6 +109,8 @@ html, body { height: 100%; overflow: hidden; }
   background: var(--ink);
   overflow: hidden;
   height: 100%;
+  /* Ensure text is always white inside chat */
+  color: #fff;
 }
 
 .chat-layout {
@@ -468,7 +474,7 @@ html, body { height: 100%; overflow: hidden; }
   font-size: 10px; font-weight: 800; color: var(--purple-2);
   margin-bottom: 3px; display: block;
 }
-.msg-text { font-size: 14px; }
+.msg-text { font-size: 14px; color: #fff; word-break: break-word; }
 
 /* Ticks + time row */
 .msg-footer {
@@ -708,83 +714,108 @@ html, body { height: 100%; overflow: hidden; }
 
 /* ── Mobile ── */
 @media (max-width: 767px) {
-  /* ── Chat tab must fill between top and bottom nav only ── */
-  #tab-chat.active {
-    position: fixed;
-    top: var(--top-nav-h);
-    bottom: var(--nav-h);
-    left: 0; right: 0;
-    overflow: hidden;
+  /* ── tab-view#tab-chat: no position:fixed needed, parent .dash-main is already fixed ── */
+  #tab-chat {
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
   }
 
+  /* Layout fills full height of tab */
   .chat-layout {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    flex: 1;
+    min-height: 0;
   }
 
-  /* Sidebar fills entire layout on mobile */
+  /* Sidebar: full width, slides out to left */
   .chat-sidebar {
     width: 100%;
     position: absolute; inset: 0; z-index: 20;
     transition: transform .28s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
   }
   .chat-sidebar.hidden-mobile {
     transform: translateX(-100%);
     pointer-events: none;
   }
 
-  /* Panel fills entire layout, slides in from right */
+  /* Panel: slides in from right, fills entire layout */
   .chat-panel {
-    position: absolute; inset: 0; z-index: 25;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    /* KEY FIX: bottom 0 inside the layout, not the viewport */
+    bottom: 0;
+    z-index: 25;
     display: flex !important;
     flex-direction: column;
+    overflow: hidden;
     transition: transform .28s cubic-bezier(.4,0,.2,1);
     transform: translateX(100%);
-    /* CRITICAL: panel must not overflow nav */
-    height: 100%;
-    overflow: hidden;
   }
   .chat-panel.visible-mobile {
     transform: translateX(0);
   }
 
-  /* Messages area takes all space between header and input */
-  .chat-messages-area {
-    flex: 1;
-    min-height: 0;        /* CRITICAL for flex scroll */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Active chat fills panel height */
+  /* Active chat: fills panel, flex column */
   #active-chat {
-    height: 100% !important;
+    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
-    min-height: 0;
+    min-height: 0 !important;
+    height: 100% !important;
   }
 
-  /* Input wrap stays at bottom, never overlaps footer */
+  /* Messages: takes remaining space, scrolls */
+  .chat-messages-area {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 10px 6px;
+  }
+
+  /* Input wrap: shrinks to content, never grows */
   .chat-input-wrap {
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
     position: relative;
-  }
-  .chat-input-row {
-    padding: 8px 10px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    /* Prevent keyboard from pushing it behind bottom nav */
+    z-index: 30;
   }
 
-  /* Back button visible */
+  /* Input row: safe area padding for iPhone notch */
+  .chat-input-row {
+    padding: 8px 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    background: var(--ink);
+  }
+
+  /* Emoji picker: smaller on mobile */
+  .emoji-picker {
+    max-height: 120px;
+    bottom: 100%;
+  }
+
+  /* Back button */
   .chat-back-btn { display: flex !important; }
 
-  /* Wider bubbles on mobile */
-  .msg-row { max-width: 88%; }
+  /* Wider bubbles */
+  .msg-row { max-width: 90%; }
 
-  /* Emoji picker height limit on mobile */
-  .emoji-picker { max-height: 130px; }
+  /* Message text — ensure it's visible */
+  .msg-text {
+    color: #fff !important;
+    font-size: 14px !important;
+    word-break: break-word;
+  }
+  .msg-row.theirs .msg-bubble {
+    background: rgba(255,255,255,0.12) !important;
+  }
+  .msg-sender-name { color: var(--purple-2) !important; }
 }
 
 /* ── Group info drawer ── */
