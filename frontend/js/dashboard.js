@@ -377,8 +377,8 @@ async function loadChat() {
     const data = await ChatAPI.rooms();
     allRooms = data;
     renderRoomList();
-    // Auto-open global chat on desktop
-    if (window.innerWidth > 600) {
+    // Auto-open global chat on desktop only (avoid layout shift on mobile)
+    if (window.innerWidth >= 768) {
       openRoom("global", "Sangam Community", "Community group");
     }
   } catch {
@@ -455,7 +455,7 @@ async function openRoom(roomId, roomName, sub) {
   // Show active chat
   document.getElementById("chat-empty-state").style.display = "none";
   const ac = document.getElementById("active-chat");
-  ac.style.display = "flex";
+  ac.style.cssText = "display:flex;flex-direction:column;height:100%";
 
   // Load messages
   await loadMessages(roomId);
@@ -548,6 +548,8 @@ async function sendChatMessage() {
 
   input.value = "";
   input.style.height = "auto";
+  input.style.height = "38px";   // reset to single line
+  input.focus();                   // keep keyboard open on mobile
 
   // Optimistic local render
   const now = new Date().toISOString();
@@ -591,6 +593,10 @@ function connectSocket(room) {
 function backToRoomList() {
   document.getElementById("chat-sidebar")?.classList.remove("hidden-mobile");
   document.getElementById("chat-panel")?.classList.remove("visible-mobile");
+  // Reset state so the room list is clean
+  activeRoom = null;
+  activeRoomName = "";
+  if (chatSocket) { try { chatSocket.disconnect(); } catch(e){} chatSocket = null; }
 }
 
 function filterChatRooms(q) {
@@ -625,6 +631,9 @@ async function handleFileAttach(input) {
 function autoGrow(el) {
   el.style.height = "auto";
   el.style.height = Math.min(el.scrollHeight, 110) + "px";
+  // keep messages scrolled to bottom as textarea grows
+  const area = document.getElementById("chat-messages-area");
+  if (area) area.scrollTop = area.scrollHeight;
 }
 
 function openDMSearch() {
