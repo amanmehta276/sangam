@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Sangam</title>
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
@@ -714,108 +714,118 @@ html, body { height: 100%; overflow: hidden; }
 
 /* ── Mobile ── */
 @media (max-width: 767px) {
-  /* ── tab-view#tab-chat: no position:fixed needed, parent .dash-main is already fixed ── */
+
+  /* The ONLY thing needed: make chat tab not scrollable */
   #tab-chat {
     overflow: hidden !important;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #0a1929 !important;
   }
 
-  /* Layout fills full height of tab */
+  /* chat-layout fills tab completely */
   .chat-layout {
+    flex: 1 !important;
+    min-height: 0 !important;
     position: relative;
-    width: 100%;
-    height: 100%;
     overflow: hidden;
-    flex: 1;
-    min-height: 0;
+    display: flex;
   }
 
-  /* Sidebar: full width, slides out to left */
+  /* Sidebar: full width slide */
   .chat-sidebar {
-    width: 100%;
-    position: absolute; inset: 0; z-index: 20;
-    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    z-index: 20;
     overflow-y: auto;
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    background: var(--ink);
   }
   .chat-sidebar.hidden-mobile {
     transform: translateX(-100%);
     pointer-events: none;
   }
 
-  /* Panel: slides in from right, fills entire layout */
+  /* Panel: slides from right, FULL height of layout */
   .chat-panel {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    /* KEY FIX: bottom 0 inside the layout, not the viewport */
-    bottom: 0;
+    position: absolute !important;
+    inset: 0 !important;
     z-index: 25;
-    display: flex !important;
-    flex-direction: column;
-    overflow: hidden;
-    transition: transform .28s cubic-bezier(.4,0,.2,1);
-    transform: translateX(100%);
-  }
-  .chat-panel.visible-mobile {
-    transform: translateX(0);
-  }
-
-  /* Active chat: fills panel, flex column */
-  #active-chat {
-    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
-    min-height: 0 !important;
-    height: 100% !important;
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    transform: translateX(100%);
+    background: #0a1929;
+  }
+  .chat-panel.visible-mobile {
+    transform: translateX(0) !important;
   }
 
-  /* Messages: takes remaining space, scrolls */
+  /* Active chat: flex column fills panel */
+  #active-chat {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Panel header: fixed height */
+  .chat-panel-header {
+    flex-shrink: 0 !important;
+  }
+
+  /* Messages area: FLEX 1 — takes all remaining space */
   .chat-messages-area {
     flex: 1 !important;
     min-height: 0 !important;
     overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    padding: 10px 10px 6px;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px 10px !important;
   }
 
-  /* Input wrap: shrinks to content, never grows */
+  /* Reply bar: shrinks to content */
+  .reply-preview-bar {
+    flex-shrink: 0 !important;
+  }
+
+  /* Input wrap: shrinks to content, ALWAYS at bottom */
   .chat-input-wrap {
     flex-shrink: 0 !important;
-    position: relative;
-    /* Prevent keyboard from pushing it behind bottom nav */
-    z-index: 30;
-  }
-
-  /* Input row: safe area padding for iPhone notch */
-  .chat-input-row {
-    padding: 8px 8px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    position: relative !important;
     background: var(--ink);
   }
 
-  /* Emoji picker: smaller on mobile */
-  .emoji-picker {
-    max-height: 120px;
-    bottom: 100%;
+  /* Input row: compact on mobile */
+  .chat-input-row {
+    padding: 8px 8px 8px !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    gap: 6px !important;
   }
+
+  /* Smaller send/attach buttons on mobile */
+  .chat-send-btn  { width: 38px !important; height: 38px !important; }
+  .chat-attach-btn{ width: 34px !important; height: 34px !important; }
+  .chat-emoji-btn { width: 30px !important; height: 30px !important; font-size: 18px !important; }
+
+  /* Emoji picker */
+  .emoji-picker { max-height: 110px; }
 
   /* Back button */
   .chat-back-btn { display: flex !important; }
 
-  /* Wider bubbles */
-  .msg-row { max-width: 90%; }
+  /* Bubbles: wider */
+  .msg-row { max-width: 88%; }
 
-  /* Message text — ensure it's visible */
-  .msg-text {
-    color: #fff !important;
-    font-size: 14px !important;
-    word-break: break-word;
-  }
-  .msg-row.theirs .msg-bubble {
-    background: rgba(255,255,255,0.12) !important;
-  }
-  .msg-sender-name { color: var(--purple-2) !important; }
+  /* Text always white */
+  .msg-text { color: #fff !important; font-size: 14px !important; }
+  .msg-row.theirs .msg-bubble { background: rgba(255,255,255,0.12) !important; }
+  .msg-sender-name { color: #93c5fd !important; }
+  .msg-time { color: rgba(255,255,255,0.5) !important; }
 }
 
 /* ── Group info drawer ── */

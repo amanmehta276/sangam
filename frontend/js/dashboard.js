@@ -550,9 +550,9 @@ async function openRoom(roomId, roomName, sub) {
   updateNavBadge();
 
   // Show active-chat
-  document.getElementById("chat-empty-state").style.display = "none";
+  const emptyState = document.getElementById("chat-empty-state"); if(emptyState) emptyState.style.display = "none";
   const ac = document.getElementById("active-chat");
-  ac.style.cssText = "display:flex;flex-direction:column;height:100%;min-height:0;position:relative;overflow:hidden";
+  ac.style.display = "flex";   // CSS handles the rest via !important rules
 
   await loadMessages(roomId);
   connectSocket(roomId);
