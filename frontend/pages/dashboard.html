@@ -826,6 +826,15 @@ html, body { height: 100%; overflow: hidden; }
   .msg-row.theirs .msg-bubble { background: rgba(255,255,255,0.12) !important; }
   .msg-sender-name { color: #93c5fd !important; }
   .msg-time { color: rgba(255,255,255,0.5) !important; }
+
+  /* ── KEY FIX: hide bottom nav when chat panel is open ── */
+  body.chat-panel-open .bottom-nav {
+    display: none !important;
+  }
+  /* And give dash-main full height when nav is hidden */
+  body.chat-panel-open .dash-main {
+    bottom: 0 !important;
+  }
 }
 
 /* ── Group info drawer ── */

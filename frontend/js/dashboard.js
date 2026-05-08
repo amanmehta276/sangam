@@ -68,6 +68,8 @@ function showTab(tab) {
   currentTab = tab;
   document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".bnav-item").forEach(n => n.classList.remove("active"));
+  // Always restore bottom nav when switching tabs
+  document.body.classList.remove("chat-panel-open");
 
   document.getElementById(`tab-${tab}`)?.classList.add("active");
   document.querySelector(`.bnav-item[data-tab="${tab}"]`)?.classList.add("active");
@@ -518,9 +520,10 @@ async function openRoom(roomId, roomName, sub) {
   activeRoom     = roomId;
   activeRoomName = roomName;
 
-  // Mobile: slide panel in
+  // Mobile: slide panel in + hide bottom nav so it doesn't cover messages
   document.getElementById("chat-sidebar")?.classList.add("hidden-mobile");
   document.getElementById("chat-panel")?.classList.add("visible-mobile");
+  document.body.classList.add("chat-panel-open");
 
   // Header
   const color = getColor((roomName[0]||"G").toUpperCase());
@@ -970,6 +973,7 @@ function updateNavBadge() {
 function backToRoomList() {
   document.getElementById("chat-sidebar")?.classList.remove("hidden-mobile");
   document.getElementById("chat-panel")?.classList.remove("visible-mobile");
+  document.body.classList.remove("chat-panel-open");
   activeRoom = null;
   activeRoomName = "";
   if (chatSocket) { try { chatSocket.disconnect(); } catch(e){} chatSocket = null; }
