@@ -552,7 +552,7 @@ async function openRoom(roomId, roomName, sub) {
   // Show active-chat
   document.getElementById("chat-empty-state").style.display = "none";
   const ac = document.getElementById("active-chat");
-  ac.style.cssText = "display:flex;flex-direction:column;height:100%;position:relative";
+  ac.style.cssText = "display:flex;flex-direction:column;height:100%;min-height:0;position:relative;overflow:hidden";
 
   await loadMessages(roomId);
   connectSocket(roomId);
@@ -746,6 +746,16 @@ function connectSocket(room) {
   const token = Auth.getToken() || "";
   chatSocket = io("http://localhost:5000", { auth: { token: `Bearer ${token}` } });
   chatSocket.emit("join", { token: `Bearer ${token}`, room });
+
+  // On mobile: when keyboard opens (viewport shrinks), scroll to bottom
+  if ("visualViewport" in window) {
+    window.visualViewport.onresize = () => {
+      const area = document.getElementById("chat-messages-area");
+      if (area && activeRoom) {
+        setTimeout(() => { area.scrollTop = area.scrollHeight; }, 80);
+      }
+    };
+  }
 
   chatSocket.on("new_message", msg => {
     // Update last message in room list for all rooms
