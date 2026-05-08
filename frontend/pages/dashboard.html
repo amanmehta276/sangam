@@ -377,14 +377,20 @@ html, body { height: 100%; overflow: hidden; }
 
 /* Date divider */
 .msg-date-divider {
-  text-align: center;
-  margin: 12px 0 8px;
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 4px 10px;
+}
+.msg-date-divider::before,
+.msg-date-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.08);
 }
 .msg-date-divider span {
-  font-size: 11px; color: rgba(255,255,255,0.38);
+  font-size: 10px; color: rgba(255,255,255,0.4);
   background: rgba(255,255,255,0.07);
-  border-radius: 999px; padding: 4px 14px;
-  font-weight: 500;
+  border-radius: 999px; padding: 4px 13px;
+  font-weight: 600; letter-spacing: .3px;
+  white-space: nowrap; flex-shrink: 0;
 }
 
 /* System message */
@@ -492,19 +498,49 @@ html, body { height: 100%; overflow: hidden; }
 .msg-reaction-chip span { font-size: 10px; color: rgba(255,255,255,0.6); }
 
 /* Media */
-.msg-img {
-  max-width: 220px; border-radius: 12px;
-  margin-bottom: 3px; cursor: pointer;
-  display: block;
-  transition: opacity .2s;
+.msg-media-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 240px;
 }
-.msg-img:hover { opacity: .9; }
+.msg-img {
+  width: 100%; max-width: 240px;
+  border-radius: 12px;
+  display: block;
+  cursor: zoom-in;
+  transition: transform .2s;
+  object-fit: cover;
+}
+.msg-media-wrap:hover .msg-img { transform: scale(1.02); }
+.msg-img-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; cursor: zoom-in;
+  transition: background .2s;
+  opacity: 0;
+  border-radius: 12px;
+}
+.msg-media-wrap:hover .msg-img-overlay { background: rgba(0,0,0,0.3); opacity: 1; }
+.msg-video {
+  width: 100%; max-width: 260px;
+  border-radius: 12px;
+  display: block;
+  background: #000;
+}
 .msg-file {
   display: flex; align-items: center; gap: 9px;
   background: rgba(255,255,255,0.1);
-  border-radius: 10px; padding: 9px 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 10px 13px;
   font-size: 13px; color: #fff; text-decoration: none; cursor: pointer;
+  min-width: 180px; max-width: 240px;
+  transition: background .18s;
 }
+.msg-file:hover { background: rgba(255,255,255,0.16); }
 
 /* ── Typing indicator ── */
 .typing-indicator {
@@ -672,7 +708,23 @@ html, body { height: 100%; overflow: hidden; }
 
 /* ── Mobile ── */
 @media (max-width: 767px) {
-  .chat-layout { position: relative; overflow: hidden; }
+  /* ── Chat tab must fill between top and bottom nav only ── */
+  #tab-chat.active {
+    position: fixed;
+    top: var(--top-nav-h);
+    bottom: var(--nav-h);
+    left: 0; right: 0;
+    overflow: hidden;
+  }
+
+  .chat-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Sidebar fills entire layout on mobile */
   .chat-sidebar {
     width: 100%;
     position: absolute; inset: 0; z-index: 20;
@@ -682,16 +734,57 @@ html, body { height: 100%; overflow: hidden; }
     transform: translateX(-100%);
     pointer-events: none;
   }
+
+  /* Panel fills entire layout, slides in from right */
   .chat-panel {
-    position: absolute; inset: 0; z-index: 10;
+    position: absolute; inset: 0; z-index: 25;
+    display: flex !important;
+    flex-direction: column;
     transition: transform .28s cubic-bezier(.4,0,.2,1);
     transform: translateX(100%);
+    /* CRITICAL: panel must not overflow nav */
+    height: 100%;
+    overflow: hidden;
   }
   .chat-panel.visible-mobile {
     transform: translateX(0);
   }
+
+  /* Messages area takes all space between header and input */
+  .chat-messages-area {
+    flex: 1;
+    min-height: 0;        /* CRITICAL for flex scroll */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Active chat fills panel height */
+  #active-chat {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    min-height: 0;
+  }
+
+  /* Input wrap stays at bottom, never overlaps footer */
+  .chat-input-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  .chat-input-row {
+    padding: 8px 10px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  /* Back button visible */
   .chat-back-btn { display: flex !important; }
+
+  /* Wider bubbles on mobile */
   .msg-row { max-width: 88%; }
+
+  /* Emoji picker height limit on mobile */
+  .emoji-picker { max-height: 130px; }
 }
 
 /* ── Group info drawer ── */

@@ -409,59 +409,108 @@ async function loadChat() {
   }
 }
 
-/* ══ Render Room List ══ */
+/* ══ Render Room List — WhatsApp style unified + sorted by recency ══ */
 function renderRoomList() {
   const el = document.getElementById("chat-rooms-list");
   if (!el) return;
 
   const { system_groups = [], my_groups = [], dms = [] } = allRooms;
-  let html = "";
 
-  if (system_groups.length) {
-    html += `<div class="chat-section-label">Groups</div>`;
-    html += system_groups.map(r => roomItem(r.id, r.name, r.name[0], "group", "", "", r.members)).join("");
-  }
-  if (my_groups.length) {
-    html += `<div class="chat-section-label">My Groups</div>`;
-    html += my_groups.map(r => roomItem(r.id||r.room, r.name, r.name[0], "mygroup", r.last_message, r.last_time)).join("");
-  }
-  if (dms.length) {
-    html += `<div class="chat-section-label">Direct Messages</div>`;
-    html += dms.map(d => roomItem(d.id, d.with_name, d.with_name[0], "dm", d.last_message, d.last_time)).join("");
+  // Normalize all rooms into one array
+  const all = [
+    ...system_groups.map(r => ({
+      id: r.id, name: r.name, initial: r.name[0], type: "group",
+      lastMsg: r.last_message || "", lastTime: r.last_time || r.created_at || "",
+      members: r.members || 0, pinned: r.id === "global",
+    })),
+    ...my_groups.map(r => ({
+      id: r.id || r.room, name: r.name, initial: r.name[0], type: "mygroup",
+      lastMsg: r.last_message || "", lastTime: r.last_time || "",
+      members: 0, pinned: false,
+    })),
+    ...dms.map(d => ({
+      id: d.id, name: d.with_name, initial: d.with_name[0], type: "dm",
+      lastMsg: d.last_message || "", lastTime: d.last_time || "",
+      members: 0, pinned: false,
+    })),
+  ];
+
+  // Sort: pinned first, then by lastTime descending (most recent on top)
+  all.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    const ta = a.lastTime ? new Date(a.lastTime).getTime() : 0;
+    const tb = b.lastTime ? new Date(b.lastTime).getTime() : 0;
+    return tb - ta;
+  });
+
+  if (!all.length) {
+    el.innerHTML = `<div style="padding:40px 20px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px">
+      No chats yet.<br><br>
+      <button onclick="openDMSearch()" style="background:var(--purple);color:#fff;border:none;border-radius:999px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Start a DM</button>
+    </div>`;
+    return;
   }
 
-  el.innerHTML = html || `<div style="padding:30px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px">No chats yet</div>`;
+  el.innerHTML = all.map(r => roomItem(r.id, r.name, r.initial, r.type, r.lastMsg, r.lastTime, r.members, r.pinned)).join("");
 }
 
-function roomItem(id, name, initial, type, lastMsg="", lastTime="", memberCount=0) {
-  const color    = getColor(initial);
+function roomItem(id, name, initial, type, lastMsg="", lastTime="", memberCount=0, pinned=false) {
+  const color    = getColor(initial || "A");
   const isActive = activeRoom === id ? " active" : "";
   const unread   = unreadCounts[id] || 0;
   const isOnline = type === "dm" && onlineUsers.has(id);
-  const chip     = type === "group" || type === "mygroup"
-    ? `<span class="room-chip">GROUP</span>` : "";
-  const lastPreview = lastMsg
-    ? `<div class="room-last ${unread ? "unread-preview" : ""}">${escHtml(lastMsg)}</div>` : "";
+
+  // Last message preview with media hint
+  let preview = lastMsg || "";
+  if (!preview && memberCount) preview = `${memberCount} members`;
+  const previewIcon = preview.startsWith("📷") || preview.startsWith("🖼") ? "" :
+    type === "dm" ? "" : "";
+
   const onlineDot = isOnline ? `<div class="room-online-dot"></div>` : "";
+  const pinIcon   = pinned ? `<span style="font-size:10px;opacity:.5;margin-left:2px">📌</span>` : "";
+
+  // Type icon
+  const typeIcon = type === "dm" ? "👤" : "👥";
+
   const badgeHtml = unread
     ? `<div class="room-badge">${unread > 99 ? "99+" : unread}</div>` : "";
-  const timeHtml  = lastTime ? `<div class="room-time">${formatTime(lastTime)}</div>` : "";
+  const timeHtml  = lastTime
+    ? `<div class="room-time">${formatChatTime2(lastTime)}</div>` : "";
 
   return `
   <div class="room-item${isActive}" onclick="openRoom('${escHtml(id)}','${escHtml(name)}','${type}')">
     <div class="room-av" style="background:${color}">
-      ${initial.toUpperCase()}
+      ${(initial||"?").toUpperCase()}
       ${onlineDot}
     </div>
     <div class="room-info">
-      <div class="room-name">${escHtml(name)} ${chip}</div>
-      ${lastPreview}
+      <div class="room-name">
+        ${escHtml(name)} ${pinIcon}
+        ${unread ? `<span style="width:8px;height:8px;background:var(--purple-2);border-radius:50%;display:inline-block;margin-left:2px;flex-shrink:0"></span>` : ""}
+      </div>
+      <div class="room-last ${unread ? "unread-preview" : ""}">
+        <span style="opacity:.5;font-size:10px">${typeIcon}</span>
+        ${preview ? escHtml(preview).slice(0, 45) + (preview.length > 45 ? "…" : "") : ""}
+      </div>
     </div>
     <div class="room-meta">
       ${timeHtml}
       ${badgeHtml}
     </div>
   </div>`;
+}
+
+/* Format time for room list — show time if today, else date */
+function formatChatTime2(iso) {
+  if (!iso) return "";
+  const d   = new Date(iso);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  if (isToday) return d.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", hour12:true });
+  const diff = (now - d) / 86400000;
+  if (diff < 7) return d.toLocaleDateString("en-IN", { weekday:"short" });
+  return d.toLocaleDateString("en-IN", { day:"numeric", month:"short" });
 }
 
 /* ══ Open Room ══ */
@@ -599,11 +648,31 @@ function renderMessages(msgs) {
     html += replySnippet;
 
     if (m.media_type === "image" && m.media_url) {
-      html += `<img class="msg-img" src="${escHtml(m.media_url)}" alt="image" onclick="window.open(this.src,'_blank')">`;
-    } else if (m.media_type === "file" && m.media_url) {
-      html += `<a class="msg-file" href="${escHtml(m.media_url)}" target="_blank">📎 ${escHtml(m.content||"File")}</a>`;
+      html += `<div class="msg-media-wrap">
+        <img class="msg-img" src="${escHtml(m.media_url)}" alt="image"
+          loading="lazy"
+          onclick="openLightbox('${escHtml(m.media_url)}')"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'120\'><rect fill=\'%23334155\' width=\'200\' height=\'120\'/><text fill=\'%2394a3b8\' x=\'50%\' y=\'55%\' text-anchor=\'middle\' font-size=\'13\'>Image unavailable</text></svg>'">
+        <div class="msg-img-overlay" onclick="openLightbox('${escHtml(m.media_url)}')">🔍</div>
+      </div>`;
     } else if (m.media_type === "video" && m.media_url) {
-      html += `<video controls style="max-width:220px;border-radius:10px"><source src="${escHtml(m.media_url)}"></video>`;
+      html += `<div class="msg-media-wrap">
+        <video class="msg-video" controls preload="metadata" onclick="event.stopPropagation()">
+          <source src="${escHtml(m.media_url)}">
+          Your browser does not support video.
+        </video>
+      </div>`;
+    } else if (m.media_type === "file" && m.media_url) {
+      const ext = (m.media_url.split('.').pop()||"").toLowerCase();
+      const icon = ext === "pdf" ? "📄" : ext === "doc" || ext === "docx" ? "📝" : "📎";
+      html += `<a class="msg-file" href="${escHtml(m.media_url)}" target="_blank" rel="noopener">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${icon}</div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(m.content||"File")}</div>
+          <div style="font-size:10px;opacity:.6;text-transform:uppercase">${ext || "file"}</div>
+        </div>
+        <div style="margin-left:auto;opacity:.7;font-size:18px">⬇</div>
+      </a>`;
     } else {
       html += `<div class="msg-text">${escHtml(m.content||"").replace(/\n/g,"<br>")}</div>`;
     }
@@ -679,6 +748,18 @@ function connectSocket(room) {
   chatSocket.emit("join", { token: `Bearer ${token}`, room });
 
   chatSocket.on("new_message", msg => {
+    // Update last message in room list for all rooms
+    const updateRoomPreview = (rooms) => rooms.map(r => {
+      const rid = r.id || r.room || r.with_name;
+      if (rid === msg.room || r.id === msg.room) {
+        return { ...r, last_message: msg.content || "📎 Media", last_time: msg.created_at };
+      }
+      return r;
+    });
+    allRooms.system_groups = updateRoomPreview(allRooms.system_groups || []);
+    allRooms.my_groups     = updateRoomPreview(allRooms.my_groups     || []);
+    allRooms.dms           = updateRoomPreview(allRooms.dms           || []);
+
     if (msg.room !== activeRoom) {
       unreadCounts[msg.room] = (unreadCounts[msg.room]||0) + 1;
       updateNavBadge();
@@ -687,6 +768,7 @@ function connectSocket(room) {
     }
     if (String(msg.sender_id) === String(currentUser.id)) return;
     appendMessage(msg);
+    renderRoomList(); // refresh sidebar preview
   });
 
   chatSocket.on("typing", data => {
@@ -1036,6 +1118,27 @@ async function handleFileAttach(input) {
     showToast("Sent!", "success");
   } catch { showToast("Upload failed", "error"); }
   input.value = "";
+}
+
+/* ══ Lightbox ══ */
+function openLightbox(src) {
+  let lb = document.getElementById("chat-lightbox");
+  if (!lb) {
+    lb = document.createElement("div");
+    lb.id = "chat-lightbox";
+    lb.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;backdrop-filter:blur(6px)";
+    lb.onclick = () => lb.remove();
+    document.body.appendChild(lb);
+  }
+  lb.innerHTML = `
+    <div style="position:relative;max-width:95vw;max-height:92vh">
+      <img src="${escHtml(src)}" style="max-width:95vw;max-height:88vh;border-radius:12px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+      <button onclick="event.stopPropagation();document.getElementById('chat-lightbox').remove()"
+        style="position:absolute;top:-14px;right:-14px;background:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)">✕</button>
+      <a href="${escHtml(src)}" download target="_blank"
+        style="position:absolute;bottom:-14px;right:-14px;background:var(--purple);color:#fff;border-radius:50%;width:30px;height:30px;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.3)">⬇</a>
+    </div>`;
+  document.body.appendChild(lb);
 }
 
 /* ══ autoGrow ══ */
