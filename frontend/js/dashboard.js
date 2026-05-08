@@ -370,32 +370,46 @@ function renderJob(j) {
 function searchJobs(q) { /* filter locally or API */ }
 
 /* ════════════════════════════════════════
-   CHAT — WhatsApp style
+   CHAT — Full Featured
 ════════════════════════════════════════ */
+
+/* ── State ── */
+let replyingTo       = null;   // { id, sender_name, content }
+let chatLightMode    = false;
+let typingTimer      = null;
+let ctxTargetMsg     = null;   // message targeted by context menu
+let groupMembers     = {};     // roomId → [member list]
+let unreadCounts     = {};     // roomId → count
+let onlineUsers      = new Set();
+
+/* ══ Load Chat ══ */
 async function loadChat() {
   try {
     const data = await ChatAPI.rooms();
     allRooms = data;
     renderRoomList();
-    // Auto-open global chat on desktop only (avoid layout shift on mobile)
     if (window.innerWidth >= 768) {
-      openRoom("global", "Sangam Community", "Community group");
+      openRoom("global", "Sangam Community", "group");
     }
   } catch {
-    // Offline — render demo rooms
     allRooms = {
       system_groups: [
-        { id:"global",     name:"Sangam Community",  icon:"globe" },
-        { id:"placements", name:"Placements 2025",   icon:"briefcase" },
-        { id:"mentorship", name:"Mentorship Connect",icon:"handshake" },
+        { id:"global",     name:"Sangam Community",   icon:"🌍", members:120 },
+        { id:"placements", name:"Placements 2025",    icon:"💼", members:84  },
+        { id:"mentorship", name:"Mentorship Connect", icon:"🤝", members:47  },
+        { id:"cse-batch",  name:"CSE Batch 2022",     icon:"💻", members:62  },
       ],
       my_groups: [],
       dms: [],
     };
     renderRoomList();
+    if (window.innerWidth >= 768) {
+      openRoom("global", "Sangam Community", "group");
+    }
   }
 }
 
+/* ══ Render Room List ══ */
 function renderRoomList() {
   const el = document.getElementById("chat-rooms-list");
   if (!el) return;
@@ -404,93 +418,134 @@ function renderRoomList() {
   let html = "";
 
   if (system_groups.length) {
-    html += `<div class="room-section-label">Groups</div>`;
-    html += system_groups.map(r => roomItem(r.id, r.name, "G", "group")).join("");
+    html += `<div class="chat-section-label">Groups</div>`;
+    html += system_groups.map(r => roomItem(r.id, r.name, r.name[0], "group", "", "", r.members)).join("");
   }
   if (my_groups.length) {
-    html += `<div class="room-section-label">My Groups</div>`;
-    html += my_groups.map(r => roomItem(r.id||r.room, r.name, r.name[0], "mygroup")).join("");
+    html += `<div class="chat-section-label">My Groups</div>`;
+    html += my_groups.map(r => roomItem(r.id||r.room, r.name, r.name[0], "mygroup", r.last_message, r.last_time)).join("");
   }
   if (dms.length) {
-    html += `<div class="room-section-label">Direct Messages</div>`;
+    html += `<div class="chat-section-label">Direct Messages</div>`;
     html += dms.map(d => roomItem(d.id, d.with_name, d.with_name[0], "dm", d.last_message, d.last_time)).join("");
   }
 
-  el.innerHTML = html || `<div class="feed-loading" style="color:rgba(255,255,255,0.4)">No chats yet</div>`;
+  el.innerHTML = html || `<div style="padding:30px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px">No chats yet</div>`;
 }
 
-function roomItem(id, name, initial, type, lastMsg = "", lastTime = "") {
-  const color = getColor(initial);
+function roomItem(id, name, initial, type, lastMsg="", lastTime="", memberCount=0) {
+  const color    = getColor(initial);
   const isActive = activeRoom === id ? " active" : "";
+  const unread   = unreadCounts[id] || 0;
+  const isOnline = type === "dm" && onlineUsers.has(id);
+  const chip     = type === "group" || type === "mygroup"
+    ? `<span class="room-chip">GROUP</span>` : "";
+  const lastPreview = lastMsg
+    ? `<div class="room-last ${unread ? "unread-preview" : ""}">${escHtml(lastMsg)}</div>` : "";
+  const onlineDot = isOnline ? `<div class="room-online-dot"></div>` : "";
+  const badgeHtml = unread
+    ? `<div class="room-badge">${unread > 99 ? "99+" : unread}</div>` : "";
+  const timeHtml  = lastTime ? `<div class="room-time">${formatTime(lastTime)}</div>` : "";
+
   return `
   <div class="room-item${isActive}" onclick="openRoom('${escHtml(id)}','${escHtml(name)}','${type}')">
-    <div class="room-av" style="background:${color}">${initial.toUpperCase()}</div>
-    <div class="room-info">
-      <div class="room-name">${escHtml(name)}</div>
-      ${lastMsg ? `<div class="room-last">${escHtml(lastMsg)}</div>` : ""}
+    <div class="room-av" style="background:${color}">
+      ${initial.toUpperCase()}
+      ${onlineDot}
     </div>
-    ${lastTime ? `<div class="room-time">${formatTime(lastTime)}</div>` : ""}
+    <div class="room-info">
+      <div class="room-name">${escHtml(name)} ${chip}</div>
+      ${lastPreview}
+    </div>
+    <div class="room-meta">
+      ${timeHtml}
+      ${badgeHtml}
+    </div>
   </div>`;
 }
 
+/* ══ Open Room ══ */
 async function openRoom(roomId, roomName, sub) {
   activeRoom     = roomId;
   activeRoomName = roomName;
 
-  // Mobile: hide sidebar, show panel
+  // Mobile: slide panel in
   document.getElementById("chat-sidebar")?.classList.add("hidden-mobile");
   document.getElementById("chat-panel")?.classList.add("visible-mobile");
 
-  // Update panel header
+  // Header
+  const color = getColor((roomName[0]||"G").toUpperCase());
+  const av = document.getElementById("cp-avatar");
+  if (av) { av.textContent = (roomName[0]||"G").toUpperCase(); av.style.background = color; }
   document.getElementById("cp-name").textContent = roomName;
-  document.getElementById("cp-sub").textContent  = sub || "Group";
-  document.getElementById("cp-avatar").textContent = (roomName[0] || "G").toUpperCase();
 
-  // Highlight active room
+  const subText = document.getElementById("cp-sub-text");
+  const statusDot = document.getElementById("cp-status-dot");
+  if (sub === "dm") {
+    const isOnline = onlineUsers.has(roomId);
+    if (subText) subText.textContent = isOnline ? "Online" : "Offline";
+    if (statusDot) { statusDot.className = "chat-status-dot " + (isOnline ? "online" : ""); }
+    document.getElementById("group-info-btn").style.display = "none";
+  } else {
+    if (subText) subText.textContent = sub === "group" ? "Community group" : "Group";
+    if (statusDot) statusDot.className = "chat-status-dot";
+    document.getElementById("group-info-btn").style.display = "";
+  }
+
+  // Highlight room item
   document.querySelectorAll(".room-item").forEach(el => el.classList.remove("active"));
-  document.querySelectorAll(".room-item").forEach(el => {
-    if (el.textContent.includes(roomName)) el.classList.add("active");
-  });
+  event?.currentTarget?.classList.add("active");
 
-  // Show active chat
+  // Clear unread
+  unreadCounts[roomId] = 0;
+  updateNavBadge();
+
+  // Show active-chat
   document.getElementById("chat-empty-state").style.display = "none";
   const ac = document.getElementById("active-chat");
-  ac.style.cssText = "display:flex;flex-direction:column;height:100%";
+  ac.style.cssText = "display:flex;flex-direction:column;height:100%;position:relative";
 
-  // Load messages
   await loadMessages(roomId);
-
-  // Connect socket
   connectSocket(roomId);
-
-  // Focus input
+  cancelReply();
   document.getElementById("chat-input")?.focus();
 }
 
+/* ══ Load Messages ══ */
 async function loadMessages(roomId) {
   const area = document.getElementById("chat-messages-area");
   if (!area) return;
-  area.innerHTML = `<div class="msg-system">Loading messages…</div>`;
+  area.innerHTML = `<div class="msg-system">Loading…</div>`;
 
   let msgs;
-  try {
-    msgs = await ChatAPI.getMessages(roomId);
-  } catch {
-    msgs = [
-      { id:"d1", sender_id:"other", sender_name:"Rahul Verma", sender_roll:"CSE20011", room:roomId, content:"Hey everyone! Welcome to Sangam.", created_at: new Date(Date.now()-3600000).toISOString() },
-      { id:"d2", sender_id:"other", sender_name:"Priya Singh",  sender_roll:"EEE22045", room:roomId, content:"This is a great platform for our college!", created_at: new Date(Date.now()-1800000).toISOString() },
+  try { msgs = await ChatAPI.getMessages(roomId); }
+  catch {
+    const names = ["Rahul Verma","Priya Singh","Kiran Mehta","Dr. S. Tiwari"];
+    const texts = [
+      "Hey everyone! Welcome to Sangam 👋",
+      "This platform is amazing! Just connected with 3 alumni today.",
+      "Anyone preparing for placements? Let's form a study group!",
+      "Department seminar this Friday — don't miss it!",
+      "Just got my Google offer! Happy to help anyone with interview prep 🎉",
+      "DSA tip: Practice sliding window problems today 💡",
     ];
+    msgs = texts.map((t,i) => ({
+      id: "d"+i,
+      sender_id: i % 3 === 0 ? String(currentUser.id) : "other"+i,
+      sender_name: i % 3 === 0 ? currentUser.name : names[i % names.length],
+      sender_roll: "CSE22"+i,
+      room: roomId,
+      content: t,
+      created_at: new Date(Date.now() - (texts.length-i)*600000).toISOString(),
+      status: i % 3 === 0 ? (i === texts.length-3 ? "seen" : "delivered") : null,
+    }));
   }
 
-  if (!msgs.length) {
-    area.innerHTML = `<div class="msg-system">No messages yet. Be the first!</div>`;
-    return;
-  }
-
-  area.innerHTML = renderMessages(msgs);
+  area.innerHTML = msgs.length ? renderMessages(msgs) : `<div class="msg-system">No messages yet. Say hello! 👋</div>`;
   area.scrollTop = area.scrollHeight;
 }
 
+/* ══ Render Messages ══ */
 function renderMessages(msgs) {
   const myId = String(currentUser.id || "");
   let html = "";
@@ -508,10 +563,40 @@ function renderMessages(msgs) {
     const color  = getColor((m.sender_name||"A")[0]);
     const avInitial = (m.sender_name||"?")[0].toUpperCase();
 
-    html += `<div class="msg-row ${isMine ? "mine" : "theirs"}">`;
-    if (!isMine) html += `<div class="msg-av-sm" style="background:${color}">${avInitial}</div>`;
+    // Ticks
+    let ticks = "";
+    if (isMine) {
+      const cls = m.status === "seen" ? "seen" : m.status === "delivered" ? "delivered" : "";
+      ticks = `<span class="msg-ticks ${cls}">${m.status === "seen" ? "✓✓" : m.status === "delivered" ? "✓✓" : "✓"}</span>`;
+    }
+
+    // Reply snippet
+    let replySnippet = "";
+    if (m.reply_to) {
+      replySnippet = `<div class="msg-reply-snippet" onclick="scrollToMsg('${m.reply_to.id}')">
+        <strong>${escHtml(m.reply_to.sender_name)}</strong>${escHtml(m.reply_to.content||"").slice(0,60)}
+      </div>`;
+    }
+
+    // Reactions
+    const reactions = (m.reactions||[]);
+    const reactHtml = reactions.length
+      ? `<div class="msg-reactions">${reactions.map(r =>
+          `<div class="msg-reaction-chip" onclick="addReaction('${m.id}','${r.emoji}')">${r.emoji}<span>${r.count}</span></div>`
+        ).join("")}</div>` : "";
+
+    html += `<div class="msg-row ${isMine ? "mine" : "theirs"}" id="msg-${m.id}"
+       oncontextmenu="showContextMenu(event,'${m.id}','${escHtml(m.content||"")}','${escHtml(m.sender_name||"")}')"
+       ontouchstart="touchStartCtx(event,'${m.id}','${escHtml(m.content||"")}','${escHtml(m.sender_name||"")}')"
+       ontouchend="touchEndCtx()">`;
+
+    if (!isMine) {
+      html += `<div class="msg-av-sm" style="background:${color}" title="${escHtml(m.sender_name||"")}">${avInitial}</div>`;
+    }
+
     html += `<div class="msg-bubble">`;
     if (!isMine) html += `<span class="msg-sender-name">${escHtml(m.sender_name)}</span>`;
+    html += replySnippet;
 
     if (m.media_type === "image" && m.media_url) {
       html += `<img class="msg-img" src="${escHtml(m.media_url)}" alt="image" onclick="window.open(this.src,'_blank')">`;
@@ -523,15 +608,20 @@ function renderMessages(msgs) {
       html += `<div class="msg-text">${escHtml(m.content||"").replace(/\n/g,"<br>")}</div>`;
     }
 
-    html += `<div class="msg-time">${formatChatTime(m.created_at)}</div>`;
-    html += `</div>`;
-    if (isMine) html += `<div class="msg-av-sm" style="background:var(--purple)">${(currentUser.name||"U")[0].toUpperCase()}</div>`;
-    html += `</div>`;
+    html += `<div class="msg-footer"><span class="msg-time">${formatChatTime(m.created_at)}</span>${ticks}</div>`;
+    html += `</div>`; // bubble
+    html += reactHtml;
+
+    if (isMine) {
+      html += `<div class="msg-av-sm" style="background:var(--purple)">${(currentUser.name||"U")[0].toUpperCase()}</div>`;
+    }
+    html += `</div>`; // row
   });
 
   return html;
 }
 
+/* ══ Append single message ══ */
 function appendMessage(m) {
   const area = document.getElementById("chat-messages-area");
   if (!area) return;
@@ -541,64 +631,259 @@ function appendMessage(m) {
   area.scrollTop = area.scrollHeight;
 }
 
+/* ══ Send Message ══ */
 async function sendChatMessage() {
-  const input = document.getElementById("chat-input");
+  const input   = document.getElementById("chat-input");
   const content = (input?.value || "").trim();
   if (!content || !activeRoom) return;
 
   input.value = "";
   input.style.height = "auto";
-  input.style.height = "38px";   // reset to single line
-  input.focus();                   // keep keyboard open on mobile
+  input.style.height = "38px";
+  input.focus();
+  closeEmojiPicker();
 
-  // Optimistic local render
   const now = new Date().toISOString();
-  appendMessage({
-    id: "local-" + Date.now(),
+  const msg = {
+    id:          "local-" + Date.now(),
     sender_id:   String(currentUser.id),
     sender_name: currentUser.name,
     sender_roll: currentUser.roll_number,
     room:        activeRoom,
     content,
     created_at:  now,
-  });
+    status:      "sent",
+    reply_to:    replyingTo ? { ...replyingTo } : null,
+  };
+  cancelReply();
+  appendMessage(msg);
 
-  // Send via socket or REST
   if (chatSocket?.connected) {
     chatSocket.emit("message", {
-      token:   Auth.getToken() || "",
-      room:    activeRoom,
+      token:    Auth.getToken() || "",
+      room:     activeRoom,
       content,
+      reply_to: replyingTo,
     });
   } else {
-    try {
-      await ChatAPI.sendMessage(activeRoom, content);
-    } catch { /* offline */ }
+    try { await ChatAPI.sendMessage(activeRoom, content); } catch {}
   }
 }
 
+/* ══ Socket ══ */
 function connectSocket(room) {
-  if (typeof io === "undefined") return; // socket.io not loaded
-  if (chatSocket) { chatSocket.emit("leave", { room }); }
+  if (typeof io === "undefined") return;
+  if (chatSocket) { try { chatSocket.disconnect(); } catch(e){} }
   const token = Auth.getToken() || "";
   chatSocket = io("http://localhost:5000", { auth: { token: `Bearer ${token}` } });
   chatSocket.emit("join", { token: `Bearer ${token}`, room });
+
   chatSocket.on("new_message", msg => {
-    if (msg.room !== activeRoom) return;
-    if (String(msg.sender_id) === String(currentUser.id)) return; // already rendered optimistically
+    if (msg.room !== activeRoom) {
+      unreadCounts[msg.room] = (unreadCounts[msg.room]||0) + 1;
+      updateNavBadge();
+      renderRoomList();
+      return;
+    }
+    if (String(msg.sender_id) === String(currentUser.id)) return;
     appendMessage(msg);
   });
+
+  chatSocket.on("typing", data => {
+    if (data.room !== activeRoom || data.user_id === currentUser.id) return;
+    showTypingIndicator(data.name);
+  });
+  chatSocket.on("stop_typing", data => {
+    if (data.room === activeRoom) hideTypingIndicator();
+  });
+  chatSocket.on("user_online",  id => { onlineUsers.add(id);    updateOnlineStatus(id, true);  });
+  chatSocket.on("user_offline", id => { onlineUsers.delete(id); updateOnlineStatus(id, false); });
+  chatSocket.on("message_seen", data => { markMessageSeen(data.msg_id); });
 }
 
+/* ══ Typing indicator ══ */
+let typingShown = false;
+function showTypingIndicator(name) {
+  hideTypingIndicator();
+  typingShown = true;
+  const area = document.getElementById("chat-messages-area");
+  if (!area) return;
+  area.insertAdjacentHTML("beforeend",`
+    <div class="typing-indicator" id="typing-indicator">
+      <div class="msg-av-sm" style="background:#334155;font-size:10px">...</div>
+      <div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:3px">${escHtml(name)} is typing</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>`);
+  area.scrollTop = area.scrollHeight;
+}
+function hideTypingIndicator() {
+  document.getElementById("typing-indicator")?.remove();
+  typingShown = false;
+}
+
+/* ══ Typing emit ══ */
+function handleTyping() {
+  autoGrow(document.getElementById("chat-input"));
+  if (!chatSocket?.connected || !activeRoom) return;
+  chatSocket.emit("typing", { room: activeRoom, name: currentUser.name, user_id: currentUser.id });
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(stopTyping, 2000);
+}
+function stopTyping() {
+  if (chatSocket?.connected && activeRoom) {
+    chatSocket.emit("stop_typing", { room: activeRoom });
+  }
+}
+
+/* ══ Reply ══ */
+function setReply(msgId, senderName, content) {
+  replyingTo = { id: msgId, sender_name: senderName, content };
+  document.getElementById("reply-preview-bar").style.display = "flex";
+  document.getElementById("reply-from").textContent = senderName;
+  document.getElementById("reply-text").textContent = content.slice(0,80);
+  document.getElementById("chat-input")?.focus();
+  closeContextMenu();
+}
+function cancelReply() {
+  replyingTo = null;
+  document.getElementById("reply-preview-bar").style.display = "none";
+}
+
+/* ══ Emoji picker ══ */
+function toggleEmojiPicker() {
+  const p = document.getElementById("emoji-picker");
+  if (!p) return;
+  const show = p.style.display === "none" || !p.style.display;
+  p.style.display = show ? "flex" : "none";
+  if (show) {
+    // Wire clicks
+    p.querySelectorAll("span").forEach(s => {
+      s.onclick = () => {
+        const inp = document.getElementById("chat-input");
+        if (inp) { inp.value += s.textContent; inp.focus(); autoGrow(inp); }
+      };
+    });
+  }
+}
+function closeEmojiPicker() {
+  const p = document.getElementById("emoji-picker");
+  if (p) p.style.display = "none";
+}
+
+/* ══ Context menu ══ */
+let ctxMsgContent = "";
+let ctxMsgSender  = "";
+function showContextMenu(e, msgId, content, sender) {
+  e.preventDefault();
+  ctxTargetMsg  = msgId;
+  ctxMsgContent = content;
+  ctxMsgSender  = sender;
+  const menu = document.getElementById("msg-context-menu");
+  if (!menu) return;
+  menu.style.display = "block";
+  const x = Math.min(e.clientX, window.innerWidth  - 175);
+  const y = Math.min(e.clientY, window.innerHeight - 160);
+  menu.style.left = x + "px";
+  menu.style.top  = y + "px";
+}
+let _touchTimer = null;
+function touchStartCtx(e, msgId, content, sender) {
+  _touchTimer = setTimeout(() => showContextMenu(e.touches[0], msgId, content, sender), 500);
+}
+function touchEndCtx() { clearTimeout(_touchTimer); }
+function closeContextMenu() {
+  document.getElementById("msg-context-menu").style.display = "none";
+}
+document.addEventListener("click", () => closeContextMenu());
+
+function ctxReply() {
+  setReply(ctxTargetMsg, ctxMsgSender, ctxMsgContent);
+}
+function ctxCopy() {
+  navigator.clipboard?.writeText(ctxMsgContent).then(() => showToast("Copied!","success"));
+  closeContextMenu();
+}
+function ctxReact() {
+  addReaction(ctxTargetMsg, "❤️");
+  closeContextMenu();
+}
+function ctxDelete() {
+  const el = document.getElementById("msg-" + ctxTargetMsg);
+  if (el) { el.style.opacity = "0"; el.style.transform = "scale(.8)"; el.style.transition = "all .2s"; setTimeout(() => el.remove(), 200); }
+  closeContextMenu();
+  showToast("Message deleted","success");
+}
+
+/* ══ Reactions ══ */
+function addReaction(msgId, emoji) {
+  const row = document.getElementById("msg-" + msgId);
+  if (!row) return;
+  let reactionsDiv = row.querySelector(".msg-reactions");
+  if (!reactionsDiv) {
+    reactionsDiv = document.createElement("div");
+    reactionsDiv.className = "msg-reactions";
+    row.querySelector(".msg-bubble")?.after(reactionsDiv);
+  }
+  const existing = [...reactionsDiv.querySelectorAll(".msg-reaction-chip")]
+    .find(c => c.textContent.startsWith(emoji));
+  if (existing) {
+    const span = existing.querySelector("span");
+    span.textContent = parseInt(span.textContent||"1") + 1;
+  } else {
+    reactionsDiv.insertAdjacentHTML("beforeend",
+      `<div class="msg-reaction-chip">${emoji}<span>1</span></div>`);
+  }
+}
+
+/* ══ Mark seen ══ */
+function markMessageSeen(msgId) {
+  const row = document.getElementById("msg-" + msgId);
+  if (!row) return;
+  const ticks = row.querySelector(".msg-ticks");
+  if (ticks) { ticks.textContent = "✓✓"; ticks.className = "msg-ticks seen"; }
+}
+
+/* ══ Online status ══ */
+function updateOnlineStatus(userId, isOnline) {
+  const dot = document.getElementById("cp-status-dot");
+  const sub = document.getElementById("cp-sub-text");
+  if (activeRoom === userId) {
+    if (dot) dot.className = "chat-status-dot " + (isOnline ? "online" : "");
+    if (sub) sub.textContent = isOnline ? "Online" : "Last seen recently";
+  }
+}
+
+/* ══ Scroll to message ══ */
+function scrollToMsg(msgId) {
+  const el = document.getElementById("msg-" + msgId);
+  if (el) { el.scrollIntoView({ behavior:"smooth", block:"center" }); el.style.background = "rgba(255,122,24,0.15)"; setTimeout(() => el.style.background = "", 1500); }
+}
+
+/* ══ Nav badge ══ */
+function updateNavBadge() {
+  const total = Object.values(unreadCounts).reduce((a,b) => a+b, 0);
+  let badge = document.querySelector(".bnav-item[data-tab='chat'] .chat-nav-badge");
+  if (!badge && total > 0) {
+    const item = document.querySelector(".bnav-item[data-tab='chat']");
+    if (item) { item.style.position = "relative"; item.insertAdjacentHTML("beforeend", `<div class="chat-nav-badge">${total > 99 ? "99+" : total}</div>`); }
+  } else if (badge) {
+    if (total === 0) badge.remove();
+    else badge.textContent = total > 99 ? "99+" : total;
+  }
+}
+
+/* ══ Back to room list (mobile) ══ */
 function backToRoomList() {
   document.getElementById("chat-sidebar")?.classList.remove("hidden-mobile");
   document.getElementById("chat-panel")?.classList.remove("visible-mobile");
-  // Reset state so the room list is clean
   activeRoom = null;
   activeRoomName = "";
   if (chatSocket) { try { chatSocket.disconnect(); } catch(e){} chatSocket = null; }
 }
 
+/* ══ Filter rooms ══ */
 function filterChatRooms(q) {
   document.querySelectorAll(".room-item").forEach(el => {
     const name = el.querySelector(".room-name")?.textContent || "";
@@ -606,39 +891,74 @@ function filterChatRooms(q) {
   });
 }
 
-async function handleFileAttach(input) {
-  if (!input.files[0] || !activeRoom) return;
-  const file = input.files[0];
-  showToast("Uploading file…", "info");
-  try {
-    const res = await ChatAPI.uploadFile(file, activeRoom);
-    appendMessage({
-      id:          "local-" + Date.now(),
-      sender_id:   String(currentUser.id),
-      sender_name: currentUser.name,
-      sender_roll: currentUser.roll_number,
-      room:        activeRoom,
-      content:     file.name,
-      media_type:  res.media_type,
-      media_url:   res.media_url || res.url,
-      created_at:  new Date().toISOString(),
-    });
-    showToast("File sent!", "success");
-  } catch { showToast("Upload failed", "error"); }
-  input.value = "";
+/* ══ Group Info Drawer ══ */
+function openGroupInfo() {
+  const overlay = document.getElementById("group-drawer-overlay");
+  const drawer  = document.getElementById("group-drawer");
+  if (!overlay || !drawer) return;
+
+  document.getElementById("gd-name").textContent  = activeRoomName;
+  document.getElementById("gd-avatar").textContent = (activeRoomName[0]||"G").toUpperCase();
+  document.getElementById("gd-avatar").style.background = getColor((activeRoomName[0]||"G").toUpperCase());
+
+  const members = groupMembers[activeRoom] || [
+    { name:"Rahul Verma", roll:"CSE20011", isAdmin:true },
+    { name:"Priya Singh", roll:"EEE22045", isAdmin:false },
+    { name:"Kiran Mehta", roll:"CSE19032", isAdmin:false },
+    { name:currentUser.name, roll:currentUser.roll_number, isAdmin:false },
+  ];
+  document.getElementById("gd-count").textContent = `${members.length} members`;
+
+  const list = document.getElementById("gd-members-list");
+  list.innerHTML = members.map(m => `
+    <div class="gd-member">
+      <div class="gd-member-av" style="background:${getColor((m.name||"A")[0])}">${(m.name||"?")[0]}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:#fff">${escHtml(m.name)}
+          ${m.isAdmin ? `<span class="gd-admin-badge">Admin</span>` : ""}
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4)">${m.roll||""}</div>
+      </div>
+    </div>`).join("");
+
+  overlay.classList.add("open");
+  drawer.classList.add("open");
+}
+function closeGroupInfo() {
+  document.getElementById("group-drawer-overlay")?.classList.remove("open");
+  document.getElementById("group-drawer")?.classList.remove("open");
 }
 
-function autoGrow(el) {
-  el.style.height = "auto";
-  el.style.height = Math.min(el.scrollHeight, 110) + "px";
-  // keep messages scrolled to bottom as textarea grows
-  const area = document.getElementById("chat-messages-area");
-  if (area) area.scrollTop = area.scrollHeight;
+/* ══ Chat options menu ══ */
+function openChatOptions(e) {
+  showContextMenu(e, null, "", "");
+  const menu = document.getElementById("msg-context-menu");
+  if (!menu) return;
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="showToast('Searching in chat…');closeContextMenu()">🔍 Search in Chat</div>
+    <div class="ctx-item" onclick="openGroupInfo();closeContextMenu()">ℹ️ Group Info</div>
+    <div class="ctx-item" onclick="toggleChatTheme();closeContextMenu()">🌙 Toggle Theme</div>
+    <div class="ctx-item danger" onclick="showToast('Left group');closeContextMenu()">🚪 Leave Group</div>`;
 }
 
+/* ══ Theme toggle ══ */
+function toggleChatTheme() {
+  chatLightMode = !chatLightMode;
+  document.body.classList.toggle("chat-light-mode", chatLightMode);
+  const btn = document.getElementById("theme-toggle-btn");
+  if (btn) btn.textContent = chatLightMode ? "🌞" : "🌙";
+  showToast(chatLightMode ? "Light mode on" : "Dark mode on", "success");
+}
+
+/* ══ Search in chat ══ */
+function searchInChat() {
+  showToast("Search in chat — coming soon!", "info");
+}
+
+/* ══ DM search ══ */
 function openDMSearch() {
   openModal(`
-    <div style="padding-bottom:8px">
+    <div>
       <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px">Start a Direct Message</div>
       <input id="dm-search-input" class="profile-input" placeholder="Search by name or roll number…" oninput="searchDMUsers(this.value)">
       <div id="dm-search-results" style="margin-top:12px"></div>
@@ -666,10 +986,11 @@ async function startDMWith(roll) {
   try {
     const res = await ChatAPI.startDM(roll);
     showTab("chat");
-    setTimeout(() => openRoom(res.room, res.with_user?.name || "DM", "Direct Message"), 300);
+    setTimeout(() => openRoom(res.room, res.with_user?.name || "DM", "dm"), 300);
   } catch { showToast("Could not start DM", "error"); }
 }
 
+/* ══ Create Group ══ */
 function openNewGroupModal() {
   openModal(`
     <div>
@@ -689,8 +1010,40 @@ async function createGroup() {
     closeModal();
     showToast(`Group "${name}" created!`, "success");
     await loadChat();
-    openRoom(res.room || `group_${res.id}`, name, "New group");
+    openRoom(res.room || `group_${res.id}`, name, "mygroup");
   } catch { showToast("Could not create group", "error"); }
+}
+
+/* ══ File attach ══ */
+async function handleFileAttach(input) {
+  if (!input.files[0] || !activeRoom) return;
+  const file = input.files[0];
+  showToast("Uploading…", "info");
+  try {
+    const res = await ChatAPI.uploadFile(file, activeRoom);
+    appendMessage({
+      id:          "local-" + Date.now(),
+      sender_id:   String(currentUser.id),
+      sender_name: currentUser.name,
+      sender_roll: currentUser.roll_number,
+      room:        activeRoom,
+      content:     file.name,
+      media_type:  res.media_type,
+      media_url:   res.media_url || res.url,
+      created_at:  new Date().toISOString(),
+      status:      "sent",
+    });
+    showToast("Sent!", "success");
+  } catch { showToast("Upload failed", "error"); }
+  input.value = "";
+}
+
+/* ══ autoGrow ══ */
+function autoGrow(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  const area = document.getElementById("chat-messages-area");
+  if (area) area.scrollTop = area.scrollHeight;
 }
 
 /* ════════════════════════════════════════
