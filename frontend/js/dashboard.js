@@ -115,7 +115,7 @@ async function loadFeed(filter = null) {
   catch { allPosts = DEMO_POSTS; }
   const posts = filter ? allPosts.filter(p => p.post_type === filter) : allPosts;
   el.innerHTML = posts.length ? posts.map(renderPost).join("") : `<div class="feed-loading">No posts yet.</div>`;
-  loadStories();
+  ;
 }
 
 /* ── External RSS Jobs (shown in Jobs tab) ───────────────── */
@@ -263,21 +263,21 @@ function filterFeed(type, chipEl) {
   loadFeed(type);
 }
 
-function loadStories() {
-  const strip = document.getElementById("stories-strip");
-  if (!strip) return;
-  const users = (allPosts||[]).map(p => p.author).filter(Boolean).slice(0, 8);
-  const existing = strip.innerHTML;
-  users.forEach(u => {
-    const color   = getColor((u.name||"A")[0]);
-    const initial = (u.name||"?")[0].toUpperCase();
-    strip.insertAdjacentHTML("beforeend", `
-      <div class="story">
-        <div class="story-ring"><div class="story-inner" style="background:${color};color:#fff">${initial}</div></div>
-        <div class="story-name">${escHtml(u.name?.split(" ")[0]||"")}</div>
-      </div>`);
-  });
-}
+// function loadStories() {
+//   const strip = document.getElementById("stories-strip");
+//   if (!strip) return;
+//   const users = (allPosts||[]).map(p => p.author).filter(Boolean).slice(0, 8);
+//   const existing = strip.innerHTML;
+//   users.forEach(u => {
+//     const color   = getColor((u.name||"A")[0]);
+//     const initial = (u.name||"?")[0].toUpperCase();
+//     strip.insertAdjacentHTML("beforeend", `
+//       <div class="story">
+//         <div class="story-ring"><div class="story-inner" style="background:${color};color:#fff">${initial}</div></div>
+//         <div class="story-name">${escHtml(u.name?.split(" ")[0]||"")}</div>
+//       </div>`);
+//   });
+// }
 
 /* ════════════════════════════════════════
    ALUMNI
