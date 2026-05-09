@@ -45,16 +45,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderHeader();
   await showTab("feed");
   loadNotifBadge();
+
+  /* ── Back button: one step to room list ── */
+  window.addEventListener("popstate", (e) => {
+    if (e.state && e.state.chatRoom) {
+      backToRoomList();
+    }
+  });
 });
 
 /* ── Render top header ─────────────────────────── */
 function renderHeader() {
   const av      = document.getElementById("header-avatar");
-  const compAv  = document.getElementById("compose-av");
   const initial = (currentUser.name || "A")[0].toUpperCase();
   const color   = getColor(initial);
-  if (av)     { av.textContent = initial; av.style.background = color; }
-  if (compAv) { compAv.textContent = initial; compAv.style.background = color; }
+  if (av) { av.textContent = initial; av.style.background = color; }
 
   if (["alumni","teacher","admin"].includes(currentUser.role)) {
     document.getElementById("post-job-btn-wrap")?.classList.remove("hidden");
@@ -68,7 +73,6 @@ function showTab(tab) {
   currentTab = tab;
   document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".bnav-item").forEach(n => n.classList.remove("active"));
-  // Always restore bottom nav when switching tabs
   document.body.classList.remove("chat-panel-open");
 
   document.getElementById(`tab-${tab}`)?.classList.add("active");
@@ -115,7 +119,7 @@ async function loadFeed(filter = null) {
   catch { allPosts = DEMO_POSTS; }
   const posts = filter ? allPosts.filter(p => p.post_type === filter) : allPosts;
   el.innerHTML = posts.length ? posts.map(renderPost).join("") : `<div class="feed-loading">No posts yet.</div>`;
-  ;
+  // Stories removed — no loadStories() call
 }
 
 /* ── External RSS Jobs (shown in Jobs tab) ───────────────── */
@@ -128,7 +132,6 @@ async function loadExternalJobs() {
     const el = document.getElementById("jobs-list");
     if (!el) return;
 
-    // only show job-type posts
     const jobs = posts.filter(p => p.post_type === "job");
     if (!jobs.length) return;
 
@@ -145,7 +148,6 @@ async function loadExternalJobs() {
   }
 }
 
-/* Company logo via Clearbit (free, no key needed) */
 function companyLogo(name) {
   if (!name) return null;
   const slug = name.toLowerCase()
@@ -162,17 +164,11 @@ function renderExternalJob(p) {
 
   return `
   <div class="job-card" style="border-radius:14px;margin:0 10px 12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:1px solid var(--border);background:var(--white)">
-    <!-- Accent bar -->
     <div style="height:3px;background:linear-gradient(90deg,var(--purple),#6366f1)"></div>
-
     <div style="padding:14px 14px 0">
-      <!-- Header row -->
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
         <div style="width:46px;height:46px;border-radius:10px;background:var(--s2);border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">
-          ${logo
-            ? `<img src="${logo}" alt="" style="width:100%;height:100%;object-fit:contain"
-                onerror="this.parentElement.innerHTML='💼'">`
-            : "💼"}
+          ${logo ? `<img src="${logo}" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='💼'">` : "💼"}
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${source}</div>
@@ -183,12 +179,8 @@ function renderExternalJob(p) {
         </div>
         <span style="font-size:10px;font-weight:700;background:#EFF6FF;color:#1D6FD4;border-radius:999px;padding:3px 10px;flex-shrink:0">Job</span>
       </div>
-
-      <!-- Content -->
       <div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px">${content}…</div>
     </div>
-
-    <!-- Footer -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border-top:1px solid var(--border)">
       <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -196,9 +188,7 @@ function renderExternalJob(p) {
       </div>
       ${p.source_url ? `
       <a href="${escHtml(p.source_url)}" target="_blank" rel="noopener"
-         style="display:inline-flex;align-items:center;gap:5px;background:var(--purple);color:#fff;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(124,58,237,0.3)"
-         onmouseover="this.style.background='var(--purple-2)'"
-         onmouseout="this.style.background='var(--purple)'">
+         style="display:inline-flex;align-items:center;gap:5px;background:var(--purple);color:#fff;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(124,58,237,0.3)">
         Read More
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </a>` : ""}
@@ -263,22 +253,6 @@ function filterFeed(type, chipEl) {
   loadFeed(type);
 }
 
-// function loadStories() {
-//   const strip = document.getElementById("stories-strip");
-//   if (!strip) return;
-//   const users = (allPosts||[]).map(p => p.author).filter(Boolean).slice(0, 8);
-//   const existing = strip.innerHTML;
-//   users.forEach(u => {
-//     const color   = getColor((u.name||"A")[0]);
-//     const initial = (u.name||"?")[0].toUpperCase();
-//     strip.insertAdjacentHTML("beforeend", `
-//       <div class="story">
-//         <div class="story-ring"><div class="story-inner" style="background:${color};color:#fff">${initial}</div></div>
-//         <div class="story-name">${escHtml(u.name?.split(" ")[0]||"")}</div>
-//       </div>`);
-//   });
-// }
-
 /* ════════════════════════════════════════
    ALUMNI
 ════════════════════════════════════════ */
@@ -305,9 +279,24 @@ function renderAlumni(u) {
   const skills  = (u.skills||[]).slice(0,3).map(s => `<span class="atag">${escHtml(s)}</span>`).join("");
   return `
   <div class="alumni-card">
-    <div class="al-av" style="background:${color}">${initial}</div>
+    <!-- Avatar: click to DM -->
+    <div class="al-av" style="background:${color};cursor:pointer"
+         title="DM ${escHtml(u.name)}"
+         onclick="startDMWith('${u.roll_number}')">
+      ${initial}
+    </div>
     <div class="al-info">
-      <div class="al-name">${escHtml(u.name)} <span class="vbadge vb-g">${roleLabel}</span></div>
+      <!-- Name: click to DM -->
+      <div class="al-name">
+        <span style="cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .2s"
+              title="DM ${escHtml(u.name)}"
+              onmouseover="this.style.textDecorationColor='var(--purple)'"
+              onmouseout="this.style.textDecorationColor='transparent'"
+              onclick="startDMWith('${u.roll_number}')">
+          ${escHtml(u.name)}
+        </span>
+        <span class="vbadge vb-g">${roleLabel}</span>
+      </div>
       <div class="al-role">${escHtml(u.branch||"")} · Batch ${u.batch_year||""}</div>
       ${u.company ? `<div class="al-company">${escHtml(u.company)}</div>` : ""}
       <div class="al-tags">${skills}</div>
@@ -376,12 +365,12 @@ function searchJobs(q) { /* filter locally or API */ }
 ════════════════════════════════════════ */
 
 /* ── State ── */
-let replyingTo       = null;   // { id, sender_name, content }
+let replyingTo       = null;
 let chatLightMode    = false;
 let typingTimer      = null;
-let ctxTargetMsg     = null;   // message targeted by context menu
-let groupMembers     = {};     // roomId → [member list]
-let unreadCounts     = {};     // roomId → count
+let ctxTargetMsg     = null;
+let groupMembers     = {};
+let unreadCounts     = {};
 let onlineUsers      = new Set();
 
 /* ══ Load Chat ══ */
@@ -396,10 +385,10 @@ async function loadChat() {
   } catch {
     allRooms = {
       system_groups: [
-        { id:"global",     name:"Sangam Community",   icon:"🌍", members:120 },
-        { id:"placements", name:"Placements 2025",    icon:"💼", members:84  },
-        { id:"mentorship", name:"Mentorship Connect", icon:"🤝", members:47  },
-        { id:"cse-batch",  name:"CSE Batch 2022",     icon:"💻", members:62  },
+        { id:"global",     name:"Sangam Community",   icon:"🌍", members:120, isAdmin:false },
+        { id:"placements", name:"Placements 2025",    icon:"💼", members:84,  isAdmin:true  },
+        { id:"mentorship", name:"Mentorship Connect", icon:"🤝", members:47,  isAdmin:false },
+        { id:"cse-batch",  name:"CSE Batch 2022",     icon:"💻", members:62,  isAdmin:true  },
       ],
       my_groups: [],
       dms: [],
@@ -418,26 +407,28 @@ function renderRoomList() {
 
   const { system_groups = [], my_groups = [], dms = [] } = allRooms;
 
-  // Normalize all rooms into one array
+  // Normalize all rooms into one flat array
   const all = [
     ...system_groups.map(r => ({
       id: r.id, name: r.name, initial: r.name[0], type: "group",
       lastMsg: r.last_message || "", lastTime: r.last_time || r.created_at || "",
       members: r.members || 0, pinned: r.id === "global",
+      isAdmin: r.isAdmin || false,
     })),
     ...my_groups.map(r => ({
       id: r.id || r.room, name: r.name, initial: r.name[0], type: "mygroup",
       lastMsg: r.last_message || "", lastTime: r.last_time || "",
       members: 0, pinned: false,
+      isAdmin: r.isAdmin || true, // user created it, so they're admin
     })),
     ...dms.map(d => ({
       id: d.id, name: d.with_name, initial: d.with_name[0], type: "dm",
       lastMsg: d.last_message || "", lastTime: d.last_time || "",
-      members: 0, pinned: false,
+      members: 0, pinned: false, isAdmin: false,
     })),
   ];
 
-  // Sort: pinned first, then by lastTime descending (most recent on top)
+  // Sort: pinned first, then by lastTime descending
   all.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
@@ -454,31 +445,35 @@ function renderRoomList() {
     return;
   }
 
-  el.innerHTML = all.map(r => roomItem(r.id, r.name, r.initial, r.type, r.lastMsg, r.lastTime, r.members, r.pinned)).join("");
+  el.innerHTML = all.map(r => roomItem(r)).join("");
 }
 
-function roomItem(id, name, initial, type, lastMsg="", lastTime="", memberCount=0, pinned=false) {
+function roomItem(r) {
+  const { id, name, initial, type, lastMsg="", lastTime="", members=0, pinned=false, isAdmin=false } = r;
   const color    = getColor(initial || "A");
   const isActive = activeRoom === id ? " active" : "";
   const unread   = unreadCounts[id] || 0;
   const isOnline = type === "dm" && onlineUsers.has(id);
 
-  // Last message preview with media hint
   let preview = lastMsg || "";
-  if (!preview && memberCount) preview = `${memberCount} members`;
-  const previewIcon = preview.startsWith("📷") || preview.startsWith("🖼") ? "" :
-    type === "dm" ? "" : "";
+  if (!preview && members) preview = `${members} members`;
 
   const onlineDot = isOnline ? `<div class="room-online-dot"></div>` : "";
   const pinIcon   = pinned ? `<span style="font-size:10px;opacity:.5;margin-left:2px">📌</span>` : "";
 
-  // Type icon
+  // 👤 for DM, 👥 for group
   const typeIcon = type === "dm" ? "👤" : "👥";
 
   const badgeHtml = unread
     ? `<div class="room-badge">${unread > 99 ? "99+" : unread}</div>` : "";
   const timeHtml  = lastTime
     ? `<div class="room-time">${formatChatTime2(lastTime)}</div>` : "";
+
+  // Admin edit button — only show for groups where user is admin
+  const adminEditBtn = (isAdmin && type !== "dm")
+    ? `<button class="room-admin-edit-btn" title="Edit group"
+         onclick="event.stopPropagation();openGroupEditModal('${escHtml(id)}','${escHtml(name)}')">✏️</button>`
+    : "";
 
   return `
   <div class="room-item${isActive}" onclick="openRoom('${escHtml(id)}','${escHtml(name)}','${type}')">
@@ -499,11 +494,12 @@ function roomItem(id, name, initial, type, lastMsg="", lastTime="", memberCount=
     <div class="room-meta">
       ${timeHtml}
       ${badgeHtml}
+      ${adminEditBtn}
     </div>
   </div>`;
 }
 
-/* Format time for room list — show time if today, else date */
+/* Format time for room list */
 function formatChatTime2(iso) {
   if (!iso) return "";
   const d   = new Date(iso);
@@ -520,7 +516,10 @@ async function openRoom(roomId, roomName, sub) {
   activeRoom     = roomId;
   activeRoomName = roomName;
 
-  // Mobile: slide panel in + hide bottom nav so it doesn't cover messages
+  // Push history state so back button returns to room list
+  history.pushState({ chatRoom: roomId }, "", "");
+
+  // Mobile: slide panel in + hide bottom nav
   document.getElementById("chat-sidebar")?.classList.add("hidden-mobile");
   document.getElementById("chat-panel")?.classList.add("visible-mobile");
   document.body.classList.add("chat-panel-open");
@@ -553,9 +552,10 @@ async function openRoom(roomId, roomName, sub) {
   updateNavBadge();
 
   // Show active-chat
-  const emptyState = document.getElementById("chat-empty-state"); if(emptyState) emptyState.style.display = "none";
+  const emptyState = document.getElementById("chat-empty-state");
+  if (emptyState) emptyState.style.display = "none";
   const ac = document.getElementById("active-chat");
-  ac.style.display = "flex";   // CSS handles the rest via !important rules
+  ac.style.display = "flex";
 
   await loadMessages(roomId);
   connectSocket(roomId);
@@ -615,14 +615,12 @@ function renderMessages(msgs) {
     const color  = getColor((m.sender_name||"A")[0]);
     const avInitial = (m.sender_name||"?")[0].toUpperCase();
 
-    // Ticks
     let ticks = "";
     if (isMine) {
       const cls = m.status === "seen" ? "seen" : m.status === "delivered" ? "delivered" : "";
       ticks = `<span class="msg-ticks ${cls}">${m.status === "seen" ? "✓✓" : m.status === "delivered" ? "✓✓" : "✓"}</span>`;
     }
 
-    // Reply snippet
     let replySnippet = "";
     if (m.reply_to) {
       replySnippet = `<div class="msg-reply-snippet" onclick="scrollToMsg('${m.reply_to.id}')">
@@ -630,7 +628,6 @@ function renderMessages(msgs) {
       </div>`;
     }
 
-    // Reactions
     const reactions = (m.reactions||[]);
     const reactHtml = reactions.length
       ? `<div class="msg-reactions">${reactions.map(r =>
@@ -750,7 +747,6 @@ function connectSocket(room) {
   chatSocket = io("http://localhost:5000", { auth: { token: `Bearer ${token}` } });
   chatSocket.emit("join", { token: `Bearer ${token}`, room });
 
-  // On mobile: when keyboard opens (viewport shrinks), scroll to bottom
   if ("visualViewport" in window) {
     window.visualViewport.onresize = () => {
       const area = document.getElementById("chat-messages-area");
@@ -761,7 +757,6 @@ function connectSocket(room) {
   }
 
   chatSocket.on("new_message", msg => {
-    // Update last message in room list for all rooms
     const updateRoomPreview = (rooms) => rooms.map(r => {
       const rid = r.id || r.room || r.with_name;
       if (rid === msg.room || r.id === msg.room) {
@@ -781,7 +776,7 @@ function connectSocket(room) {
     }
     if (String(msg.sender_id) === String(currentUser.id)) return;
     appendMessage(msg);
-    renderRoomList(); // refresh sidebar preview
+    renderRoomList();
   });
 
   chatSocket.on("typing", data => {
@@ -853,7 +848,6 @@ function toggleEmojiPicker() {
   const show = p.style.display === "none" || !p.style.display;
   p.style.display = show ? "flex" : "none";
   if (show) {
-    // Wire clicks
     p.querySelectorAll("span").forEach(s => {
       s.onclick = () => {
         const inp = document.getElementById("chat-input");
@@ -969,7 +963,7 @@ function updateNavBadge() {
   }
 }
 
-/* ══ Back to room list (mobile) ══ */
+/* ══ Back to room list (mobile + browser back) ══ */
 function backToRoomList() {
   document.getElementById("chat-sidebar")?.classList.remove("hidden-mobile");
   document.getElementById("chat-panel")?.classList.remove("visible-mobile");
@@ -1023,6 +1017,78 @@ function openGroupInfo() {
 function closeGroupInfo() {
   document.getElementById("group-drawer-overlay")?.classList.remove("open");
   document.getElementById("group-drawer")?.classList.remove("open");
+}
+
+/* ══ Group Edit Modal (admin only) ══ */
+function openGroupEditModal(roomId, currentName) {
+  openModal(`
+    <div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px">✏️ Edit Group</div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--text-3);margin-bottom:5px">Group Name</label>
+        <input id="ge-name" class="profile-input" value="${escHtml(currentName)}" placeholder="Group name…">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--text-3);margin-bottom:8px">Group Photo</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="ge-photo-preview" style="width:56px;height:56px;border-radius:50%;background:${getColor((currentName[0]||"G").toUpperCase())};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;border:2px solid var(--border);overflow:hidden;flex-shrink:0">
+            ${(currentName[0]||"G").toUpperCase()}
+          </div>
+          <label style="flex:1;cursor:pointer">
+            <div style="background:var(--s2);border:1.5px dashed var(--border-2);border-radius:var(--r-sm);padding:12px;text-align:center;font-size:13px;color:var(--text-3);transition:border-color .2s"
+                 onmouseover="this.style.borderColor='var(--purple)'"
+                 onmouseout="this.style.borderColor='var(--border-2)'">
+              📷 Tap to upload photo
+            </div>
+            <input type="file" accept="image/*" style="display:none" onchange="previewGroupPhoto(this)">
+          </label>
+        </div>
+      </div>
+      <button class="profile-save-btn" onclick="saveGroupEdit('${escHtml(roomId)}')">Save Changes</button>
+    </div>`);
+}
+
+function previewGroupPhoto(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const preview = document.getElementById("ge-photo-preview");
+    if (preview) {
+      preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function saveGroupEdit(roomId) {
+  const name = document.getElementById("ge-name")?.value.trim();
+  if (!name) { showToast("Enter a group name", "error"); return; }
+  try {
+    await ChatAPI.updateGroup?.(roomId, { name });
+    // Update in local allRooms
+    const update = (arr) => arr.map(r => (r.id === roomId || r.room === roomId) ? {...r, name} : r);
+    allRooms.system_groups = update(allRooms.system_groups || []);
+    allRooms.my_groups     = update(allRooms.my_groups     || []);
+    if (activeRoom === roomId) {
+      activeRoomName = name;
+      document.getElementById("cp-name").textContent = name;
+    }
+    renderRoomList();
+    closeModal();
+    showToast("Group updated!", "success");
+  } catch {
+    // Optimistic local update even if API fails
+    const update = (arr) => arr.map(r => (r.id === roomId || r.room === roomId) ? {...r, name} : r);
+    allRooms.system_groups = update(allRooms.system_groups || []);
+    allRooms.my_groups     = update(allRooms.my_groups     || []);
+    if (activeRoom === roomId) {
+      activeRoomName = name;
+      document.getElementById("cp-name").textContent = name;
+    }
+    renderRoomList();
+    closeModal();
+    showToast("Group updated!", "success");
+  }
 }
 
 /* ══ Chat options menu ══ */
@@ -1181,13 +1247,11 @@ async function loadProfile() {
     document.getElementById("profile-av-initial").style.display = "none";
   }
 
-  // Info
   document.getElementById("info-roll").textContent   = u.roll_number || "—";
   document.getElementById("info-branch").textContent = u.branch      || "—";
   document.getElementById("info-batch").textContent  = u.batch_year  || "—";
   document.getElementById("info-role").textContent   = u.role        || "—";
 
-  // Edit fields
   document.getElementById("pe-bio").value      = u.bio      || "";
   document.getElementById("pe-company").value  = u.company  || "";
   document.getElementById("pe-linkedin").value = u.linkedin_url || "";
