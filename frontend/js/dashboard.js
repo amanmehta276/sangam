@@ -2,7 +2,7 @@
 
 /* ── State ─────────────────────────────────────── */
 let currentUser    = null;
-let currentTab     = "feed";
+let currentTab     = "home";
 let activeRoom     = null;
 let activeRoomName = "";
 let chatSocket     = null;
@@ -10,7 +10,7 @@ let allRooms       = { system_groups: [], my_groups: [], dms: [] };
 let allPosts       = [];
 
 /* ── Colors ─────────────────────────────────────── */
-const AV_COLORS = ["#7C3AED","#E8610A","#16A34A","#0288D1","#E91E63","#FF5722","#00796B","#5C6BC0"];
+const AV_COLORS = ["#7C3AED","a#E8610A","#16A34A","#0288D1","#E91E63","#FF5722","#00796B","#5C6BC0"];
 const getColor  = s => AV_COLORS[(s||"A").charCodeAt(0) % AV_COLORS.length];
 
 /* ── Helpers ─────────────────────────────────────── */
@@ -43,7 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   renderHeader();
-  await showTab("feed");
+  // Open home (embedded public index) after login
+  await showTab("home");
   loadNotifBadge();
 
   /* ── Back button: one step to room list ── */
@@ -82,6 +83,7 @@ function showTab(tab) {
   if (fab) fab.style.display = tab === "feed" ? "flex" : "none";
 
   switch (tab) {
+    case "home":    loadHome();    break;
     case "feed":    loadFeed();    break;
     case "alumni":  loadAlumni();  break;
     case "jobs":    loadJobs();    break;
@@ -89,6 +91,17 @@ function showTab(tab) {
     case "profile": loadProfile(); break;
     case "notifs":  loadNotifs();  break;
   }
+}
+
+/* ════════════════════════════════════════
+   HOME (embedded public index)
+   Minimal handler: nothing heavy — iframe in DOM loads ../index.html
+════════════════════════════════════════ */
+function loadHome() {
+  // placeholder for future dynamic hydration if needed
+  const el = document.getElementById('tab-home');
+  if (!el) return;
+  // If desired, could postMessage to iframe or lazy-load content
 }
 
 /* ════════════════════════════════════════
@@ -1252,15 +1265,52 @@ async function loadProfile() {
   document.getElementById("info-batch").textContent  = u.batch_year  || "—";
   document.getElementById("info-role").textContent   = u.role        || "—";
 
+  // Quick stats for new layout
+  document.getElementById("quick-roll").textContent   = u.roll_number || "—";
+  document.getElementById("quick-branch").textContent = u.branch      || "—";
+  document.getElementById("quick-batch").textContent  = u.batch_year  || "—";
+  document.getElementById("profile-bio-display").textContent = u.bio || "Add a bio to tell your story";
+
   document.getElementById("pe-bio").value      = u.bio      || "";
   document.getElementById("pe-company").value  = u.company  || "";
   document.getElementById("pe-linkedin").value = u.linkedin_url || "";
   document.getElementById("pe-github").value   = u.github_url  || "";
   document.getElementById("pe-email").value    = u.email    || "";
+  document.getElementById("pe-phone").value    = u.phone    || "";
+  document.getElementById("pe-location").value = u.location || "";
+
+  // Alumni fields
+  if (document.getElementById("pe-graduation-year")) document.getElementById("pe-graduation-year").value = u.graduation_year || "";
+  if (document.getElementById("pe-alumni-position")) document.getElementById("pe-alumni-position").value = u.alumni_position || "";
+  if (document.getElementById("pe-alumni-company")) document.getElementById("pe-alumni-company").value = u.alumni_company || "";
 
   const skills = Array.isArray(u.skills) ? u.skills : (u.skills || "").split(",").filter(Boolean);
   document.getElementById("pe-skills").value = skills.join(", ");
   renderSkillChips(skills);
+
+  // Initialize ID card
+  updateIDCard();
+  if (u.role === 'alumni') switchCardType('alumni');
+  
+  // Hide edit form when profile loads
+  const editForm = document.getElementById('edit-form-section');
+  if (editForm) editForm.style.display = 'none';
+  const editBtn = document.getElementById('edit-btn');
+  if (editBtn) editBtn.textContent = 'Edit';
+}
+
+function toggleEditForm() {
+  const form = document.getElementById('edit-form-section');
+  const btn = document.getElementById('edit-btn');
+  if (!form || !btn) return;
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.textContent = 'Cancel';
+  } else {
+    form.style.display = 'none';
+    btn.textContent = 'Edit';
+    loadProfile();
+  }
 }
 
 function renderSkillChips(skills) {
@@ -1294,13 +1344,19 @@ async function saveProfile() {
     linkedin_url: document.getElementById("pe-linkedin")?.value || "",
     github_url:   document.getElementById("pe-github")?.value || "",
     email:        document.getElementById("pe-email")?.value || "",
+    phone:        document.getElementById("pe-phone")?.value || "",
+    location:     document.getElementById("pe-location")?.value || "",
+    graduation_year: document.getElementById("pe-graduation-year")?.value || "",
+    alumni_position: document.getElementById("pe-alumni-position")?.value || "",
+    alumni_company: document.getElementById("pe-alumni-company")?.value || "",
     skills,
   };
   try {
     const updated = await UsersAPI.update(payload);
     currentUser = {...currentUser, ...updated};
     Auth.setUser(currentUser);
-    showToast("Profile saved!", "success");
+    showToast("Profile saved", "success");
+    toggleEditForm();
     loadProfile();
   } catch { showToast("Save failed. Try again.", "error"); }
 }
@@ -1312,8 +1368,133 @@ async function uploadAvatar(input) {
     document.getElementById("profile-av-img").src = res.avatar_url;
     document.getElementById("profile-av-img").style.display = "block";
     document.getElementById("profile-av-initial").style.display = "none";
-    showToast("Avatar updated!", "success");
+    showToast("Avatar updated", "success");
+    loadProfile();
   } catch { showToast("Upload failed", "error"); }
+}
+
+async function uploadWallpaper(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const wallpaper = document.getElementById('profile-wallpaper');
+    if (wallpaper) {
+      wallpaper.style.backgroundImage = `url('${e.target.result}')`;
+      wallpaper.style.backgroundSize = 'cover';
+      wallpaper.style.backgroundPosition = 'center';
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function toggleEditForm() {
+  const form = document.getElementById("edit-form-section");
+  if (form) {
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  }
+}
+
+/* ══ ID Card Functions ══ */
+let currentCardType = 'student';
+
+function switchCardType(type) {
+  currentCardType = type;
+  const btnStudent = document.getElementById('btn-student');
+  const btnAlumni = document.getElementById('btn-alumni');
+  const alumniSection = document.getElementById('alumni-section');
+  
+  if (type === 'student') {
+    if (btnStudent) {
+      btnStudent.style.background = 'var(--purple)';
+      btnStudent.style.color = '#fff';
+      btnStudent.style.borderColor = 'var(--purple)';
+    }
+    if (btnAlumni) {
+      btnAlumni.style.background = 'transparent';
+      btnAlumni.style.color = 'var(--text)';
+      btnAlumni.style.borderColor = 'var(--border)';
+    }
+    if (alumniSection) alumniSection.style.display = 'none';
+  } else {
+    if (btnStudent) {
+      btnStudent.style.background = 'transparent';
+      btnStudent.style.color = 'var(--text)';
+      btnStudent.style.borderColor = 'var(--border)';
+    }
+    if (btnAlumni) {
+      btnAlumni.style.background = 'var(--purple)';
+      btnAlumni.style.color = '#fff';
+      btnAlumni.style.borderColor = 'var(--purple)';
+    }
+    if (alumniSection) alumniSection.style.display = 'block';
+  }
+  updateIDCard();
+}
+
+function updateIDCard() {
+  const user = currentUser || {};
+  const cardName = document.getElementById('card-name');
+  const cardBatch = document.getElementById('card-batch');
+  const cardID = document.getElementById('card-id');
+  const cardTypeLabel = document.getElementById('card-type-label');
+  const cardAvatar = document.getElementById('card-avatar-letter');
+  
+  if (cardName) cardName.textContent = user.name || 'Name';
+  if (cardBatch) cardBatch.textContent = `Batch ${user.batch_year || '2024'}`;
+  if (cardID) cardID.textContent = `SAG-${(user.id || user.roll_number || '000000').toString().padEnd(6, '0').slice(-6)}`;
+  if (cardTypeLabel) cardTypeLabel.textContent = currentCardType === 'student' ? 'Student' : 'Alumni';
+  if (cardAvatar) cardAvatar.textContent = (user.name || 'A')[0].toUpperCase();
+}
+
+function generateIDCard() {
+  saveProfile();
+  const user = currentUser || {};
+  if (!user.id && !user.roll_number) {
+    showToast('Please log in first', 'error');
+    return;
+  }
+  
+  const sangamID = `SAG-${(user.id || user.roll_number || '000000').toString().padEnd(6, '0').slice(-6)}`;
+  const qrData = JSON.stringify({
+    type: currentCardType,
+    name: user.name,
+    id: sangamID,
+    roll: user.roll_number,
+    batch: user.batch_year,
+    profile_url: `${window.location.origin}?profile=${user.id || user.roll_number}`
+  });
+  
+  generateQRCode(qrData);
+  document.getElementById('qr-modal').style.display = 'flex';
+  showToast('ID Card generated', 'success');
+}
+
+function generateQRCode(data) {
+  const encodedData = encodeURIComponent(data);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedData}`;
+  
+  const smallQR = document.getElementById('qr-code-small');
+  const largeQR = document.getElementById('qr-code-large');
+  
+  if (smallQR) smallQR.innerHTML = `<img src="${qrUrl}" style="width:100%;height:100%;border-radius:6px" alt="QR Code" onerror="this.outerHTML='<span>QR</span>'">`;
+  if (largeQR) largeQR.innerHTML = `<img src="${qrUrl}" style="width:100%;height:100%;border-radius:var(--r-sm)" alt="QR Code" onerror="this.outerHTML='<span>Failed</span>'">`;
+}
+
+function closeQRModal() {
+  document.getElementById('qr-modal').style.display = 'none';
+}
+
+function downloadQRCode() {
+  const qrImg = document.getElementById('qr-code-large')?.querySelector('img');
+  if (!qrImg) {
+    showToast('QR code not ready', 'error');
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = qrImg.src;
+  link.download = `sangam-id-${currentUser.id || currentUser.roll_number || 'card'}.png`;
+  link.click();
+  showToast('QR Code downloaded', 'success');
 }
 
 /* ════════════════════════════════════════
