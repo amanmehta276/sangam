@@ -3,7 +3,7 @@
 # Free storage = local disk. For production use Cloudinary (free tier).
 
 import os, uuid, mimetypes
-from flask import current_app
+from flask import current_app, request
 from werkzeug.utils import secure_filename
 
 IMAGE_EXTS = {"png","jpg","jpeg","gif","webp"}

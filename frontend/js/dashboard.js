@@ -60,7 +60,15 @@ function renderHeader() {
   const av      = document.getElementById("header-avatar");
   const initial = (currentUser.name || "A")[0].toUpperCase();
   const color   = getColor(initial);
-  if (av) { av.textContent = initial; av.style.background = color; }
+  if (av) {
+    if (currentUser.avatar_url) {
+      av.innerHTML = `<img src="${escHtml(currentUser.avatar_url)}" alt="${escHtml(currentUser.name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      av.style.background = "none";
+    } else {
+      av.textContent = initial;
+      av.style.background = color;
+    }
+  }
 
   if (["alumni","teacher","admin"].includes(currentUser.role)) {
     document.getElementById("post-job-btn-wrap")?.classList.remove("hidden");
@@ -1249,6 +1257,7 @@ async function loadProfile() {
   let u = currentUser;
   try { u = await AuthAPI.me(); currentUser = u; Auth.setUser(u); } catch {}
 
+  renderHeader();
   document.getElementById("profile-name-display").textContent  = u.name || "—";
   document.getElementById("profile-meta-display").textContent  = `${u.branch||""} · Batch ${u.batch_year||""} · ${u.role||""}`;
   document.getElementById("profile-trust-display").textContent = u.trust_level === "verified" ? "⬤ Verified" : "⬤ " + (u.trust_level||"New");
@@ -1365,6 +1374,9 @@ async function uploadAvatar(input) {
   if (!input.files[0]) return;
   try {
     const res = await UsersAPI.uploadAvatar(input.files[0]);
+    currentUser = { ...currentUser, avatar_url: res.avatar_url };
+    Auth.setUser(currentUser);
+    renderHeader();
     document.getElementById("profile-av-img").src = res.avatar_url;
     document.getElementById("profile-av-img").style.display = "block";
     document.getElementById("profile-av-initial").style.display = "none";

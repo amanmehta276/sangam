@@ -25,6 +25,7 @@ class Config:
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
     MAX_FILE_MB   = int(os.getenv("MAX_FILE_MB", "10"))
     ALLOWED_EXT   = {"png","jpg","jpeg","gif","webp","mp4","mov","pdf","doc","docx","xlsx","zip"}
+    UPLOAD_BASE_URL = os.getenv("UPLOAD_BASE_URL", "")
 
     COLLEGE_NAME  = "Chhattisgarh Institute of Technology"
     COLLEGE_SHORT = "CGIT"

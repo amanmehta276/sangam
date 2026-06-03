@@ -38,7 +38,8 @@ def update_profile(current_user):
     data = request.get_json() or {}
     db   = get_db()
 
-    allowed = ["bio","linkedin_url","github_url","company","email","semester"]
+    allowed = ["bio","linkedin_url","github_url","company","email","semester",
+               "phone","location","graduation_year","alumni_position","alumni_company"]
     update  = {}
     for f in allowed:
         if f in data:
