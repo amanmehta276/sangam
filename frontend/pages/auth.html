@@ -5,50 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sangam — Sign In</title>
 <link rel="icon" href="../favicon.ico">
-<link rel="stylesheet" href="../css/variables.css">
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="../css/components.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="../css/auth.css">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<style>
-/* ── Extra styles needed for auth flow ── */
-.btn-auth{
-  width:100%;background:var(--purple);color:#fff;
-  border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;
-  margin-top:8px;cursor:pointer;border:none;
-  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn-auth:hover{background:var(--ink-2);transform:translateY(-1px)}
-.btn-auth:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.auth-divider{text-align:center;margin:16px 0;position:relative}
-.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.1)}
-.auth-divider span{background:var(--ink);padding:0 12px;font-size:12px;color:rgba(255,255,255,0.3);position:relative}
-.auth-footer-link{text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-top:12px}
-.auth-footer-link a{color:var(--purple-2);cursor:pointer;font-weight:600}
-.error-msg{background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);color:#fca5a5;border-radius:var(--r-sm);padding:10px 14px;font-size:13px;margin-top:10px}
-.prefill-strip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:16px}
-.prefill-av{width:40px;height:40px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0}
-.prefill-name{font-size:15px;font-weight:600;color:#fff}
-.prefill-meta{font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px}
-.mobile-info{font-size:12px;color:rgba(255,255,255,0.4);margin-top:6px;font-style:italic}
-.otp-row{display:flex;gap:8px;justify-content:center;margin:18px 0}
-.otp-cell{
-  width:44px;height:52px;border-radius:var(--r-sm);
-  background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);
-  color:#fff;font-size:20px;font-weight:700;text-align:center;outline:none;
-  transition:border-color .2s;caret-color:var(--purple-2);
-}
-.otp-cell:focus{border-color:var(--purple-2);background:rgba(124,58,237,0.1)}
-.otp-cell.filled{border-color:var(--green)}
-.otp-info{text-align:center;font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:8px}
-.otp-resend{text-align:center;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.4)}
-.otp-resend span{color:var(--purple-2);cursor:pointer;font-weight:600}
-.notfound-box{text-align:center;padding:24px;background:rgba(255,122,24,0.08);border:1px solid rgba(255,122,24,0.2);border-radius:var(--r);margin-top:12px}
-.notfound-icon{font-size:32px;margin-bottom:8px}
-.notfound-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
-.notfound-box p{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:14px;line-height:1.6}
-.dev-otp-banner{background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:#6ee7b7;text-align:center;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
-</style>
 </head>
 <body class="auth-page">
 
@@ -63,12 +22,16 @@
       <div class="logo-lockup">
         <div class="college-logos">
           <div class="logo-slot">
-            <div class="logo-box"><img src="../cgitlogo.jpg" onerror="this.outerHTML='<span style=font-size:28px>🏛</span>'" alt="CIT"></div>
+            <div class="logo-box">
+              <img src="../cgitlogo.jpg" onerror="this.outerHTML='<i class=\'ti ti-building-bank\' style=\'font-size:28px;color:rgba(255,255,255,0.3)\'></i>'" alt="CGIT">
+            </div>
             <span class="logo-box-label">CGIT Raipur</span>
           </div>
           <div class="logo-divider"></div>
           <div class="logo-slot">
-            <div class="logo-box"><img src="../sangam.jpeg" onerror="this.outerHTML='<span style=font-size:28px>⚡</span>'" alt="Sangam"></div>
+            <div class="logo-box">
+              <img src="../sangam.jpeg" onerror="this.outerHTML='<i class=\'ti ti-users\' style=\'font-size:28px;color:rgba(255,255,255,0.3)\'></i>'" alt="Sangam">
+            </div>
             <span class="logo-box-label">Sangam</span>
           </div>
         </div>
@@ -77,12 +40,14 @@
           <span class="wm-main">San<em>gam</em></span>
           <span class="wm-sub">विद्या नित्यं संयोजयति</span>
         </div>
-        <div class="project-tag"><span>◆</span>Official College Network</div>
+        <div class="project-tag"><span>◆</span> Official College Network</div>
       </div>
     </div>
     <div class="splash-bottom">
       <p class="splash-tagline">Students. Alumni. Opportunities.<br>One trusted college network.</p>
-      <button class="btn-cta" onclick="showScreen('s-login')">Sign In to Sangam →</button>
+      <button class="btn-cta" onclick="showScreen('s-login')">
+        Sign In to Sangam <i class="ti ti-arrow-right" style="font-size:14px"></i>
+      </button>
       <div class="splash-links">
         <span onclick="showScreen('s-signup')">New here? Sign Up</span>
         <span onclick="showScreen('s-login')">Alumni? Join here</span>
@@ -100,25 +65,24 @@
     <div class="auth-scroll">
       <div class="auth-body">
         <div class="auth-college-strip">
-          <div class="auth-logo-mini">🏛</div>
+          <div class="auth-logo-mini"><i class="ti ti-building-bank" style="color:rgba(255,255,255,0.3)"></i></div>
           <div class="auth-college-name">Chhattisgarh Institute of Technology</div>
         </div>
 
         <div class="fgrp">
           <label class="flabel">Roll Number</label>
-          <!-- BUG FIX: id="login-roll" matches what auth.js reads -->
           <input type="text" class="finput" id="login-roll"
             placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
           <div class="roll-hint">Format: BRANCH + YEAR + ROLL (e.g. CSE22101)</div>
         </div>
         <div class="fgrp">
           <label class="flabel">Full Name</label>
-          <!-- BUG FIX: id="login-name" matches auth.js -->
           <input type="text" class="finput" id="login-name" placeholder="Your full name as on college ID">
         </div>
 
-        <!-- BUG FIX: onclick="doCheckRoll()" not verifyCredentialsForLogin() -->
-        <button class="btn-auth" id="btn-check-roll" onclick="doCheckRoll()">Continue →</button>
+        <button class="btn-auth" id="btn-check-roll" onclick="doCheckRoll()">
+          Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
 
         <div class="error-msg hidden" id="login-error"></div>
 
@@ -127,13 +91,14 @@
           First time here? <a onclick="showScreen('s-signup')">Sign Up</a>
         </div>
 
-        <!-- Not registered state -->
         <div id="login-notfound" class="hidden">
           <div class="notfound-box">
-            <div class="notfound-icon">🔍</div>
+            <div class="notfound-icon"><i class="ti ti-search" style="font-size:28px;color:rgba(255,255,255,0.2)"></i></div>
             <div class="notfound-title">Not registered yet</div>
             <p>Your roll number exists in our database but you haven't created an account.</p>
-            <button class="btn-auth" onclick="showScreen('s-signup')">Create Account →</button>
+            <button class="btn-auth" onclick="showScreen('s-signup')">
+              Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -153,7 +118,6 @@
           OTP sent to <strong id="login-mobile-masked">XXXXXXX****</strong>
         </div>
         <div id="login-dev-otp-banner" class="dev-otp-banner hidden"></div>
-        <!-- BUG FIX: class="login-otp-cell" matches auth.js getOtpValue("login-otp-cell") -->
         <div class="otp-row">
           <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
             oninput="otpNext(this,0,'login')" onkeydown="otpBack(this,event)">
@@ -168,7 +132,9 @@
           <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
             oninput="otpNext(this,5,'login')" onkeydown="otpBack(this,event)">
         </div>
-        <button class="btn-auth" id="btn-login-verify" onclick="doLoginVerify()">Verify & Sign In →</button>
+        <button class="btn-auth" id="btn-login-verify" onclick="doLoginVerify()">
+          Verify &amp; Sign In <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
         <div class="error-msg hidden" id="login-otp-error"></div>
         <div class="otp-resend">Didn't get it? <span onclick="resendOtp('login')">Resend OTP</span></div>
       </div>
@@ -185,32 +151,34 @@
     <div class="auth-scroll">
       <div class="auth-body">
         <div class="auth-college-strip">
-          <div class="auth-logo-mini">🏛</div>
+          <div class="auth-logo-mini"><i class="ti ti-building-bank" style="color:rgba(255,255,255,0.3)"></i></div>
           <div class="auth-college-name">CGIT — Only for registered students</div>
         </div>
 
         <div class="fgrp">
           <label class="flabel">Roll Number</label>
-          <!-- BUG FIX: id="signup-roll" matches auth.js (was "su-roll") -->
           <input type="text" class="finput" id="signup-roll"
             placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
           <div class="roll-hint">Format: BRANCH + YEAR + ROLL e.g. CSE22101</div>
         </div>
         <div class="fgrp">
           <label class="flabel">Full Name</label>
-          <!-- BUG FIX: id="signup-name" matches auth.js (was "su-name") -->
           <input type="text" class="finput" id="signup-name" placeholder="Your name as on college ID">
         </div>
         <div class="fgrp">
-          <label class="flabel">Mobile Number <span style="color:rgba(255,255,255,0.3);font-weight:400">(optional if in DB)</span></label>
-          <!-- BUG FIX: id="signup-mobile" matches auth.js (was "su-contact") -->
+          <label class="flabel">
+            Mobile Number
+            <span style="color:rgba(255,255,255,0.2);font-weight:400;letter-spacing:0;text-transform:none;font-size:11px"> — optional if in DB</span>
+          </label>
           <input type="tel" class="finput" id="signup-mobile" placeholder="10-digit mobile number">
         </div>
 
-        <!-- BUG FIX: onclick="doVerifyRoll()" not "verifyCredentialsForSignup()" -->
-        <button class="btn-auth" id="btn-verify-roll" onclick="doVerifyRoll()">Verify & Continue →</button>
+        <button class="btn-auth" id="btn-verify-roll" onclick="doVerifyRoll()">
+          Verify &amp; Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
         <div class="error-msg hidden" id="signup-error"></div>
 
+        <div class="auth-divider"><span>or</span></div>
         <div class="auth-footer-link">Already registered? <a onclick="showScreen('s-login')">Sign In</a></div>
       </div>
     </div>
@@ -238,7 +206,6 @@
         </div>
         <div id="signup-dev-otp-banner" class="dev-otp-banner hidden"></div>
 
-        <!-- BUG FIX: class="signup-otp-cell" matches auth.js getOtpValue("signup-otp-cell") -->
         <div class="otp-row">
           <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
             oninput="otpNext(this,0,'signup')" onkeydown="otpBack(this,event)">
@@ -254,7 +221,9 @@
             oninput="otpNext(this,5,'signup')" onkeydown="otpBack(this,event)">
         </div>
 
-        <button class="btn-auth" id="btn-signup" onclick="doSignup()">Create Account →</button>
+        <button class="btn-auth" id="btn-signup" onclick="doSignup()">
+          Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
         <div class="error-msg hidden" id="signup-otp-error"></div>
         <div class="otp-resend">Didn't get it? <span onclick="resendOtp('signup')">Resend OTP</span></div>
       </div>
@@ -265,7 +234,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- BUG FIX: Load api.js BEFORE auth.js so AuthAPI is defined when auth.js runs -->
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
 </body>
