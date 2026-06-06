@@ -1,61 +1,66 @@
 /* ============================================================
-   variables.css — Design tokens (Purple + White theme)
+   variables.css — Sangam Design Tokens
+   Theme: Deep ink + Rich purple — NO harsh whites
    ============================================================ */
 :root {
-  /* ── Brand ──────────────────────────────────────────── */
-  --purple:       #0F4C81;
-  --purple-2:     #FF7A18;
-  --purple-3:     #BFDFFF;
-  --purple-dk:    #082546;
-  --purple-glow:  rgba(255,122,24,0.18);
-  --purple-light: #EFF6FF;
-  --purple-light2:#DBECFF;
+  /* ── Brand / Accent ──────────────────────────────────── */
+  --purple:        #7C3AED;
+  --purple-2:      #9333EA;
+  --purple-3:      #A855F7;
+  --purple-dk:     #5B21B6;
+  --purple-deep:   #4C1D95;
+  --purple-glow:   rgba(124,58,237,0.15);
+  --purple-light:  rgba(124,58,237,0.12);
+  --purple-light2: rgba(124,58,237,0.08);
 
-  /* ── Ink (dark surfaces) ─────────────────────────────────── */
-  --ink:      #071624;
-  --ink-2:    #102E56;
-  --ink-3:    #173D69;
+  /* ── Ink (dark surfaces) ─────────────────────────────── */
+  --ink:    #0C0C0F;
+  --ink-2:  #13131A;
+  --ink-3:  #1A1A24;
+  --ink-4:  #22222E;
+  --ink-5:  #2C2C3A;
 
-  /* ── White surfaces ──────────────────────────────────── */
-  --white:    #FFFFFF;
-  --cream:    #FDFCFF;
-  --s2:       #F9F7FF;
-  --s3:       #F0ECFF;
-  --s4:       #E4DCFF;
+  /* ── App surfaces (NOT white — soft dark-purple tinted) ─ */
+  --bg:     #F0EEF8;   /* page bg: very soft lavender, not white        */
+  --white:  #FFFFFF;   /* only true white where necessary                */
+  --cream:  #F0EEF8;
+  --s2:     #E8E5F4;   /* card/section bg: muted lavender                */
+  --s3:     #DDD9EE;   /* slightly deeper                                */
+  --s4:     #CBC6E0;   /* borders, dividers on light bg                  */
 
-  /* ── Text ────────────────────────────────────────────── */
-  --text:     #0F0A1E;
-  --text-2:   #4A4070;
-  --text-3:   #8A80A8;
-  --text-4:   #B8B0D0;
+  /* ── Text (on light bg) ─────────────────────────────── */
+  --text:   #1A1730;
+  --text-2: #3D3860;
+  --text-3: #7A748A;
+  --text-4: #AAA5BB;
 
   /* ── Borders ─────────────────────────────────────────── */
-  --border:   rgba(124,58,237,0.12);
-  --border-2: rgba(124,58,237,0.22);
-  --border-dk:rgba(255,255,255,0.09);
+  --border:    #D4D0E8;
+  --border-2:  #C2BDDB;
+  --border-dk: #2C2C3A;
 
-  /* ── Status colors ───────────────────────────────────── */
-  --green:    #16A34A;
-  --blue:     #1D6FD4;
-  --orange:   #E8610A;
-  --red:      #DC2626;
-  --gold:     #D4A520;
+  /* ── Status ──────────────────────────────────────────── */
+  --green:  #16A34A;
+  --blue:   #2563EB;
+  --orange: #EA580C;
+  --red:    #DC2626;
+  --gold:   #B45309;
 
   /* ── Radii ───────────────────────────────────────────── */
-  --r-xs: 6px;
-  --r-sm: 10px;
-  --r:    16px;
-  --r-lg: 22px;
-  --r-xl: 28px;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r:    8px;
+  --r-lg: 14px;
+  --r-xl: 20px;
 
   /* ── Shadows ─────────────────────────────────────────── */
-  --sh:    0 2px 12px rgba(124,58,237,0.08);
-  --sh-md: 0 6px 28px rgba(124,58,237,0.14);
-  --sh-lg: 0 16px 56px rgba(124,58,237,0.18);
-  --sh-pu: 0 8px 28px rgba(124,58,237,0.40);
+  --sh:    0 1px 6px rgba(60,40,120,0.08);
+  --sh-md: 0 4px 18px rgba(60,40,120,0.12);
+  --sh-lg: 0 10px 36px rgba(60,40,120,0.16);
+  --sh-pu: 0 6px 24px rgba(124,58,237,0.40);
 
   /* ── Layout ──────────────────────────────────────────── */
-  --nav-h:    64px;
-  --top-nav-h:58px;
-  --max-w:    480px;
+  --nav-h:     60px;
+  --top-nav-h: 56px;
+  --max-w:     480px;
 }
