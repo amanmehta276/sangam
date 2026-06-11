@@ -94,20 +94,16 @@ html,body{height:100%;overflow:hidden}
   background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,0.3) 12px,rgba(255,255,255,0.3) 24px);
 }
 
-.al-role,.al-name,.al-company,.al-tags,.al-batch{
-  color:#fff;font-size:11px;
+.al-info,.jc-title,.jc-company,.jc-by,.jc-tags,.jc-foot{
+  color:#fff;font-size:13px;margin-top:4px;
 }
 
-.alumni-card{
-  display:flex;align-items:center;gap:12px;padding:12px;margin-left: auto;
+.conn-btn,.apply-btn{
+  margin-top:12px;padding:8px 16px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:none;color:#fff;background:var(--purple);
+  transition:background .18s;
 }
-.conn-btn{
-  color:#fff;background:var(--purple-2);
-  padding:6px 12px;border-radius:var(--r-sm);border:none;
-  font-size:13px;font-weight:500;cursor:pointer;
-  transition:all .15s;
-}
-
 /* QR Modal */
 #qr-modal{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
@@ -410,166 +406,200 @@ html,body{height:100%;overflow:hidden}
   <div class="tab-view" id="tab-profile">
     <div class="profile-page">
 
-      <!-- ── COVER + AVATAR ── -->
+      <!-- COVER -->
       <div class="profile-cover">
         <div class="profile-cover-bg" id="profile-wallpaper"></div>
-        <!-- subtle grid overlay -->
         <div class="profile-cover-grid"></div>
         <button class="profile-cover-change-btn" onclick="document.getElementById('wallpaper-input').click()">
-          <i class="ti ti-photo"></i> Change cover
+          <i class="ti ti-camera"></i>
         </button>
         <input id="wallpaper-input" type="file" accept="image/*" style="display:none" onchange="uploadWallpaper(this)">
-        <div class="profile-av-wrap">
-          <div class="profile-av-ring" id="profile-avatar-btn" onclick="document.getElementById('avatar-input').click()">
-            <span id="profile-av-initial">A</span>
-            <img id="profile-av-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
-            <div class="profile-av-edit-overlay"><i class="ti ti-camera" style="font-size:16px"></i></div>
-          </div>
-          <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      </div>
+
+      <!-- AVATAR BAR -->
+      <div class="profile-av-bar">
+        <div class="profile-av-ring" id="profile-avatar-btn" onclick="document.getElementById('avatar-input').click()">
+          <span id="profile-av-initial">A</span>
+          <img id="profile-av-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+          <div class="profile-av-edit-overlay"><i class="ti ti-camera" style="font-size:15px"></i></div>
+        </div>
+        <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        <div class="profile-av-actions">
+          <button class="profile-edit-btn" id="edit-btn" onclick="toggleEditForm()">
+            <i class="ti ti-pencil" style="font-size:13px"></i> Edit profile
+          </button>
         </div>
       </div>
 
-      <!-- ── IDENTITY ROW ── -->
-      <div class="profile-identity">
-        <div class="profile-identity-left">
-          <div class="profile-name" id="profile-name-display">Loading…</div>
-          <div class="profile-sub" id="profile-meta-display">—</div>
-          <div class="profile-verified" id="profile-trust-display">
-            <i class="ti ti-rosette-discount-check" style="font-size:13px"></i> Verified Student
-          </div>
-        </div>
-        <button class="profile-edit-btn" id="edit-btn" onclick="toggleEditForm()">
-          <i class="ti ti-pencil" style="font-size:13px"></i> Edit Profile
-        </button>
-      </div>
-
-      <!-- ── QUICK STATS ── -->
-      <div class="profile-stats-row">
-        <div class="profile-stat">
-          <div class="profile-stat-label">Roll No.</div>
-          <div class="profile-stat-val" id="quick-roll">—</div>
-        </div>
-        <div class="profile-stat-divider"></div>
-        <div class="profile-stat">
-          <div class="profile-stat-label">Branch</div>
-          <div class="profile-stat-val" id="quick-branch">—</div>
-        </div>
-        <div class="profile-stat-divider"></div>
-        <div class="profile-stat">
-          <div class="profile-stat-label">Batch</div>
-          <div class="profile-stat-val" id="quick-batch">—</div>
-        </div>
-        <div class="profile-stat-divider"></div>
-        <div class="profile-stat">
-          <div class="profile-stat-label">Role</div>
-          <div class="profile-stat-val" style="color:var(--purple-3)">Student</div>
-        </div>
-      </div>
-
-      <!-- ── MAIN BODY ── -->
+      <!-- BODY: 2-col layout -->
       <div class="profile-body">
 
-        <!-- LEFT: info sections -->
-        <div class="profile-info-col">
+        <!-- LEFT -->
+        <div class="profile-left">
 
-          <!-- Bio -->
-          <div class="pinfo-card">
-            <div class="pinfo-card-header">
-              <div class="pinfo-card-title"><i class="ti ti-user"></i> Bio</div>
-              <button class="pinfo-edit-btn" onclick="toggleEditForm()">Edit</button>
+          <!-- Identity -->
+          <div class="pcard">
+            <div class="profile-name" id="profile-name-display">Loading…</div>
+            <div class="profile-headline" id="profile-meta-display">—</div>
+            <div class="profile-location">
+              <i class="ti ti-map-pin" style="font-size:12px"></i>
+              Raipur, Chhattisgarh, India
             </div>
-            <div class="pinfo-card-body" id="profile-bio-display">
-              Add a bio to tell your story…
+            <div class="profile-verified" id="profile-trust-display">
+              <i class="ti ti-rosette-discount-check" style="font-size:12px"></i> Verified Student · CGIT Raipur
+            </div>
+            <div class="profile-stats-row">
+              <div class="profile-stat">
+                <div class="profile-stat-label">Roll No.</div>
+                <div class="profile-stat-val" id="quick-roll">—</div>
+              </div>
+              <div class="profile-stat-div"></div>
+              <div class="profile-stat">
+                <div class="profile-stat-label">Branch</div>
+                <div class="profile-stat-val" id="quick-branch">—</div>
+              </div>
+              <div class="profile-stat-div"></div>
+              <div class="profile-stat">
+                <div class="profile-stat-label">Batch</div>
+                <div class="profile-stat-val" id="quick-batch">—</div>
+              </div>
             </div>
           </div>
 
-          <!-- Company / Role -->
-          <div class="pinfo-card">
-            <div class="pinfo-card-header">
-              <div class="pinfo-card-title"><i class="ti ti-briefcase"></i> Company &amp; Role</div>
-              <button class="pinfo-edit-btn" onclick="toggleEditForm()">Edit</button>
+          <!-- About -->
+          <div class="pcard">
+            <div class="pcard-header">
+              <div class="pcard-title">About</div>
+              <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
             </div>
-            <div class="pinfo-card-body" id="company-role-display">
-              Not added yet
+            <div class="pcard-body profile-about" id="profile-bio-display">Add a bio to tell your story…</div>
+          </div>
+
+          <!-- Experience -->
+          <div class="pcard">
+            <div class="pcard-header">
+              <div class="pcard-title">Experience</div>
+              <div style="display:flex;gap:6px">
+                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-plus"></i></button>
+                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
+              </div>
+            </div>
+            <div class="pcard-body" id="company-role-display">
+              <div class="exp-empty">Add your experience to stand out</div>
             </div>
           </div>
 
           <!-- Skills -->
-          <div class="pinfo-card">
-            <div class="pinfo-card-header">
-              <div class="pinfo-card-title"><i class="ti ti-tools"></i> Skills</div>
-              <button class="pinfo-edit-btn" onclick="toggleEditForm()">Edit</button>
+          <div class="pcard">
+            <div class="pcard-header">
+              <div class="pcard-title">Skills</div>
+              <div style="display:flex;gap:6px">
+                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-plus"></i></button>
+                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
+              </div>
             </div>
-            <div class="pinfo-card-body" id="skills-display">
-              No skills added yet
+            <div class="pcard-body" id="skills-display">
+              <div class="exp-empty">Add skills to help recruiters find you</div>
             </div>
-            <div class="pinfo-hint">Comma-separated e.g. React, Python, Figma</div>
+            <div class="pcard-hint">Comma-separated e.g. React, Python, Figma</div>
           </div>
 
           <!-- Links -->
-          <div class="pinfo-card">
-            <div class="pinfo-card-header">
-              <div class="pinfo-card-title"><i class="ti ti-link"></i> Links</div>
-              <button class="pinfo-edit-btn" onclick="toggleEditForm()">Edit</button>
+          <div class="pcard" style="padding-bottom:4px">
+            <div class="pcard-header">
+              <div class="pcard-title">Contact &amp; Links</div>
+              <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
             </div>
-            <div class="pinfo-links" id="links-display">
-              <div class="pinfo-link-row">
-                <span class="pinfo-link-icon"><i class="ti ti-brand-linkedin"></i></span>
-                <span class="pinfo-link-label">LinkedIn</span>
-                <span class="pinfo-link-val">—</span>
+            <div id="links-display">
+              <div class="plink-row">
+                <div class="plink-icon"><i class="ti ti-brand-linkedin"></i></div>
+                <div class="plink-info"><div class="plink-label">LinkedIn</div><div class="plink-val">Not added</div></div>
               </div>
-              <div class="pinfo-link-row">
-                <span class="pinfo-link-icon"><i class="ti ti-brand-github"></i></span>
-                <span class="pinfo-link-label">GitHub</span>
-                <span class="pinfo-link-val">—</span>
+              <div class="plink-row">
+                <div class="plink-icon"><i class="ti ti-brand-github"></i></div>
+                <div class="plink-info"><div class="plink-label">GitHub</div><div class="plink-val">Not added</div></div>
               </div>
-              <div class="pinfo-link-row" style="border-bottom:none">
-                <span class="pinfo-link-icon"><i class="ti ti-mail"></i></span>
-                <span class="pinfo-link-label">Email</span>
-                <span class="pinfo-link-val">—</span>
+              <div class="plink-row" style="border:none">
+                <div class="plink-icon"><i class="ti ti-mail"></i></div>
+                <div class="plink-info"><div class="plink-label">Email</div><div class="plink-val">Not added</div></div>
               </div>
             </div>
           </div>
 
-        </div>
+        </div><!-- /profile-left -->
 
-        <!-- RIGHT: ID Card -->
-        <div class="profile-card-col">
-          <div class="pcard-header">
-            <div class="pcard-title">Sangam ID Card</div>
-            <div class="pcard-type-btns">
-              <button id="btn-student" class="pcard-type-btn active" onclick="switchCardType('student')">Student</button>
-              <button id="btn-alumni" class="pcard-type-btn" onclick="switchCardType('alumni')">Alumni</button>
+        <!-- RIGHT -->
+        <div class="profile-right">
+
+          <!-- ID Card -->
+          <div class="pcard">
+            <div class="pcard-header">
+              <div class="pcard-title">Sangam ID Card</div>
+              <div class="pcard-type-btns">
+                <button id="btn-student" class="pcard-type-btn active" onclick="switchCardType('student')">Student</button>
+                <button id="btn-alumni" class="pcard-type-btn" onclick="switchCardType('alumni')">Alumni</button>
+              </div>
             </div>
+            <div class="id-card" id="id-card-preview" onclick="generateIDCard()">
+              <div class="id-card-shimmer"></div>
+              <div class="id-card-top">
+                <div class="id-card-college">CGIT · Sangam</div>
+                <div id="card-type-label" class="id-card-type">Student</div>
+              </div>
+              <div class="id-card-mid">
+                <div class="id-card-av" id="card-avatar-letter">A</div>
+                <div id="card-name" class="id-card-name">Your Name</div>
+                <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
+              </div>
+              <div class="id-card-bottom">
+                <div class="id-card-id-label">Sangam ID</div>
+                <div id="card-id" class="id-card-id">SAG-000000</div>
+                <div id="qr-code-small" class="id-card-qr">
+                  <i class="ti ti-qrcode" style="font-size:26px;opacity:.5"></i>
+                </div>
+              </div>
+            </div>
+            <button class="pcard-generate-btn" onclick="generateIDCard()">
+              <i class="ti ti-qrcode" style="font-size:15px"></i> Generate QR Code
+            </button>
+            <p class="pcard-hint" style="text-align:center;margin-top:6px;padding:0 0 4px">Tap card to preview QR</p>
           </div>
 
-          <div class="id-card" id="id-card-preview" onclick="generateIDCard()">
-            <!-- shimmer lines decoration -->
-            <div class="id-card-shimmer"></div>
-            <div class="id-card-top">
-              <div class="id-card-college">CGIT · Sangam</div>
-              <div id="card-type-label" class="id-card-type">Student</div>
+          <!-- People you may know -->
+          <div class="pcard" style="padding-bottom:4px">
+            <div class="pcard-header">
+              <div class="pcard-title">People you may know</div>
+              <span style="font-size:10px;color:rgba(255,255,255,0.25)">From CGIT</span>
             </div>
-            <div class="id-card-mid">
-              <div class="id-card-av" id="card-avatar-letter">A</div>
-              <div id="card-name" class="id-card-name">Your Name</div>
-              <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
-            </div>
-            <div class="id-card-bottom">
-              <div class="id-card-id-label">Sangam ID</div>
-              <div id="card-id" class="id-card-id">SAG-000000</div>
-              <div id="qr-code-small" class="id-card-qr">
-                <i class="ti ti-qrcode" style="font-size:28px;opacity:.5"></i>
+            <div id="pymk-list">
+              <div class="pymk-item">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#7C3AED,#9333EA)">R</div>
+                <div class="pymk-info">
+                  <div class="pymk-name">Rahul Sharma</div>
+                  <div class="pymk-meta">CSE · Batch 2023</div>
+                </div>
+                <button class="pymk-connect-btn">+ Connect</button>
+              </div>
+              <div class="pymk-item">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#0369A1,#0284C7)">P</div>
+                <div class="pymk-info">
+                  <div class="pymk-name">Priya Verma</div>
+                  <div class="pymk-meta">EEE · Batch 2024</div>
+                </div>
+                <button class="pymk-connect-btn">+ Connect</button>
+              </div>
+              <div class="pymk-item" style="border:none">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#B45309,#D97706)">A</div>
+                <div class="pymk-info">
+                  <div class="pymk-name">Ankit Patel</div>
+                  <div class="pymk-meta">ME · Alumni 2022</div>
+                </div>
+                <button class="pymk-connect-btn">+ Connect</button>
               </div>
             </div>
           </div>
 
-          <button class="pcard-generate-btn" onclick="generateIDCard()">
-            <i class="ti ti-qrcode" style="font-size:16px"></i> Generate QR Code
-          </button>
-          <p class="pcard-hint">Tap the card to generate your QR code</p>
-        </div>
-
+        </div><!-- /profile-right -->
       </div><!-- /profile-body -->
     </div><!-- /profile-page -->
   </div>
