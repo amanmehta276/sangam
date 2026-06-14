@@ -1,185 +1,267 @@
 /* ============================================================
-   js/api.js — Sangam Complete API Layer
-   Every backend endpoint wired — auth, profile, posts,
-   jobs, chat, uploads, notifications
+   auth.js — Sangam Auth Flow
+   Depends on: api.js (loaded before this)
+   Screens: s-splash → s-login → s-login-otp
+            s-splash → s-signup → s-signup-otp
    ============================================================ */
 
-const API_BASE = "http://localhost:5000/api";
+/* ── Screen navigation ─────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll(".auth-screen").forEach(s => s.classList.remove("active"));
+  const el = document.getElementById(id);
+  if (el) el.classList.add("active");
+}
 
-/* ════════════════════════════════════════
-   AUTH STORAGE
-════════════════════════════════════════ */
-const Auth = {
-  getToken:    ()  => localStorage.getItem("sangam_token"),
-  setToken:    (t) => localStorage.setItem("sangam_token", t),
-  getUser:     ()  => { try { return JSON.parse(localStorage.getItem("sangam_user") || "null"); } catch { return null; } },
-  setUser:     (u) => localStorage.setItem("sangam_user", JSON.stringify(u)),
-  clear:       ()  => { localStorage.removeItem("sangam_token"); localStorage.removeItem("sangam_user"); },
-  isLoggedIn:  ()  => !!localStorage.getItem("sangam_token"),
-};
+/* ── Toast ─────────────────────────────────────────────── */
+function authToast(msg, type = "info") {
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove("show"), 3000);
+}
 
-/* ════════════════════════════════════════
-   BASE FETCH
-════════════════════════════════════════ */
-async function _fetch(path, opts = {}) {
-  const token = Auth.getToken();
-  const isFormData = opts.body instanceof FormData;
+/* ── Error display ──────────────────────────────────────── */
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+function hideError(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add("hidden");
+}
 
-  const headers = {
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-    ...(!isFormData ? { "Content-Type": "application/json" } : {}),
-    ...(opts.headers || {}),
-  };
+/* ── Button loading state ───────────────────────────────── */
+function setLoading(btnId, loading, text = "") {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn._orig = btn.innerHTML;
+    btn.innerHTML = `<span style="opacity:.6">Loading…</span>`;
+  } else {
+    btn.innerHTML = text || btn._orig || btn.innerHTML;
+  }
+}
 
-  const config = {
-    method:  opts.method || "GET",
-    headers,
-    body: opts.body
-      ? (isFormData ? opts.body : JSON.stringify(opts.body))
-      : undefined,
-  };
+/* ── OTP input helpers ──────────────────────────────────── */
+function otpNext(el, idx, prefix) {
+  el.value = el.value.replace(/\D/g, "").slice(0, 1);
+  if (el.value) el.classList.add("filled");
+  else el.classList.remove("filled");
+
+  if (el.value) {
+    const cells = document.querySelectorAll(`.${prefix}-otp-cell`);
+    if (cells[idx + 1]) cells[idx + 1].focus();
+  }
+}
+
+function otpBack(el, e) {
+  if (e.key === "Backspace" && !el.value) {
+    const cells = [...el.parentElement.querySelectorAll(".otp-cell")];
+    const idx = cells.indexOf(el);
+    if (idx > 0) cells[idx - 1].focus();
+  }
+}
+
+function getOtpValue(className) {
+  return [...document.querySelectorAll(`.${className}`)]
+    .map(c => c.value.trim())
+    .join("");
+}
+
+function clearOtp(className) {
+  document.querySelectorAll(`.${className}`).forEach(c => {
+    c.value = "";
+    c.classList.remove("filled");
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   LOGIN — Step 1: Roll + Name
+═══════════════════════════════════════════════════ */
+async function doCheckRoll() {
+  const roll = (document.getElementById("login-roll")?.value || "").trim().toUpperCase();
+  const name = (document.getElementById("login-name")?.value || "").trim();
+
+  hideError("login-error");
+  document.getElementById("login-notfound")?.classList.add("hidden");
+
+  if (!roll || !name) {
+    showError("login-error", "Please enter your roll number and name.");
+    return;
+  }
+
+  setLoading("btn-check-roll", true);
 
   try {
-    const res  = await fetch(`${API_BASE}${path}`, config);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw { status: res.status, message: data.error || "Request failed", data };
-    return data;
+    const res = await AuthAPI.checkRoll(roll, name);
+
+    // Show masked mobile
+    const masked = document.getElementById("login-mobile-masked");
+    if (masked) masked.textContent = res.mobile_masked || "XXXXXXXXXX";
+
+    // Dev OTP banner
+    if (res.dev_otp) {
+      const banner = document.getElementById("login-dev-otp-banner");
+      if (banner) {
+        banner.textContent = `DEV OTP: ${res.dev_otp}`;
+        banner.classList.remove("hidden");
+      }
+    }
+
+    clearOtp("login-otp-cell");
+    showScreen("s-login-otp");
+
   } catch (err) {
-    if (err.status) throw err;
-    throw { status: 0, message: "Server nahi mila. Backend chal raha hai?", data: {} };
+    const msg = err?.message || "Something went wrong";
+    if (err?.data?.error === "not_registered") {
+      document.getElementById("login-notfound")?.classList.remove("hidden");
+    } else {
+      showError("login-error", msg);
+    }
+  } finally {
+    setLoading("btn-check-roll", false, `Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
   }
 }
 
-/* ════════════════════════════════════════
-   AUTH API
-════════════════════════════════════════ */
-const AuthAPI = {
-  verifyRoll:  (roll_number, name, mobile = "") =>
-    _fetch("/auth/verify-roll",  { method: "POST", body: { roll_number, name, mobile } }),
+/* ═══════════════════════════════════════════════════
+   LOGIN — Step 2: OTP verify
+═══════════════════════════════════════════════════ */
+async function doLoginVerify() {
+  const roll = (document.getElementById("login-roll")?.value || "").trim().toUpperCase();
+  const otp  = getOtpValue("login-otp-cell");
 
-  signup:      (roll_number, name, otp, mobile = "") =>
-    _fetch("/auth/signup",       { method: "POST", body: { roll_number, name, otp, mobile } }),
+  hideError("login-otp-error");
 
-  checkRoll:   (roll_number, name) =>
-    _fetch("/auth/check-roll",   { method: "POST", body: { roll_number, name } }),
-
-  loginVerify: (roll_number, otp) =>
-    _fetch("/auth/login-verify", { method: "POST", body: { roll_number, otp } }),
-
-  resendOtp:   (roll_number)  =>
-    _fetch("/auth/resend-otp",   { method: "POST", body: { roll_number } }),
-
-  // loginOtp is same as checkRoll – used in auth.js
-  loginOtp:    (roll_number)  =>
-    _fetch("/auth/check-roll",   { method: "POST", body: { roll_number, name: window._loginName || "" } }),
-
-  me: () => _fetch("/auth/me"),
-
-  logout: async () => {
-    try { await _fetch("/auth/logout", { method: "POST" }); } catch {}
-    Auth.clear();
-    window.location.href = window.location.pathname.includes("pages") ? "auth.html" : "pages/auth.html";
-  },
-};
-
-/* ════════════════════════════════════════
-   USERS API  (profile + uploads)
-════════════════════════════════════════ */
-const UsersAPI = {
-
-  // Get my full profile
-  me: () => _fetch("/users/me"),
-
-  // ── Update profile (LinkedIn-style) ──────────────────
-  update: (payload) =>
-    _fetch("/users/me", { method: "PUT", body: payload }),
-
-  // ── Upload avatar photo ───────────────────────────────
-  uploadAvatar: async (file) => {
-    const form = new FormData();
-    form.append("file", file);
-    return _fetch("/users/me/avatar", { method: "POST", body: form });
-  },
-
-  // ── Upload wallpaper / cover ──────────────────────────
-  uploadWallpaper: async (file) => {
-    const form = new FormData();
-    form.append("file", file);
-    return _fetch("/users/me/wallpaper", { method: "POST", body: form });
-  },
-
-  // Alumni directory
-  list: (params = {}) => {
-    const qs = new URLSearchParams(params).toString();
-    return _fetch(`/users${qs ? "?" + qs : ""}`);
-  },
-};
-
-/* ════════════════════════════════════════
-   POSTS API
-════════════════════════════════════════ */
-const PostsAPI = {
-  list:   (filter) => {
-    const qs = filter ? `?type=${filter}` : "";
-    return _fetch(`/posts${qs}`);
-  },
-  create: (payload) => _fetch("/posts", { method: "POST", body: payload }),
-  like:   (id)      => _fetch(`/posts/${id}/like`, { method: "POST" }),
-};
-
-/* ════════════════════════════════════════
-   JOBS API
-════════════════════════════════════════ */
-const JobsAPI = {
-  list:   (params = {}) => {
-    const qs = new URLSearchParams(params).toString();
-    return _fetch(`/jobs${qs ? "?" + qs : ""}`);
-  },
-  create: (payload)     => _fetch("/jobs", { method: "POST", body: payload }),
-  apply:  (id)          => _fetch(`/jobs/${id}/apply`, { method: "POST" }),
-};
-
-/* ════════════════════════════════════════
-   CHAT API
-════════════════════════════════════════ */
-const ChatAPI = {
-  rooms:       ()           => _fetch("/chat/rooms"),
-  getMessages: (room)       => _fetch(`/chat/rooms/${room}/messages`),
-  sendMessage: (room, content, reply_to = null) =>
-    _fetch(`/chat/rooms/${room}/messages`, { method: "POST", body: { content, reply_to } }),
-  startDM:     (roll)       => _fetch("/chat/dm/start",       { method: "POST", body: { roll_number: roll } }),
-  createGroup: (name, members) =>
-    _fetch("/chat/groups", { method: "POST", body: { name, members } }),
-  searchUsers: (q)          => _fetch(`/chat/search-users?q=${encodeURIComponent(q)}`),
-  uploadFile:  async (file, room) => {
-    const form = new FormData();
-    form.append("file", file);
-    form.append("room", room);
-    return _fetch("/chat/upload", { method: "POST", body: form });
-  },
-};
-
-/* ════════════════════════════════════════
-   NOTIFICATIONS API
-════════════════════════════════════════ */
-const NotifsAPI = {
-  list:    ()   => _fetch("/notifications"),
-  readAll: ()   => _fetch("/notifications/read-all", { method: "POST" }),
-  read:    (id) => _fetch(`/notifications/${id}/read`, { method: "POST" }),
-};
-
-/* ════════════════════════════════════════
-   TOAST
-════════════════════════════════════════ */
-function showToast(message, type = "success") {
-  let toast = document.getElementById("toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "toast";
-    document.body.appendChild(toast);
+  if (otp.length < 6) {
+    showError("login-otp-error", "Enter the 6-digit OTP.");
+    return;
   }
-  toast.textContent  = message;
-  toast.className    = `toast show ${type}`;
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 3000);
+
+  setLoading("btn-login-verify", true);
+
+  try {
+    const res = await AuthAPI.login(roll, otp);
+    Auth.setToken(res.token);
+    Auth.setUser(res.user);
+    authToast("Welcome back! 👋", "success");
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
+  } catch (err) {
+    showError("login-otp-error", err?.message || "Wrong OTP. Try again.");
+  } finally {
+    setLoading("btn-login-verify", false, `Verify & Sign In <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+  }
 }
+
+/* ═══════════════════════════════════════════════════
+   SIGNUP — Step 1: Roll + Name + Mobile
+═══════════════════════════════════════════════════ */
+async function doVerifyRoll() {
+  const roll   = (document.getElementById("signup-roll")?.value   || "").trim().toUpperCase();
+  const name   = (document.getElementById("signup-name")?.value   || "").trim();
+  const mobile = (document.getElementById("signup-mobile")?.value || "").trim();
+
+  hideError("signup-error");
+
+  if (!roll || !name) {
+    showError("signup-error", "Roll number and name are required.");
+    return;
+  }
+
+  setLoading("btn-verify-roll", true);
+
+  try {
+    const res = await AuthAPI.signup(roll, name, mobile);
+
+    // Prefill info strip
+    const av = document.getElementById("signup-av");
+    if (av) av.textContent = (res.name || name)[0].toUpperCase();
+
+    const dispName = document.getElementById("signup-display-name");
+    if (dispName) dispName.textContent = res.name || name;
+
+    const dispInfo = document.getElementById("signup-student-info");
+    if (dispInfo) dispInfo.textContent = `${res.branch || ""} · Batch ${res.batch_year || ""} · ${res.role || "student"}`;
+
+    const masked = document.getElementById("signup-mobile-masked");
+    if (masked) masked.textContent = res.mobile_masked || "XXXXXXXXXX";
+
+    // Dev OTP
+    if (res.dev_otp) {
+      const banner = document.getElementById("signup-dev-otp-banner");
+      if (banner) {
+        banner.textContent = `DEV OTP: ${res.dev_otp}`;
+        banner.classList.remove("hidden");
+      }
+    }
+
+    clearOtp("signup-otp-cell");
+    showScreen("s-signup-otp");
+
+  } catch (err) {
+    const msg = err?.message || "Something went wrong";
+    if (err?.data?.error === "already_registered") {
+      showError("signup-error", "Account already exists. Please sign in.");
+      setTimeout(() => showScreen("s-login"), 2000);
+    } else {
+      showError("signup-error", msg);
+    }
+  } finally {
+    setLoading("btn-verify-roll", false, `Verify & Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SIGNUP — Step 2: OTP → create account
+═══════════════════════════════════════════════════ */
+async function doSignup() {
+  const roll   = (document.getElementById("signup-roll")?.value   || "").trim().toUpperCase();
+  const name   = (document.getElementById("signup-name")?.value   || "").trim();
+  const mobile = (document.getElementById("signup-mobile")?.value || "").trim();
+  const otp    = getOtpValue("signup-otp-cell");
+
+  hideError("signup-otp-error");
+
+  if (otp.length < 6) {
+    showError("signup-otp-error", "Enter the 6-digit OTP.");
+    return;
+  }
+
+  setLoading("btn-signup", true);
+
+  try {
+    const res = await AuthAPI.verifySignup(roll, otp, name, mobile);
+    Auth.setToken(res.token);
+    Auth.setUser(res.user);
+    authToast("Account created! Welcome 🎉", "success");
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 900);
+  } catch (err) {
+    showError("signup-otp-error", err?.message || "Wrong OTP. Try again.");
+  } finally {
+    setLoading("btn-signup", false, `Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+  }
+}
+
+/* ── Resend OTP ─────────────────────────────────────────── */
+async function resendOtp(type) {
+  if (type === "login") {
+    await doCheckRoll();
+    clearOtp("login-otp-cell");
+    authToast("OTP resent!", "info");
+  } else {
+    await doVerifyRoll();
+    clearOtp("signup-otp-cell");
+    authToast("OTP resent!", "info");
+  }
+}
+
+/* ── Redirect if already logged in ─────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  if (Auth.isLoggedIn()) {
+    window.location.href = "dashboard.html";
+  }
+});
