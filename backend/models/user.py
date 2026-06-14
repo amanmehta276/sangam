@@ -1,75 +1,84 @@
-# models/user.py
-
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+from bson import ObjectId
+from models import users_col
 
 class User:
-    def __init__(self, data):
-        self.id            = str(data.get("_id"))
-        self.name          = data.get("name")
-        self.roll_number   = data.get("roll_number")
-
-        self.mobile        = data.get("mobile")
-        self.mobile_verified = data.get("mobile_verified", False)
-
-        self.email         = data.get("email")
-        self.password_hash = data.get("password_hash")
-
-        self.branch        = data.get("branch")
-        self.batch_year    = data.get("batch_year")
-        self.semester      = data.get("semester")
-
-        self.role          = data.get("role", "student")
-        self.trust_level   = data.get("trust_level", "new")
-
-        self.bio           = data.get("bio")
-        self.avatar_url    = data.get("avatar_url")
-        self.linkedin_url  = data.get("linkedin_url")
-        self.github_url    = data.get("github_url")
-        self.company       = data.get("company")
-        self.skills        = data.get("skills", [])
-
-        self.created_at    = data.get("created_at", datetime.utcnow())
-        self.last_seen     = data.get("last_seen", datetime.utcnow())
-
-    # 🔐 Password
-    def set_password(self, raw):
-        self.password_hash = generate_password_hash(raw)
-
-    def check_password(self, raw):
-        return bool(self.password_hash and check_password_hash(self.password_hash, raw))
-
-    # 📱 Mobile mask
-    def mobile_masked(self):
-        if self.mobile and len(self.mobile) >= 4:
-            return "XXXXXXX" + self.mobile[-4:]
-        return "Not on file"
-
-    # 📦 Convert to JSON
-    def to_dict(self, public=True):
-        d = {
-            "id": self.id,
-            "name": self.name,
-            "roll_number": self.roll_number,
-            "branch": self.branch,
-            "batch_year": self.batch_year,
-            "semester": self.semester,
-            "role": self.role,
-            "trust_level": self.trust_level,
-            "bio": self.bio,
-            "avatar_url": self.avatar_url,
-            "linkedin_url": self.linkedin_url,
-            "github_url": self.github_url,
-            "company": self.company,
-            "skills": self.skills,
-            "mobile_verified": self.mobile_verified,
-            "mobile_masked": self.mobile_masked(),
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+    @staticmethod
+    def create(data: dict) -> dict:
+        now = datetime.utcnow()
+        doc = {
+            "roll_number":     data.get("roll_number","").upper().strip(),
+            "name":            data.get("name","").strip(),
+            "mobile":          data.get("mobile","").strip(),
+            "branch":          data.get("branch",""),
+            "batch_year":      data.get("batch_year",""),
+            "role":            data.get("role","student"),
+            "trust_level":     "new",
+            "bio":             "",
+            "company":         "",
+            "location":        "",
+            "email":           "",
+            "phone":           "",
+            "skills":          [],
+            "linkedin_url":    "",
+            "github_url":      "",
+            "avatar_url":      "",
+            "wallpaper_url":   "",
+            "graduation_year": "",
+            "alumni_position": "",
+            "alumni_company":  "",
+            "created_at":      now,
+            "updated_at":      now,
         }
+        result = users_col.insert_one(doc)
+        doc["_id"] = result.inserted_id
+        return doc
 
-        if not public:
-            d["email"] = self.email
-            d["mobile"] = self.mobile
+    @staticmethod
+    def find_by_roll(roll: str) -> dict | None:
+        return users_col.find_one({"roll_number": roll.upper().strip()})
 
-        return d
+    @staticmethod
+    def find_by_id(uid: str) -> dict | None:
+        try:
+            return users_col.find_one({"_id": ObjectId(uid)})
+        except Exception:
+            return None
+
+    @staticmethod
+    def update(uid: str, data: dict) -> dict | None:
+        allowed = [
+            "bio","company","location","email","phone","skills",
+            "linkedin_url","github_url","avatar_url","wallpaper_url",
+            "graduation_year","alumni_position","alumni_company","trust_level",
+        ]
+        update = {k: data[k] for k in allowed if k in data}
+        if "skills" in update and isinstance(update["skills"], str):
+            update["skills"] = [s.strip() for s in update["skills"].split(",") if s.strip()]
+        update["updated_at"] = datetime.utcnow()
+        users_col.update_one({"_id": ObjectId(uid)}, {"$set": update})
+        return User.find_by_id(uid)
+
+    @staticmethod
+    def to_dict(u: dict) -> dict:
+        if not u:
+            return {}
+        u = dict(u)
+        u["id"] = str(u.pop("_id"))
+        u.pop("password", None)
+        return u
+
+    @staticmethod
+    def search(q: str = "", role: str = "", branch: str = "", limit: int = 50) -> list:
+        filt = {}
+        if role:   filt["role"]   = role
+        if branch: filt["branch"] = branch
+        if q:
+            filt["$or"] = [
+                {"name":        {"$regex": q, "$options": "i"}},
+                {"roll_number": {"$regex": q, "$options": "i"}},
+                {"company":     {"$regex": q, "$options": "i"}},
+                {"skills":      {"$elemMatch": {"$regex": q, "$options": "i"}}},
+            ]
+        docs = list(users_col.find(filt, {"password": 0}).limit(min(limit, 100)))
+        return [User.to_dict(u) for u in docs]

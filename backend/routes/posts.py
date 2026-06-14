@@ -1,164 +1,119 @@
-# # routes/posts.py
-# from flask import Blueprint, request, jsonify
-# from bson import ObjectId
-# from datetime import datetime
-# from config.database import get_db
-# from middleware.auth_middleware import token_required, user_to_dict
-
-# posts_bp = Blueprint("posts", __name__)
-
-# def _post_dict(p):
-#     author = p.get("author_snapshot", {})
-#     return {
-#         "id": str(p["_id"]), "post_type": p.get("post_type","update"),
-#         "content": p.get("content",""),
-#         "tags": p.get("tags",[]),
-#         "likes": p.get("likes",0),
-#         "author": author,
-#         "created_at": p["created_at"].isoformat() if p.get("created_at") else "",
-#     }
-
-# @posts_bp.route("/", methods=["GET"])
-# @token_required
-# def get_posts(cur):
-#     filt = {}
-#     t = request.args.get("type")
-#     if t: filt["post_type"] = t
-#     posts = list(get_db().posts.find(filt).sort("created_at",-1).limit(30))
-#     return jsonify([_post_dict(p) for p in posts])
-
-# @posts_bp.route("/", methods=["POST"])
-# @token_required
-# def create_post(cur):
-#     d = request.get_json() or {}
-#     if not d.get("content"): return jsonify({"error":"content required"}),400
-#     tags = d.get("tags",[])
-#     doc = {
-#         "author_id": cur["_id"],
-#         "author_snapshot": user_to_dict(cur),
-#         "post_type": d.get("post_type","update"),
-#         "content": d["content"],
-#         "tags": tags if isinstance(tags,list) else [t.strip() for t in tags.split(",")],
-#         "likes": 0, "liked_by": [],
-#         "created_at": datetime.utcnow(),
-#     }
-#     res = get_db().posts.insert_one(doc); doc["_id"] = res.inserted_id
-#     return jsonify(_post_dict(doc)), 201
-
-# @posts_bp.route("/<pid>/like", methods=["POST"])
-# @token_required
-# def like_post(cur, pid):
-#     db   = get_db()
-#     uid  = cur["_id"]
-#     post = db.posts.find_one({"_id": ObjectId(pid)})
-#     if not post: return jsonify({"error":"not found"}),404
-#     liked = uid in post.get("liked_by",[])
-#     if liked:
-#         db.posts.update_one({"_id":post["_id"]},{"$inc":{"likes":-1},"$pull":{"liked_by":uid}})
-#     else:
-#         db.posts.update_one({"_id":post["_id"]},{"$inc":{"likes":1},"$addToSet":{"liked_by":uid}})
-#     updated = db.posts.find_one({"_id": post["_id"]})
-#     return jsonify({"likes": updated["likes"], "liked": not liked})
-
-
-
-
-
-
 """
-routes/posts.py  — Feed posts CRUD
+Posts / Feed routes
+GET    /api/posts          — List posts (feed)
+POST   /api/posts          — Create post
+POST   /api/posts/:id/like — Like/unlike
+DELETE /api/posts/:id      — Delete (own post or admin)
 """
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
-from utils.token import auth_required
-from models.user import get_db, find_user_by_roll
-from datetime import datetime
 from bson import ObjectId
+import datetime
 
-posts_bp = Blueprint("posts", __name__)
+from models import posts_col, users_col
+from utils import login_required
 
-def _oid(id_str):
-    try: return ObjectId(id_str)
-    except: return None
+posts_bp = Blueprint("posts", __name__, url_prefix="/api/posts")
 
-def _serialize(p):
-    p["_id"] = str(p["_id"])
+def _out(p):
+    p["id"] = str(p.pop("_id"))
     return p
 
-
-# ── List posts ─────────────────────────────────────────────
-@posts_bp.route("/api/posts", methods=["GET"])
-@auth_required
+# ── List posts ────────────────────────────────────────────
+@posts_bp.route("", methods=["GET"])
+@login_required
 def list_posts():
-    db     = get_db()
-    params = request.args
-    query  = {}
-    if params.get("type"): query["post_type"] = params["type"]
+    post_type = request.args.get("type","")
+    limit     = min(int(request.args.get("limit", 30)), 100)
+    filt      = {}
+    if post_type: filt["post_type"] = post_type
 
-    posts = list(db.posts.find(query).sort("created_at", -1).limit(40))
-    return jsonify([_serialize(p) for p in posts]), 200
+    posts = list(posts_col.find(filt).sort("created_at",-1).limit(limit))
+    return jsonify([_out(p) for p in posts])
 
-
-# ── Create post ────────────────────────────────────────────
-@posts_bp.route("/api/posts", methods=["POST"])
-@auth_required
+# ── Create post ───────────────────────────────────────────
+@posts_bp.route("", methods=["POST"])
+@login_required
 def create_post():
-    roll = get_jwt_identity()["roll"]
-    user = find_user_by_roll(roll)
-    data = request.get_json() or {}
+    uid  = request.current_user.get("sub")
+    data = request.json or {}
 
-    content = (data.get("content") or "").strip()
+    content   = (data.get("content") or "").strip()
+    post_type = data.get("post_type","update")
+    tags      = data.get("tags",[])
+
     if not content:
-        return jsonify({"error": "Content cannot be empty"}), 400
+        return jsonify({"error": "Content required"}), 400
 
-    db  = get_db()
-    now = datetime.utcnow()
+    user = users_col.find_one({"_id": ObjectId(uid)}, {"password":0})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
-    doc = {
+    now  = datetime.datetime.utcnow()
+    post = {
         "author": {
-            "name":         user["name"],
-            "roll_number":  user["roll_number"],
-            "branch":       user["branch"],
-            "batch_year":   user["batch_year"],
-            "role":         user["type"],
-            "trust_level":  user["trust_level"],
-            "avatar_url":   user.get("avatar_url", ""),
+            "id":           str(user["_id"]),
+            "name":         user.get("name",""),
+            "roll_number":  user.get("roll_number",""),
+            "branch":       user.get("branch",""),
+            "batch_year":   user.get("batch_year",""),
+            "role":         user.get("role","student"),
+            "trust_level":  user.get("trust_level","new"),
+            "avatar_url":   user.get("avatar_url",""),
         },
-        "post_type":  data.get("post_type", "update"),
+        "post_type":  post_type,
         "content":    content,
-        "tags":       data.get("tags", []),
+        "tags":       tags if isinstance(tags, list) else [],
         "likes":      0,
         "liked_by":   [],
         "created_at": now,
         "updated_at": now,
     }
 
-    result = db.posts.insert_one(doc)
-    doc["_id"] = str(result.inserted_id)
-    return jsonify(doc), 201
+    result = posts_col.insert_one(post)
+    post["id"] = str(result.inserted_id)
+    post.pop("_id", None)
+    return jsonify(post), 201
 
-
-# ── Like/unlike ────────────────────────────────────────────
-@posts_bp.route("/api/posts/<post_id>/like", methods=["POST"])
-@auth_required
+# ── Like / unlike ─────────────────────────────────────────
+@posts_bp.route("/<post_id>/like", methods=["POST"])
+@login_required
 def like_post(post_id):
-    roll = get_jwt_identity()["roll"]
-    db   = get_db()
-    oid  = _oid(post_id)
-    if not oid:
-        return jsonify({"error": "Invalid post id"}), 400
-
-    post = db.posts.find_one({"_id": oid})
+    uid  = request.current_user.get("sub")
+    post = posts_col.find_one({"_id": ObjectId(post_id)})
     if not post:
         return jsonify({"error": "Post not found"}), 404
 
     liked_by = post.get("liked_by", [])
-    if roll in liked_by:
-        liked_by.remove(roll)
+    if uid in liked_by:
+        # Unlike
+        posts_col.update_one(
+            {"_id": ObjectId(post_id)},
+            {"$pull": {"liked_by": uid}, "$inc": {"likes": -1}}
+        )
         liked = False
     else:
-        liked_by.append(roll)
+        # Like
+        posts_col.update_one(
+            {"_id": ObjectId(post_id)},
+            {"$addToSet": {"liked_by": uid}, "$inc": {"likes": 1}}
+        )
         liked = True
 
-    db.posts.update_one({"_id": oid}, {"$set": {"liked_by": liked_by, "likes": len(liked_by)}})
-    return jsonify({"likes": len(liked_by), "liked": liked}), 200
+    updated = posts_col.find_one({"_id": ObjectId(post_id)})
+    return jsonify({"likes": updated["likes"], "liked": liked})
+
+# ── Delete post ───────────────────────────────────────────
+@posts_bp.route("/<post_id>", methods=["DELETE"])
+@login_required
+def delete_post(post_id):
+    uid  = request.current_user.get("sub")
+    role = request.current_user.get("role","")
+    post = posts_col.find_one({"_id": ObjectId(post_id)})
+    if not post:
+        return jsonify({"error": "Not found"}), 404
+
+    if post["author"]["id"] != uid and role != "admin":
+        return jsonify({"error": "Not authorized"}), 403
+
+    posts_col.delete_one({"_id": ObjectId(post_id)})
+    return jsonify({"ok": True})

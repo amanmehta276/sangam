@@ -94,16 +94,6 @@ html,body{height:100%;overflow:hidden}
   background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,0.3) 12px,rgba(255,255,255,0.3) 24px);
 }
 
-.al-info,.jc-title,.jc-company,.jc-by,.jc-tags,.jc-foot{
-  color:#fff;font-size:13px;margin-top:4px;
-}
-
-.conn-btn,.apply-btn{
-  margin-top:12px;padding:8px 16px;border-radius:var(--r-sm);
-  font-size:13px;font-weight:600;cursor:pointer;
-  border:none;color:#fff;background:var(--purple);
-  transition:background .18s;
-}
 /* QR Modal */
 #qr-modal{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
@@ -190,14 +180,14 @@ html,body{height:100%;overflow:hidden}
 <main class="dash-main">
 
   <!-- HOME TAB -->
-  <div class="tab-view" id="tab-home">
+  <div class="tab-view active" id="tab-home">
     <div style="height:100%;width:100%;overflow:hidden;display:flex;flex-direction:column">
       <iframe src="../index.html?embedded=1" style="border:0;flex:1;width:100%;height:100%;min-height:300px" title="Home"></iframe>
     </div>
   </div>
 
   <!-- FEED TAB -->
-  <div class="tab-view active" id="tab-feed">
+  <div class="tab-view" id="tab-feed">
     <div class="compose-row" onclick="openPostModal()">
       <div class="compose-av" id="compose-av">A</div>
       <div class="compose-ph">Share with your college network…</div>
@@ -411,12 +401,12 @@ html,body{height:100%;overflow:hidden}
         <div class="profile-cover-bg" id="profile-wallpaper"></div>
         <div class="profile-cover-grid"></div>
         <button class="profile-cover-change-btn" onclick="document.getElementById('wallpaper-input').click()">
-          <i class="ti ti-camera"></i>
+          <i class="ti ti-camera"></i> Change Cover
         </button>
         <input id="wallpaper-input" type="file" accept="image/*" style="display:none" onchange="uploadWallpaper(this)">
       </div>
 
-      <!-- AVATAR BAR -->
+      <!-- AVATAR + EDIT BUTTON -->
       <div class="profile-av-bar">
         <div class="profile-av-ring" id="profile-avatar-btn" onclick="document.getElementById('avatar-input').click()">
           <span id="profile-av-initial">A</span>
@@ -425,25 +415,25 @@ html,body{height:100%;overflow:hidden}
         </div>
         <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
         <div class="profile-av-actions">
-          <button class="profile-edit-btn" id="edit-btn" onclick="toggleEditForm()">
-            <i class="ti ti-pencil" style="font-size:13px"></i> Edit profile
+          <button class="profile-edit-btn" id="edit-btn" onclick="openEditDrawer()">
+            <i class="ti ti-pencil" style="font-size:13px"></i> Edit Profile
           </button>
         </div>
       </div>
 
-      <!-- BODY: 2-col layout -->
+      <!-- PROFILE DISPLAY BODY -->
       <div class="profile-body">
 
         <!-- LEFT -->
         <div class="profile-left">
 
-          <!-- Identity -->
+          <!-- Identity card -->
           <div class="pcard">
             <div class="profile-name" id="profile-name-display">Loading…</div>
             <div class="profile-headline" id="profile-meta-display">—</div>
-            <div class="profile-location">
+            <div class="profile-location" id="profile-location-display">
               <i class="ti ti-map-pin" style="font-size:12px"></i>
-              Raipur, Chhattisgarh, India
+              <span>Raipur, Chhattisgarh, India</span>
             </div>
             <div class="profile-verified" id="profile-trust-display">
               <i class="ti ti-rosette-discount-check" style="font-size:12px"></i> Verified Student · CGIT Raipur
@@ -468,60 +458,50 @@ html,body{height:100%;overflow:hidden}
 
           <!-- About -->
           <div class="pcard">
-            <div class="pcard-header">
-              <div class="pcard-title">About</div>
-              <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
+            <div class="pcard-title" style="margin-bottom:10px">About</div>
+            <div class="pcard-body profile-about" id="profile-bio-display" style="color:rgba(255,255,255,0.4);font-style:italic">
+              Click "Edit Profile" to add your bio…
             </div>
-            <div class="pcard-body profile-about" id="profile-bio-display">Add a bio to tell your story…</div>
           </div>
 
           <!-- Experience -->
           <div class="pcard">
-            <div class="pcard-header">
-              <div class="pcard-title">Experience</div>
-              <div style="display:flex;gap:6px">
-                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-plus"></i></button>
-                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
-              </div>
-            </div>
-            <div class="pcard-body" id="company-role-display">
-              <div class="exp-empty">Add your experience to stand out</div>
+            <div class="pcard-title" style="margin-bottom:10px">Experience</div>
+            <div id="company-role-display">
+              <div class="exp-empty">Click "Edit Profile" to add experience</div>
             </div>
           </div>
 
           <!-- Skills -->
           <div class="pcard">
-            <div class="pcard-header">
-              <div class="pcard-title">Skills</div>
-              <div style="display:flex;gap:6px">
-                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-plus"></i></button>
-                <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
-              </div>
+            <div class="pcard-title" style="margin-bottom:10px">Skills</div>
+            <div id="skills-display">
+              <div class="exp-empty">Click "Edit Profile" to add skills</div>
             </div>
-            <div class="pcard-body" id="skills-display">
-              <div class="exp-empty">Add skills to help recruiters find you</div>
-            </div>
-            <div class="pcard-hint">Comma-separated e.g. React, Python, Figma</div>
           </div>
 
           <!-- Links -->
           <div class="pcard" style="padding-bottom:4px">
-            <div class="pcard-header">
-              <div class="pcard-title">Contact &amp; Links</div>
-              <button class="pcard-edit-icon" onclick="toggleEditForm()"><i class="ti ti-pencil"></i></button>
+            <div class="pcard-title" style="margin-bottom:4px">Contact &amp; Links</div>
+            <div class="plink-row">
+              <div class="plink-icon"><i class="ti ti-brand-linkedin"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">LinkedIn</div>
+                <div class="plink-val" id="display-linkedin">Not added</div>
+              </div>
             </div>
-            <div id="links-display">
-              <div class="plink-row">
-                <div class="plink-icon"><i class="ti ti-brand-linkedin"></i></div>
-                <div class="plink-info"><div class="plink-label">LinkedIn</div><div class="plink-val">Not added</div></div>
+            <div class="plink-row">
+              <div class="plink-icon"><i class="ti ti-brand-github"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">GitHub</div>
+                <div class="plink-val" id="display-github">Not added</div>
               </div>
-              <div class="plink-row">
-                <div class="plink-icon"><i class="ti ti-brand-github"></i></div>
-                <div class="plink-info"><div class="plink-label">GitHub</div><div class="plink-val">Not added</div></div>
-              </div>
-              <div class="plink-row" style="border:none">
-                <div class="plink-icon"><i class="ti ti-mail"></i></div>
-                <div class="plink-info"><div class="plink-label">Email</div><div class="plink-val">Not added</div></div>
+            </div>
+            <div class="plink-row" style="border:none">
+              <div class="plink-icon"><i class="ti ti-mail"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">Email</div>
+                <div class="plink-val" id="display-email">Not added</div>
               </div>
             </div>
           </div>
@@ -537,7 +517,7 @@ html,body{height:100%;overflow:hidden}
               <div class="pcard-title">Sangam ID Card</div>
               <div class="pcard-type-btns">
                 <button id="btn-student" class="pcard-type-btn active" onclick="switchCardType('student')">Student</button>
-                <button id="btn-alumni" class="pcard-type-btn" onclick="switchCardType('alumni')">Alumni</button>
+                <button id="btn-alumni"  class="pcard-type-btn"        onclick="switchCardType('alumni')">Alumni</button>
               </div>
             </div>
             <div class="id-card" id="id-card-preview" onclick="generateIDCard()">
@@ -548,7 +528,7 @@ html,body{height:100%;overflow:hidden}
               </div>
               <div class="id-card-mid">
                 <div class="id-card-av" id="card-avatar-letter">A</div>
-                <div id="card-name" class="id-card-name">Your Name</div>
+                <div id="card-name"  class="id-card-name">Your Name</div>
                 <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
               </div>
               <div class="id-card-bottom">
@@ -574,26 +554,17 @@ html,body{height:100%;overflow:hidden}
             <div id="pymk-list">
               <div class="pymk-item">
                 <div class="pymk-av" style="background:linear-gradient(135deg,#7C3AED,#9333EA)">R</div>
-                <div class="pymk-info">
-                  <div class="pymk-name">Rahul Sharma</div>
-                  <div class="pymk-meta">CSE · Batch 2023</div>
-                </div>
+                <div class="pymk-info"><div class="pymk-name">Rahul Sharma</div><div class="pymk-meta">CSE · Batch 2023</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
               <div class="pymk-item">
                 <div class="pymk-av" style="background:linear-gradient(135deg,#0369A1,#0284C7)">P</div>
-                <div class="pymk-info">
-                  <div class="pymk-name">Priya Verma</div>
-                  <div class="pymk-meta">EEE · Batch 2024</div>
-                </div>
+                <div class="pymk-info"><div class="pymk-name">Priya Verma</div><div class="pymk-meta">EEE · Batch 2024</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
               <div class="pymk-item" style="border:none">
                 <div class="pymk-av" style="background:linear-gradient(135deg,#B45309,#D97706)">A</div>
-                <div class="pymk-info">
-                  <div class="pymk-name">Ankit Patel</div>
-                  <div class="pymk-meta">ME · Alumni 2022</div>
-                </div>
+                <div class="pymk-info"><div class="pymk-name">Ankit Patel</div><div class="pymk-meta">ME · Alumni 2022</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
             </div>
@@ -602,6 +573,83 @@ html,body{height:100%;overflow:hidden}
         </div><!-- /profile-right -->
       </div><!-- /profile-body -->
     </div><!-- /profile-page -->
+  </div>
+
+  <!-- ══ EDIT PROFILE DRAWER (slides from right) ══ -->
+  <div class="edit-drawer-overlay" id="edit-drawer-overlay" onclick="closeEditDrawer()"></div>
+  <div class="edit-drawer" id="edit-drawer">
+    <div class="edit-drawer-head">
+      <div class="edit-drawer-title">Edit Profile</div>
+      <button class="edit-drawer-close" onclick="closeEditDrawer()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="edit-drawer-body">
+
+      <div class="ef-section-label">Basic Info</div>
+      <div class="ef-field">
+        <label class="ef-label">Bio</label>
+        <textarea id="pe-bio" class="ef-input ef-textarea" placeholder="Tell your story in 2-3 lines…" rows="4"></textarea>
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Company / Current Role</label>
+        <input id="pe-company" class="ef-input" placeholder="e.g. Software Engineer @ Google">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Location</label>
+        <input id="pe-location" class="ef-input" placeholder="e.g. Raipur, India">
+      </div>
+
+      <div class="ef-section-label">Skills</div>
+      <div class="ef-field">
+        <label class="ef-label">Skills <span style="font-weight:300;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.2)">(comma separated)</span></label>
+        <input id="pe-skills" class="ef-input" placeholder="React, Python, DSA, Figma…">
+        <div id="pe-skills-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:10px"></div>
+      </div>
+
+      <div class="ef-section-label">Links &amp; Contact</div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-brand-linkedin" style="color:#0A66C2;font-size:14px"></i> LinkedIn</label>
+        <input id="pe-linkedin" class="ef-input" placeholder="https://linkedin.com/in/yourname">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-brand-github" style="font-size:14px"></i> GitHub</label>
+        <input id="pe-github" class="ef-input" placeholder="https://github.com/yourname">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-mail" style="color:var(--purple-3);font-size:14px"></i> Email</label>
+        <input id="pe-email" class="ef-input" type="email" placeholder="your@email.com">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-phone" style="font-size:14px"></i> Phone</label>
+        <input id="pe-phone" class="ef-input" type="tel" placeholder="10-digit number">
+      </div>
+
+      <!-- Alumni section (shows only for alumni role) -->
+      <div id="alumni-section" style="display:none">
+        <div class="ef-section-label">Alumni Details</div>
+        <div class="ef-field">
+          <label class="ef-label">Graduation Year</label>
+          <input id="pe-graduation-year" class="ef-input" type="number" placeholder="e.g. 2022" min="2000" max="2030">
+        </div>
+        <div class="ef-field">
+          <label class="ef-label">Current Position</label>
+          <input id="pe-alumni-position" class="ef-input" placeholder="e.g. SDE-2 at Microsoft">
+        </div>
+        <div class="ef-field">
+          <label class="ef-label">Current Company</label>
+          <input id="pe-alumni-company" class="ef-input" placeholder="e.g. Google">
+        </div>
+      </div>
+
+    </div><!-- /edit-drawer-body -->
+
+    <div class="edit-drawer-foot">
+      <button class="ef-cancel-btn" onclick="closeEditDrawer()">Cancel</button>
+      <button class="ef-save-btn" onclick="saveProfile()">
+        <i class="ti ti-check" style="font-size:14px"></i> Save Changes
+      </button>
+    </div>
   </div>
 
   <!-- QR Modal -->
@@ -667,6 +715,7 @@ html,body{height:100%;overflow:hidden}
 
 <script src="../js/api.js"></script>
 <script src="../js/sidebar.js"></script>
+<script src="../js/profile.js"></script>
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

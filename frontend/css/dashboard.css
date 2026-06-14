@@ -769,3 +769,106 @@
   font-family:'DM Sans',sans-serif;transition:all .15s;
 }
 .notifs-mark-btn:hover{background:var(--purple);color:#fff}
+
+/* ══════════════════════════════════════════════════════
+   EDIT FORM — inline slide-in card
+   ══════════════════════════════════════════════════════ */
+.edit-form-card{
+  border-color:rgba(124,58,237,0.35) !important;
+  animation:slide-up .22s ease;
+}
+.ef-section-label{
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--purple-3);margin:16px 0 8px;
+  display:flex;align-items:center;gap:8px;
+}
+.ef-section-label::after{content:'';flex:1;height:1px;background:rgba(124,58,237,0.2)}
+.ef-field{margin-bottom:12px}
+.ef-label{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);margin-bottom:6px;
+}
+.ef-input{
+  width:100%;background:rgba(255,255,255,0.06);
+  border:1px solid var(--border-dk);border-radius:var(--r-sm);
+  padding:10px 13px;color:#fff;font-size:14px;outline:none;
+  font-family:'DM Sans',sans-serif;transition:border-color .15s,background .15s;
+}
+.ef-input:focus{border-color:var(--purple-2);background:rgba(124,58,237,0.07)}
+.ef-input::placeholder{color:rgba(255,255,255,0.2)}
+.ef-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.ef-actions{
+  display:flex;gap:8px;margin-top:18px;padding-top:14px;
+  border-top:1px solid var(--border-dk);
+}
+.ef-cancel-btn{
+  flex:1;padding:10px;border:1px solid var(--border-dk);
+  border-radius:var(--r-sm);background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.ef-cancel-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+.ef-save-btn{
+  flex:2;padding:10px;border:none;border-radius:var(--r-sm);
+  background:linear-gradient(135deg,var(--purple),var(--purple-2));
+  color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .15s;
+}
+.ef-save-btn:hover{background:linear-gradient(135deg,var(--purple-2),var(--purple-3));transform:translateY(-1px)}
+
+/* ══════════════════════════════════════════════════════
+   EDIT PROFILE DRAWER — slides in from right
+   ══════════════════════════════════════════════════════ */
+.edit-drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.65);
+  z-index:600;opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.edit-drawer-overlay.open{opacity:1;pointer-events:all}
+
+.edit-drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(420px,100vw);
+  background:var(--ink-2);
+  border-left:1px solid var(--border-dk);
+  z-index:700;
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.edit-drawer.open{transform:translateX(0)}
+
+.edit-drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--border-dk);
+  flex-shrink:0;background:var(--ink-2);
+}
+.edit-drawer-title{
+  font-family:'Playfair Display',serif;
+  font-size:20px;font-weight:600;color:#fff;
+}
+.edit-drawer-close{
+  width:34px;height:34px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,0.07);border:1px solid var(--border-dk);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;
+  transition:all .15s;
+}
+.edit-drawer-close:hover{background:rgba(255,255,255,0.14);color:#fff}
+
+.edit-drawer-body{
+  flex:1;overflow-y:auto;padding:20px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.07) transparent;
+}
+.edit-drawer-body::-webkit-scrollbar{width:3px}
+.edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+
+.edit-drawer-foot{
+  display:flex;gap:10px;padding:16px 20px;
+  border-top:1px solid var(--border-dk);flex-shrink:0;
+  background:var(--ink-2);
+}

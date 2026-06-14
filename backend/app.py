@@ -1,237 +1,189 @@
-# # app.py
-# from flask import Flask, send_from_directory, jsonify
-# from flask_cors import CORS
-# from flask_socketio import SocketIO, emit, join_room, leave_room
-# from config.database import init_db
-# from routes.auth   import auth_bp
-# from routes.users  import users_bp
-# from routes.posts  import posts_bp
-# from routes.jobs   import jobs_bp
-# from routes.chat   import chat_bp
-# from routes.notifs import notifs_bp
-# from routes.feed_external import feed_bp   # ← NEW
-# import jwt, os
-
-# socketio = SocketIO()
-
-
-# def create_app():
-#     app = Flask(__name__)
-#     app.config.from_object("config.settings.Config")
-
-#     os.makedirs(app.config.get("UPLOAD_FOLDER", "uploads"), exist_ok=True)
-
-#     CORS(app, origins=[
-#          "http://127.0.0.1:5500",
-#          "http://localhost:5500",
-#         "https://cgitsangam.netlify.app",
-#         "https://sangam-z93f.onrender.com"
-#     ], supports_credentials=True)
-
-#     init_db(app)
-
-#     for bp, prefix in [
-#         (auth_bp,   "/api/auth"),   (users_bp, "/api/users"),
-#         (posts_bp,  "/api/posts"),  (jobs_bp,  "/api/jobs"),
-#         (chat_bp,   "/api/chat"),   (notifs_bp,"/api/notifications"),
-#         (feed_bp,   "/api/feed/external"),     # ← NEW
-#     ]:
-#         app.register_blueprint(bp, url_prefix=prefix)
-
-#     @app.route("/uploads/<path:filename>")
-#     def serve_upload(filename):
-#         return send_from_directory(app.config.get("UPLOAD_FOLDER", "uploads"), filename)
-
-#     @app.route("/api/health")
-#     def health():
-#         return {"status": "ok", "db": "mongodb", "app": "Sangam v3"}, 200
-
-#     socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
-#     _socket_events(app)
-#     return app
-
-
-# def _get_user(token: str, secret: str):
-#     from config.database import get_db
-#     from bson import ObjectId
-#     try:
-#         data = jwt.decode(token, secret, algorithms=["HS256"])
-#         return get_db().users.find_one({"_id": ObjectId(data["user_id"])})
-#     except Exception:
-#         return None
-
-
-# def _socket_events(app):
-#     from config.database import get_db
-#     from datetime import datetime
-
-#     @socketio.on("connect")
-#     def on_connect(auth):
-#         token  = (auth or {}).get("token", "").replace("Bearer ", "")
-#         secret = app.config.get("SECRET_KEY", "")
-#         with app.app_context():
-#             u = _get_user(token, secret)
-#         if not u:
-#             return False
-#         print(f"[WS] {u['name']} connected")
-
-#     @socketio.on("join")
-#     def on_join(data):
-#         room   = data.get("room", "global")
-#         token  = data.get("token", "").replace("Bearer ", "")
-#         secret = app.config.get("SECRET_KEY", "")
-#         with app.app_context():
-#             u = _get_user(token, secret)
-#         if not u:
-#             return
-#         join_room(room)
-
-#     @socketio.on("leave")
-#     def on_leave(data):
-#         leave_room(data.get("room", "global"))
-
-#     @socketio.on("message")
-#     def on_message(data):
-#         token      = data.get("token", "").replace("Bearer ", "")
-#         room       = data.get("room", "global")
-#         content    = data.get("content", "").strip()
-#         media_type = data.get("media_type")
-#         media_url  = data.get("media_url")
-#         secret     = app.config.get("SECRET_KEY", "")
-
-#         if not content and not media_url:
-#             return
-
-#         with app.app_context():
-#             u = _get_user(token, secret)
-#             if not u:
-#                 emit("error", {"message": "Unauthorized"})
-#                 return
-
-#             db = get_db()
-#             now = datetime.utcnow()
-#             msg = {
-#                 "sender_id":   u["_id"],
-#                 "sender_name": u.get("name", ""),
-#                 "sender_roll": u.get("roll_number", ""),
-#                 "room":        room,
-#                 "content":     content,
-#                 "media_type":  media_type,
-#                 "media_url":   media_url,
-#                 "created_at":  now,
-#             }
-#             res = db.messages.insert_one(msg)
-#             msg_id = str(res.inserted_id)
-#             now_iso = now.isoformat()
-
-#         emit("new_message", {
-#             "id":          msg_id,
-#             "sender_name": u.get("name", ""),
-#             "sender_roll": u.get("roll_number", ""),
-#             "sender_id":   str(u["_id"]),
-#             "room":        room,
-#             "content":     content,
-#             "media_type":  media_type,
-#             "media_url":   media_url,
-#             "created_at":  now_iso,
-#         }, to=room)
-
-
-# if __name__ == "__main__":
-#     app = create_app()
-#     socketio.run(app, host="0.0.0.0", port=5000)
-
-
-
-
-
-
 """
-app.py — Sangam Complete Backend
+Sangam Backend — Flask + Socket.IO
 Run: python app.py
 """
 import os
-from flask import Flask, jsonify
+import datetime
+from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
-from flask_socketio import SocketIO
-from dotenv import load_dotenv
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
-load_dotenv()
+from config import cfg
+from models import messages_col, rooms_col, users_col
+from utils.jwt_helper import decode_token
 
-from utils.token import init_jwt
-from routes.auth  import auth_bp
-from routes.users import users_bp
-from routes.posts import posts_bp
-from routes.chat  import chat_bp, register_socket_events, init_socketio
-from routes.jobs  import jobs_bp
+# ── App setup ─────────────────────────────────────────────
+app = Flask(__name__, static_folder=None)
+app.config["SECRET_KEY"]       = cfg.SECRET_KEY
+app.config["MAX_CONTENT_LENGTH"] = cfg.MAX_CONTENT_LEN
 
-def create_app():
-    app = Flask(__name__)
+CORS(app, origins=[cfg.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:5500",
+                   "null"],  # allow file:// for local dev
+     supports_credentials=True)
 
-    # ── CORS ──────────────────────────────────────────────
-    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
-    # ── JWT ───────────────────────────────────────────────
-    init_jwt(app)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "sangam_secret_2025")
+# ── Serve uploaded files ──────────────────────────────────
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    return send_from_directory(cfg.UPLOAD_FOLDER, filename)
 
-    # ── Blueprints ────────────────────────────────────────
-    for bp in [auth_bp, users_bp, posts_bp, chat_bp, jobs_bp]:
-        app.register_blueprint(bp)
+# ── Register blueprints ───────────────────────────────────
+from routes.auth          import auth_bp
+from routes.users         import users_bp
+from routes.posts         import posts_bp
+from routes.jobs          import jobs_bp
+from routes.chat          import chat_bp
+from routes.notifications import notifs_bp
 
-    # ── Health ────────────────────────────────────────────
-    @app.route("/")
-    def index():
-        return jsonify({
-            "app":    "Sangam API 🔱",
-            "status": "running",
-            "routes": [
-                "POST /api/auth/verify-roll",
-                "POST /api/auth/signup",
-                "POST /api/auth/check-roll",
-                "POST /api/auth/login-verify",
-                "GET  /api/auth/me",
-                "GET  /api/users/me",
-                "PUT  /api/users/me",
-                "POST /api/users/me/avatar",
-                "POST /api/users/me/wallpaper",
-                "GET  /api/users",
-                "GET  /api/posts",
-                "POST /api/posts",
-                "POST /api/posts/<id>/like",
-                "GET  /api/jobs",
-                "POST /api/jobs",
-                "GET  /api/chat/rooms",
-                "GET  /api/chat/rooms/<room>/messages",
-                "POST /api/chat/dm/start",
-                "POST /api/chat/groups",
-            ]
-        })
+app.register_blueprint(auth_bp)
+app.register_blueprint(users_bp)
+app.register_blueprint(posts_bp)
+app.register_blueprint(jobs_bp)
+app.register_blueprint(chat_bp)
+app.register_blueprint(notifs_bp)
 
-    @app.errorhandler(404)
-    def not_found(e):
-        return jsonify({"error": "Route not found"}), 404
+# ── Health check ──────────────────────────────────────────
+@app.route("/api/health")
+def health():
+    return jsonify({"status": "ok", "app": "Sangam", "version": "1.0.0"})
 
-    @app.errorhandler(500)
-    def server_error(e):
-        return jsonify({"error": str(e)}), 500
+# ── Global error handlers ─────────────────────────────────
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "Not found"}), 404
 
-    return app
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({"error": f"File too large (max {cfg.MAX_FILE_MB}MB)"}), 413
 
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({"error": "Internal server error"}), 500
 
+# ════════════════════════════════════════════════════════════
+# SOCKET.IO — Real-time chat
+# ════════════════════════════════════════════════════════════
+
+online_users: dict = {}   # sid → user_id
+
+def _auth_socket(auth: dict):
+    """Decode JWT from socket auth, return payload or None"""
+    token = (auth or {}).get("token","").replace("Bearer ","").strip()
+    if not token:
+        return None
+    try:
+        return decode_token(token)
+    except Exception:
+        return None
+
+@socketio.on("connect")
+def on_connect(auth):
+    payload = _auth_socket(auth)
+    if not payload:
+        return False   # reject connection
+    uid = payload.get("sub")
+    online_users[request.sid] = uid
+    emit("connected", {"user_id": uid})
+    # Broadcast online status
+    socketio.emit("user_online", uid, skip_sid=request.sid)
+    print(f"[WS] {uid} connected ({request.sid})")
+
+@socketio.on("disconnect")
+def on_disconnect():
+    uid = online_users.pop(request.sid, None)
+    if uid:
+        socketio.emit("user_offline", uid)
+        print(f"[WS] {uid} disconnected")
+
+@socketio.on("join")
+def on_join(data):
+    room = data.get("room","")
+    if room:
+        join_room(room)
+        print(f"[WS] {online_users.get(request.sid)} joined {room}")
+
+@socketio.on("leave")
+def on_leave(data):
+    room = data.get("room","")
+    if room:
+        leave_room(room)
+
+@socketio.on("message")
+def on_message(data):
+    payload = _auth_socket(data)
+    if not payload:
+        emit("error", {"msg": "Unauthorized"})
+        return
+
+    uid     = payload.get("sub")
+    room    = data.get("room","")
+    content = (data.get("content") or "").strip()
+
+    if not room or not content:
+        return
+
+    # Get sender info
+    user = users_col.find_one({"_id": __import__("bson").ObjectId(uid)}, {"name":1,"roll_number":1,"avatar_url":1})
+    now  = datetime.datetime.utcnow()
+
+    msg = {
+        "sender_id":   uid,
+        "sender_name": user.get("name","") if user else "",
+        "sender_roll": user.get("roll_number","") if user else "",
+        "avatar_url":  user.get("avatar_url","") if user else "",
+        "room":        room,
+        "content":     content,
+        "media_type":  None,
+        "media_url":   None,
+        "reply_to":    data.get("reply_to"),
+        "reactions":   [],
+        "created_at":  now,
+        "status":      "delivered",
+    }
+
+    result = messages_col.insert_one(msg)
+    msg["id"] = str(result.inserted_id)
+    msg.pop("_id", None)
+    msg["created_at"] = now.isoformat()
+
+    # Update room last_message
+    rooms_col.update_one(
+        {"$or": [{"id": room}, {"_id": __import__("bson").ObjectId(room) if len(room)==24 else __import__("bson").ObjectId()}]},
+        {"$set": {"last_message": content[:100], "last_time": now}},
+        upsert=False
+    )
+
+    # Broadcast to everyone in the room
+    socketio.emit("new_message", msg, to=room)
+
+@socketio.on("typing")
+def on_typing(data):
+    room = data.get("room","")
+    if room:
+        emit("typing", {
+            "room":    room,
+            "user_id": online_users.get(request.sid,""),
+            "name":    data.get("name",""),
+        }, to=room, include_self=False)
+
+@socketio.on("stop_typing")
+def on_stop_typing(data):
+    room = data.get("room","")
+    if room:
+        emit("stop_typing", {"room": room}, to=room, include_self=False)
+
+# ════════════════════════════════════════════════════════════
+# RUN
+# ════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    app     = create_app()
-    sio     = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
-    init_socketio(sio)
-    register_socket_events(sio, os.getenv("JWT_SECRET_KEY", "sangam_jwt_2025"))
-
-    port = int(os.getenv("PORT", 5000))
-    print(f"""
-╔══════════════════════════════════════════╗
-║   🔱 Sangam Backend — CGIT Raipur       ║
-║   http://localhost:{port}                 ║
-║   DEV_MODE : {os.getenv('DEV_MODE','true')}                      ║
-║   MongoDB  : {os.getenv('MONGO_URI','mongodb://localhost/sangam')[:30]}  ║
-╚══════════════════════════════════════════╝
-    """)
-    sio.run(app, debug=True, port=port, host="0.0.0.0", allow_unsafe_werkzeug=True)
+    os.makedirs(cfg.UPLOAD_FOLDER, exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/avatars",    exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/wallpapers", exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/media",      exist_ok=True)
+    print(f"\n{'='*50}")
+    print(f"  Sangam Backend starting on port {cfg.PORT}")
+    print(f"  Frontend: {cfg.FRONTEND_URL}")
+    print(f"  OTP mode: {cfg.OTP_MODE}")
+    print(f"{'='*50}\n")
+    socketio.run(app, host="0.0.0.0", port=cfg.PORT, debug=True)

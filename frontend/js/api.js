@@ -1,136 +1,149 @@
-/* api.js — Centralised API client
-   FIX BUG 11: AuthAPI updated to match new backend endpoints.
-   Old /auth/verify-credentials and /auth/login no longer exist.
-   New flow: verify-roll → send-otp → signup (signup)
-             check-roll  → login-otp → login-verify (login)
-*/
+/* ============================================================
+   api.js — Sangam Frontend API client
+   All calls go to http://localhost:5000/api
+   ============================================================ */
 
-const API_BASE = "https://sangam-z93f.onrender.com/api";
+const API_BASE = "http://localhost:5000/api";
 
-// ── Token management ──────────────────────────────────────────
+/* ── Auth storage ────────────────────────────────────────── */
 const Auth = {
-  getToken:   ()  => localStorage.getItem("sangam_token"),
-  setToken:   (t) => localStorage.setItem("sangam_token", t),
-  getUser:    ()  => JSON.parse(localStorage.getItem("sangam_user") || "null"),
-  setUser:    (u) => localStorage.setItem("sangam_user", JSON.stringify(u)),
-  clear:      ()  => { localStorage.removeItem("sangam_token"); localStorage.removeItem("sangam_user"); },
-  isLoggedIn: ()  => !!localStorage.getItem("sangam_token"),
+  getToken:  ()  => localStorage.getItem("sangam_token"),
+  setToken:  (t) => localStorage.setItem("sangam_token", t),
+  getUser:   ()  => { try { return JSON.parse(localStorage.getItem("sangam_user")||"null"); } catch{return null;} },
+  setUser:   (u) => localStorage.setItem("sangam_user", JSON.stringify(u)),
+  clear:     ()  => { localStorage.removeItem("sangam_token"); localStorage.removeItem("sangam_user"); },
+  isLoggedIn:()  => !!localStorage.getItem("sangam_token"),
 };
 
-// ── Base fetch wrapper ────────────────────────────────────────
-async function apiCall(path, options = {}) {
+/* ── Base fetch ──────────────────────────────────────────── */
+async function _api(path, options = {}) {
   const token = Auth.getToken();
-  const isFormData = options.body instanceof FormData;
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
 
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
     ...options,
-    body: isFormData ? options.body
-        : options.body ? JSON.stringify(options.body)
-        : undefined,
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
   const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    throw { status: res.status, message: data.error || "Request failed", data };
-  }
+  if (!res.ok) throw { status: res.status, message: data.error || "Request failed", data };
   return data;
 }
 
-// ── Auth API — FIXED ENDPOINTS ────────────────────────────────
+/* ── Multipart (file upload) ─────────────────────────────── */
+async function _upload(path, formData) {
+  const token = Auth.getToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw { status: res.status, message: data.error || "Upload failed" };
+  return data;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AuthAPI
+════════════════════════════════════════════════════════════ */
 const AuthAPI = {
-  // SIGNUP STEP 1: verify roll number + name against college DB (CSV)
-  verifyRoll: (roll, name) =>
-    apiCall("/auth/verify-roll", { method: "POST", body: { roll_number: roll, name } }),
+  /* Step 1 login: roll + name → OTP */
+  checkRoll: (roll_number, name) =>
+    _api("/auth/check-roll", { method:"POST", body:{ roll_number, name } }),
 
-  // SIGNUP STEP 2: send OTP to mobile
-  sendOtp: (roll, mobile) =>
-    apiCall("/auth/send-otp", { method: "POST", body: { roll_number: roll, mobile } }),
+  /* Step 2 login: OTP → JWT */
+  login: (roll_number, otp) =>
+    _api("/auth/login", { method:"POST", body:{ roll_number, otp } }),
 
-  // SIGNUP STEP 3: verify OTP + create account
-  signup: (payload) =>
-    apiCall("/auth/signup", { method: "POST", body: payload }),
+  /* Step 1 signup: roll + name + mobile → OTP */
+  signup: (roll_number, name, mobile) =>
+    _api("/auth/signup", { method:"POST", body:{ roll_number, name, mobile } }),
 
-  // LOGIN STEP 1: check if roll is registered in MongoDB
-  checkRoll: (roll, name) =>
-    apiCall("/auth/check-roll", { method: "POST", body: { roll_number: roll, name } }),
+  /* Step 2 signup: OTP → create account + JWT */
+  verifySignup: (roll_number, otp, name, mobile) =>
+    _api("/auth/verify-signup", { method:"POST", body:{ roll_number, otp, name, mobile } }),
 
-  // LOGIN STEP 2: send OTP to registered mobile
-  loginOtp: (roll) =>
-    apiCall("/auth/login-otp", { method: "POST", body: { roll_number: roll } }),
-
-  // LOGIN STEP 3: verify OTP → get JWT
-  loginVerify: (roll, otp) =>
-    apiCall("/auth/login-verify", { method: "POST", body: { roll_number: roll, otp } }),
-
-  // Resend OTP
-  resendOtp: (roll) =>
-    apiCall("/auth/resend-otp", { method: "POST", body: { roll_number: roll } }),
-
-  // Get current logged-in user
-  me: () => apiCall("/auth/me"),
+  /* Get current user */
+  me: () => _api("/auth/me"),
 };
 
-// ── Posts API ─────────────────────────────────────────────────
-const PostsAPI = {
-  list:   (type)    => apiCall(`/posts/${type ? `?type=${type}` : ""}`),
-  create: (payload) => apiCall("/posts/", { method: "POST", body: payload }),
-  like:   (id)      => apiCall(`/posts/${id}/like`, { method: "POST" }),
-};
-
-// ── Users API ─────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   UsersAPI
+════════════════════════════════════════════════════════════ */
 const UsersAPI = {
-  list:   (params = {}) => apiCall(`/users/?${new URLSearchParams(params)}`),
-  get:    (id)          => apiCall(`/users/${id}`),
-  update: (payload)     => apiCall("/users/me", { method: "PATCH", body: payload }),
-  uploadAvatar: (file)  => {
-    const fd = new FormData();
-    fd.append("file", file);
-    return apiCall("/users/me/avatar", { method: "POST", body: fd });
+  list:   (params = {}) => _api("/users?" + new URLSearchParams(params)),
+  get:    (roll)        => _api(`/users/${roll}`),
+  update: (payload)     => _api("/users/me", { method:"PUT", body: payload }),
+
+  uploadAvatar: (file) => {
+    const fd = new FormData(); fd.append("file", file);
+    return _upload("/users/me/avatar", fd);
+  },
+  uploadWallpaper: (file) => {
+    const fd = new FormData(); fd.append("file", file);
+    return _upload("/users/me/wallpaper", fd);
   },
 };
 
-// ── Jobs API ──────────────────────────────────────────────────
-const JobsAPI = {
-  list:   (params = {}) => apiCall(`/jobs/?${new URLSearchParams(params)}`),
-  create: (payload)     => apiCall("/jobs/", { method: "POST", body: payload }),
+/* ════════════════════════════════════════════════════════════
+   PostsAPI
+════════════════════════════════════════════════════════════ */
+const PostsAPI = {
+  list:   (type)    => _api("/posts" + (type ? `?type=${type}` : "")),
+  create: (payload) => _api("/posts", { method:"POST", body: payload }),
+  like:   (id)      => _api(`/posts/${id}/like`, { method:"POST" }),
+  delete: (id)      => _api(`/posts/${id}`, { method:"DELETE" }),
 };
 
-// ── Chat API ──────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   JobsAPI
+════════════════════════════════════════════════════════════ */
+const JobsAPI = {
+  list:   (params = {}) => _api("/jobs?" + new URLSearchParams(params)),
+  create: (payload)     => _api("/jobs", { method:"POST", body: payload }),
+  delete: (id)          => _api(`/jobs/${id}`, { method:"DELETE" }),
+};
+
+/* ════════════════════════════════════════════════════════════
+   ChatAPI
+════════════════════════════════════════════════════════════ */
 const ChatAPI = {
-  rooms:       ()             => apiCall("/chat/rooms"),
-  getMessages: (room, before) => apiCall(`/chat/messages?room=${room}${before ? `&before=${before}` : ""}`),
-  sendMessage: (room, msg)    => apiCall("/chat/messages", { method: "POST", body: { room, content: msg } }),
-  startDM:     (roll)         => apiCall("/chat/dm/start", { method: "POST", body: { roll_number: roll } }),
-  createGroup: (name, rolls)  => apiCall("/chat/group/create", { method: "POST", body: { name, member_rolls: rolls } }),
-  searchUsers: (q)            => apiCall(`/chat/users/search?q=${encodeURIComponent(q)}`),
-  uploadFile: (file, room)    => {
+  rooms:       ()          => _api("/chat/rooms"),
+  getMessages: (room)      => _api(`/chat/messages/${room}`),
+  sendMessage: (room, content) =>
+    _api("/chat/messages", { method:"POST", body:{ room, content } }),
+  createGroup: (name, members) =>
+    _api("/chat/rooms", { method:"POST", body:{ name, members } }),
+  startDM: (roll) =>
+    _api(`/chat/dm/${roll}`, { method:"POST" }),
+  searchUsers: (q) => _api(`/chat/search-users?q=${encodeURIComponent(q)}`),
+  uploadFile: (file, room) => {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("room", room);
-    return apiCall("/chat/upload", { method: "POST", body: fd });
+    return _upload("/chat/upload", fd);
   },
 };
 
-// ── Notifications API ─────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   NotifsAPI
+════════════════════════════════════════════════════════════ */
 const NotifsAPI = {
-  list:    ()  => apiCall("/notifications/"),
-  readAll: ()  => apiCall("/notifications/read-all", { method: "POST" }),
+  list:    () => _api("/notifications"),
+  readAll: () => _api("/notifications/read", { method:"POST" }),
 };
 
-// ── Toast helper ──────────────────────────────────────────────
-let _toastTimer;
-function showToast(msg, type = "info", duration = 2600) {
+/* ── Toast helper (used across JS files) ─────────────────── */
+function showToast(msg, type = "info") {
   const t = document.getElementById("toast");
   if (!t) return;
-  t.classList.remove("show", "success", "error", "warning", "info");
   t.textContent = msg;
-  t.classList.add("show", type);
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove("show"), duration);
+  t.className = `toast show ${type}`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 3000);
 }
