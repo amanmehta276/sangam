@@ -6,7 +6,7 @@
 const API_BASE =
   window.location.hostname === "localhost"
     ? "http://localhost:5000/api"
-    : "https://your-backend.onrender.com/api";
+    : "https://sangam-z93f.onrender.com";
 
 /* ── Auth storage ────────────────────────────────────────── */
 const Auth = {
