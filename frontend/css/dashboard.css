@@ -499,7 +499,7 @@
     linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
   background-size:28px 28px;
 }
-.profile-cover-change-btn{
+/* .profile-cover-change-btn{
   position:absolute;bottom:10px;right:12px;z-index:5;
   width:32px;height:32px;border-radius:50%;border:none;
   background:rgba(0,0,0,0.4);color:#fff;
@@ -507,7 +507,30 @@
   font-size:14px;cursor:pointer;
   transition:background .15s;backdrop-filter:blur(6px);
 }
-.profile-cover-change-btn:hover{background:rgba(0,0,0,0.6)}
+.profile-cover-change-btn:hover{background:rgba(0,0,0,0.6)} */
+
+.profile-cover-change-btn{
+  position:absolute;
+  bottom:10px;
+  right:12px;
+  z-index:9999;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,0.6);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  cursor:pointer;
+  pointer-events:auto;
+}
+
+.profile-cover-change-btn:hover{
+  background:rgba(0,0,0,0.8);
+}
 
 /* ── Avatar bar ── */
 .profile-av-bar{
