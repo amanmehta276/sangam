@@ -499,20 +499,38 @@
     linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
   background-size:28px 28px;
 }
-.profile-cover-change-btn{
-  position:absolute;bottom:12px;right:14px;z-index:10;
-  display:inline-flex;align-items:center;gap:6px;
-  padding:8px 14px;
-  border-radius:var(--r-sm);border:none;
-  background:rgba(0,0,0,0.5);color:#fff;
-  font-size:12px;font-weight:500;cursor:pointer;
-  font-family:'DM Sans',sans-serif;
-  transition:background .15s;
-  backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.15);
-  user-select:none;
+/* .profile-cover-change-btn{
+  position:absolute;bottom:10px;right:12px;z-index:5;
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(0,0,0,0.4);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;
+  transition:background .15s;backdrop-filter:blur(6px);
 }
-.profile-cover-change-btn:hover{background:rgba(0,0,0,0.75)}
+.profile-cover-change-btn:hover{background:rgba(0,0,0,0.6)} */
+
+.profile-cover-change-btn{
+  position:absolute;
+  bottom:10px;
+  right:12px;
+  z-index:9999;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,0.6);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  cursor:pointer;
+  pointer-events:auto;
+}
+
+.profile-cover-change-btn:hover{
+  background:rgba(0,0,0,0.8);
+}
 
 /* ── Avatar bar ── */
 .profile-av-bar{
@@ -843,16 +861,14 @@
   display:flex;flex-direction:column;
   transform:translateX(100%);
   transition:transform .28s cubic-bezier(.4,0,.2,1);
-  overflow:hidden;           /* important — children handle their own scroll */
+  overflow:hidden;
 }
 .edit-drawer.open{transform:translateX(0)}
 
 .edit-drawer-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:18px 20px;
-  border-bottom:1px solid var(--border-dk);
-  flex-shrink:0;             /* never shrink — always visible */
-  background:var(--ink-2);
+  padding:18px 20px;border-bottom:1px solid var(--border-dk);
+  flex-shrink:0;background:var(--ink-2);
 }
 .edit-drawer-title{
   font-family:'Playfair Display',serif;
@@ -868,20 +884,14 @@
 .edit-drawer-close:hover{background:rgba(255,255,255,0.14);color:#fff}
 
 .edit-drawer-body{
-  flex:1;                    /* takes remaining space */
-  overflow-y:auto;           /* scrollable */
-  padding:20px;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,0.07) transparent;
+  flex:1;overflow-y:auto;padding:20px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.07) transparent;
 }
 .edit-drawer-body::-webkit-scrollbar{width:3px}
 .edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
 
 .edit-drawer-foot{
-  display:flex;gap:10px;
-  padding:14px 20px;
-  border-top:1px solid var(--border-dk);
-  flex-shrink:0;             /* never shrink — always visible at bottom */
+  display:flex;gap:10px;padding:16px 20px;
+  border-top:1px solid var(--border-dk);flex-shrink:0;
   background:var(--ink-2);
-  box-shadow:0 -4px 20px rgba(0,0,0,0.25);  /* subtle shadow to show it's above scroll */
 }

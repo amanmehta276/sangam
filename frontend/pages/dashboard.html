@@ -100,7 +100,6 @@ html,body{height:100%;overflow:hidden}
   z-index:9000;align-items:center;justify-content:center;
 }
 
-
 /* Mobile chat-panel-open override */
 @media(max-width:767px){
   body.chat-panel-open .bottom-nav{display:none !important}
@@ -401,9 +400,9 @@ html,body{height:100%;overflow:hidden}
       <div class="profile-cover">
         <div class="profile-cover-bg" id="profile-wallpaper"></div>
         <div class="profile-cover-grid"></div>
-        <button class="profile-cover-change-btn" onclick="document.getElementById('wallpaper-input').click()">
-          <i class="ti ti-camera"></i> 
-        </button>
+        <label class="profile-cover-change-btn" for="wallpaper-input">
+          <i class="ti ti-camera"></i> Change Cover
+        </label>
         <input id="wallpaper-input" type="file" accept="image/*" style="display:none" onchange="uploadWallpaper(this)">
       </div>
 

@@ -156,6 +156,9 @@ document.addEventListener("keydown", e => {
 
 /* ══ Save profile ═══════════════════════════════════════ */
 async function saveProfile() {
+  const saveBtn = document.querySelector(".ef-save-btn");
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = `<span style="opacity:.6">Saving…</span>`; }
+
   const skills = (_getv("pe-skills")||"")
     .split(",").map(s=>s.trim()).filter(Boolean);
 
@@ -192,8 +195,10 @@ async function saveProfile() {
     showToast("Saved locally ✓", "info");
   }
 
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = `<i class="ti ti-check" style="font-size:14px"></i> Save Changes`; }
+
   closeEditDrawer();
-  loadProfile(); // refresh display
+  loadProfile();
 }
 
 /* ══ Avatar upload ══════════════════════════════════════ */
