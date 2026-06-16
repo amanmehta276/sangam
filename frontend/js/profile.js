@@ -156,8 +156,11 @@ document.addEventListener("keydown", e => {
 
 /* ══ Save profile ═══════════════════════════════════════ */
 async function saveProfile() {
-  const saveBtn = document.querySelector(".ef-save-btn");
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = `<span style="opacity:.6">Saving…</span>`; }
+  const saveBtn = document.getElementById("drawer-save-btn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<i class="ti ti-loader" style="font-size:16px;animation:spin 1s linear infinite"></i> Saving…`;
+  }
 
   const skills = (_getv("pe-skills")||"")
     .split(",").map(s=>s.trim()).filter(Boolean);
@@ -176,7 +179,7 @@ async function saveProfile() {
     skills,
   };
 
-  // Save locally first — always works
+  // Always save locally first
   try {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.data)||"{}");
     localStorage.setItem(STORAGE_KEYS.data, JSON.stringify({...existing,...payload}));
@@ -185,7 +188,7 @@ async function saveProfile() {
   currentUser = { ...currentUser, ...payload };
   Auth.setUser(currentUser);
 
-  // Try server save
+  // Try server
   try {
     const updated = await UsersAPI.update(payload);
     currentUser = { ...currentUser, ...updated };
@@ -195,7 +198,10 @@ async function saveProfile() {
     showToast("Saved locally ✓", "info");
   }
 
-  if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = `<i class="ti ti-check" style="font-size:14px"></i> Save Changes`; }
+  if (saveBtn) {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = `<i class="ti ti-device-floppy" style="font-size:16px"></i> Save Changes`;
+  }
 
   closeEditDrawer();
   loadProfile();
