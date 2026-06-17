@@ -827,6 +827,10 @@
 /* ══════════════════════════════════════════════════════
    EDIT PROFILE DRAWER — slides in from right
    ══════════════════════════════════════════════════════ */
+
+.edit-drawer {
+  padding-bottom: 70px; /* bottom-nav ki height jitna */
+}
 .edit-drawer-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.65);
   z-index:600;opacity:0;pointer-events:none;
@@ -835,8 +839,10 @@
 .edit-drawer-overlay.open{opacity:1;pointer-events:all}
 
 .edit-drawer{
-  position:fixed;top:0;right:0;bottom:0;
+  position:fixed;
+  top:0;right:0;bottom:0;
   width:min(420px,100vw);
+  height:100vh;              /* explicit full height */
   background:var(--ink-2);
   border-left:1px solid var(--border-dk);
   z-index:700;
@@ -844,7 +850,6 @@
   flex-direction:column;
   transform:translateX(100%);
   transition:transform .28s cubic-bezier(.4,0,.2,1);
-  /* NO overflow:hidden — body scrolls, footer stays */
 }
 .edit-drawer.open{transform:translateX(0)}
 
@@ -852,7 +857,7 @@
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;
   border-bottom:1px solid var(--border-dk);
-  flex-shrink:0;             /* never shrink — always visible */
+  flex-shrink:0;
   background:var(--ink-2);
 }
 .edit-drawer-title{
@@ -869,22 +874,45 @@
 .edit-drawer-close:hover{background:rgba(255,255,255,0.14);color:#fff}
 
 .edit-drawer-body{
-  flex:1;                    /* takes remaining space */
-  overflow-y:auto;           /* scrollable */
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
   padding:20px;
+  min-height:0;             /* critical for flex scroll */
   scrollbar-width:thin;
   scrollbar-color:rgba(255,255,255,0.07) transparent;
+  padding-bottom: 0;
+}
+.ef-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--ink-2);
+  padding: 14px 20px;
+  margin: 0 -20px -20px;
+  border-top: 1px solid var(--border-dk);
+  z-index: 10;
 }
 .edit-drawer-body::-webkit-scrollbar{width:3px}
 .edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
 
-.edit-drawer-foot{
-  display:flex;gap:10px;
-  padding:14px 20px;
-  border-top:1px solid var(--border-dk);
-  flex-shrink:0;             /* never shrink — always visible at bottom */
-  background:var(--ink-2);
-  box-shadow:0 -4px 20px rgba(0,0,0,0.25);  /* subtle shadow to show it's above scroll */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+
+/* 
+.edit-drawer {
+  padding-bottom: 70px;  bottom-nav ki height jitna
 }
 
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.edit-drawer-body {
+  padding-bottom: 0;
+}
+
+.ef-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--ink-2);
+  padding: 14px 20px;
+  margin: 0 -20px -20px;
+  border-top: 1px solid var(--border-dk);
+  z-index: 10;
+} */
