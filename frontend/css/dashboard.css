@@ -503,7 +503,7 @@
   position:absolute;bottom:12px;right:14px;z-index:10;
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 14px;
-  border-radius:var(--r-sm);border:none;
+  border-radius:var(--r-sm);
   background:rgba(0,0,0,0.5);color:#fff;
   font-size:12px;font-weight:500;cursor:pointer;
   font-family:'DM Sans',sans-serif;
@@ -803,34 +803,10 @@
 .ef-input:focus{border-color:var(--purple-2);background:rgba(124,58,237,0.07)}
 .ef-input::placeholder{color:rgba(255,255,255,0.2)}
 .ef-textarea{resize:vertical;min-height:80px;line-height:1.6}
-.ef-actions{
-  display:flex;gap:8px;margin-top:18px;padding-top:14px;
-  border-top:1px solid var(--border-dk);
-}
-.ef-cancel-btn{
-  flex:1;padding:10px;border:1px solid var(--border-dk);
-  border-radius:var(--r-sm);background:rgba(255,255,255,0.05);
-  color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;
-  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
-}
-.ef-cancel-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
-.ef-save-btn{
-  flex:2;padding:10px;border:none;border-radius:var(--r-sm);
-  background:linear-gradient(135deg,var(--purple),var(--purple-2));
-  color:#fff;font-size:13px;font-weight:600;
-  cursor:pointer;font-family:'DM Sans',sans-serif;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  transition:all .15s;
-}
-.ef-save-btn:hover{background:linear-gradient(135deg,var(--purple-2),var(--purple-3));transform:translateY(-1px)}
 
 /* ══════════════════════════════════════════════════════
    EDIT PROFILE DRAWER — slides in from right
    ══════════════════════════════════════════════════════ */
-
-.edit-drawer {
-  padding-bottom: 70px; /* bottom-nav ki height jitna */
-}
 .edit-drawer-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.65);
   z-index:600;opacity:0;pointer-events:none;
@@ -842,7 +818,6 @@
   position:fixed;
   top:0;right:0;bottom:0;
   width:min(420px,100vw);
-  height:100vh;              /* explicit full height */
   background:var(--ink-2);
   border-left:1px solid var(--border-dk);
   z-index:700;
@@ -850,6 +825,8 @@
   flex-direction:column;
   transform:translateX(100%);
   transition:transform .28s cubic-bezier(.4,0,.2,1);
+  /* NO height:100vh — position:fixed top:0 bottom:0 already handles it */
+  /* NO padding-bottom — footer is a separate flex child now */
 }
 .edit-drawer.open{transform:translateX(0)}
 
@@ -873,26 +850,55 @@
 }
 .edit-drawer-close:hover{background:rgba(255,255,255,0.14);color:#fff}
 
+/* Scrollable body — NO padding-bottom needed */
 .edit-drawer-body{
   flex:1;
   overflow-y:auto;
   overflow-x:hidden;
   padding:20px;
-  min-height:0;             /* critical for flex scroll */
+  min-height:0;
   scrollbar-width:thin;
   scrollbar-color:rgba(255,255,255,0.07) transparent;
-  padding-bottom: 0;
-}
-.ef-actions {
-  position: sticky;
-  bottom: 0;
-  background: var(--ink-2);
-  padding: 14px 20px;
-  margin: 0 -20px -20px;
-  border-top: 1px solid var(--border-dk);
-  z-index: 10;
 }
 .edit-drawer-body::-webkit-scrollbar{width:3px}
 .edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+
+/* ══ EDIT DRAWER FOOTER — always visible, never hidden ══
+   Pulled OUT of .edit-drawer-body so it's a direct flex
+   child of .edit-drawer — same trick as chat-input-row.
+   In your HTML move .ef-actions OUTSIDE .edit-drawer-body,
+   just before </div><!--.edit-drawer-->
+*/
+.edit-drawer-footer{
+  flex-shrink:0;
+  display:flex;
+  gap:8px;
+  padding:14px 20px;
+  padding-bottom:max(14px, env(safe-area-inset-bottom, 14px));
+  border-top:1px solid var(--border-dk);
+  background:var(--ink-2);
+}
+
+/* ef-actions inside drawer body (inline forms) — keep as-is */
+.ef-actions{
+  display:flex;gap:8px;margin-top:18px;padding-top:14px;
+  border-top:1px solid var(--border-dk);
+}
+.ef-cancel-btn{
+  flex:1;padding:10px;border:1px solid var(--border-dk);
+  border-radius:var(--r-sm);background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.ef-cancel-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+.ef-save-btn{
+  flex:2;padding:10px;border:none;border-radius:var(--r-sm);
+  background:linear-gradient(135deg,var(--purple),var(--purple-2));
+  color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .15s;
+}
+.ef-save-btn:hover{background:linear-gradient(135deg,var(--purple-2),var(--purple-3));transform:translateY(-1px)}
 
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
