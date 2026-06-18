@@ -896,23 +896,3 @@
 .edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
 
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-
-
-/* 
-.edit-drawer {
-  padding-bottom: 70px;  bottom-nav ki height jitna
-}
-
-.edit-drawer-body {
-  padding-bottom: 0;
-}
-
-.ef-actions {
-  position: sticky;
-  bottom: 0;
-  background: var(--ink-2);
-  padding: 14px 20px;
-  margin: 0 -20px -20px;
-  border-top: 1px solid var(--border-dk);
-  z-index: 10;
-} */
