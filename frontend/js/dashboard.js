@@ -100,6 +100,11 @@ function renderHeader() {
   if (["alumni","teacher","admin"].includes(currentUser.role)) {
     document.getElementById("post-job-btn-wrap")?.classList.remove("hidden");
   }
+
+  // Show admin panel link for admins only
+  if (currentUser.role === "admin") {
+    document.getElementById("admin-sidebar-link").style.display = "block";
+  }
 }
 
 /* ════════════════════════════════════════════════════════════

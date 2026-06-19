@@ -143,6 +143,14 @@ html,body{height:100%;overflow:hidden}
       <i class="ti ti-logout" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
       Logout
     </a>
+    <!-- Admin panel link — only shown for admin role -->
+    <div id="admin-sidebar-link" style="display:none">
+      <div class="sidebar-section-label">Admin</div>
+      <a class="sidebar-item" href="admin.html">
+        <i class="ti ti-shield-check" style="font-size:16px;width:20px;color:var(--purple-3)"></i>
+        Admin Panel
+      </a>
+    </div>
   </nav>
   <div class="sidebar-footer">Made with care by VyomTech</div>
 </aside>
@@ -644,43 +652,17 @@ html,body{height:100%;overflow:hidden}
 
     </div><!-- /edit-drawer-body -->
 
-    <div style="
-      display:flex;
-      gap:10px;
-      padding:16px 20px;
-      border-top:1px solid rgba(255,255,255,0.08);
-      flex-shrink:0;
-      min-height:0;
-      background:#13131A;
-      box-shadow:0 -8px 32px rgba(0,0,0,0.5);
-    ">
-      <button onclick="closeEditDrawer()" style="
-        flex:1;padding:13px;
-        border:1px solid rgba(255,255,255,0.12);
-        border-radius:6px;
-        background:rgba(255,255,255,0.06);
-        color:rgba(255,255,255,0.65);
-        font-size:14px;font-weight:500;
-        cursor:pointer;
-        font-family:'DM Sans',sans-serif;
-      ">Cancel</button>
-      <button onclick="saveProfile()" id="drawer-save-btn" style="
-        flex:2;padding:13px;
-        border:none;
-        border-radius:6px;
-        background:linear-gradient(135deg,#6B21A8,#7C3AED);
-        color:#fff;
-        font-size:14px;font-weight:600;
-        cursor:pointer;
-        font-family:'DM Sans',sans-serif;
-        display:flex;align-items:center;justify-content:center;gap:8px;
-        box-shadow:0 4px 18px rgba(124,58,237,0.55);
-      ">
-        <i class="ti ti-device-floppy" style="font-size:16px"></i>
-        Save Changes
+    <!-- Save footer — always at bottom -->
+    <div style="display:flex;gap:10px;padding:14px 18px;border-top:1px solid #2C2C3A;flex-shrink:0;background:#13131A;">
+      <button onclick="closeEditDrawer()" style="flex:1;padding:12px;border:1px solid #2C2C3A;border-radius:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
+        Cancel
+      </button>
+      <button onclick="saveProfile()" id="drawer-save-btn" style="flex:2;padding:12px;border:none;border-radius:6px;background:linear-gradient(135deg,#6B21A8,#7C3AED);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="ti ti-device-floppy" style="font-size:16px"></i> Save Changes
       </button>
     </div>
-  </div>
+
+  </div><!-- /edit-drawer -->
 
   <!-- QR Modal -->
   <div id="qr-modal" onclick="if(event.target===this)closeQRModal()">

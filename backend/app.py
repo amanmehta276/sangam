@@ -17,23 +17,12 @@ app = Flask(__name__, static_folder=None)
 app.config["SECRET_KEY"]       = cfg.SECRET_KEY
 app.config["MAX_CONTENT_LENGTH"] = cfg.MAX_CONTENT_LEN
 
-CORS(
-    app,
-    origins=[
-        cfg.FRONTEND_URL,
-        "https://cgitsangam.netlify.app",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "null"
-    ],
-    supports_credentials=True
-)
+CORS(app, origins=[cfg.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:5500",
+                   "null"],  # allow file:// for local dev
+     supports_credentials=True)
 
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    async_mode="threading"
-)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+
 # ── Serve uploaded files ──────────────────────────────────
 @app.route("/uploads/<path:filename>")
 def serve_upload(filename):
@@ -46,6 +35,7 @@ from routes.posts         import posts_bp
 from routes.jobs          import jobs_bp
 from routes.chat          import chat_bp
 from routes.notifications import notifs_bp
+from routes.admin         import admin_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
@@ -53,6 +43,7 @@ app.register_blueprint(posts_bp)
 app.register_blueprint(jobs_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(notifs_bp)
+app.register_blueprint(admin_bp)
 
 # ── Health check ──────────────────────────────────────────
 @app.route("/api/health")
@@ -197,8 +188,4 @@ if __name__ == "__main__":
     print(f"  Frontend: {cfg.FRONTEND_URL}")
     print(f"  OTP mode: {cfg.OTP_MODE}")
     print(f"{'='*50}\n")
-    socketio.run(
-    app,
-    host="0.0.0.0",
-    port=cfg.PORT,
-    allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=cfg.PORT, debug=True)
