@@ -15,7 +15,11 @@ from utils import login_required
 posts_bp = Blueprint("posts", __name__, url_prefix="/api/posts")
 
 def _out(p):
-    p["id"] = str(p.pop("_id"))
+    if "_id" in p:
+        p["id"] = str(p.pop("_id"))
+    # author ka avatar_url fix karo — relative URL ko absolute banao
+    if "author" in p and p["author"].get("avatar_url","").startswith("/uploads/"):
+        p["author"]["avatar_url"] = "https://sangam-z93f.onrender.com" + p["author"]["avatar_url"]
     return p
 
 # ── List posts ────────────────────────────────────────────
@@ -27,8 +31,12 @@ def list_posts():
     filt      = {}
     if post_type: filt["post_type"] = post_type
 
-    posts = list(posts_col.find(filt).sort("created_at",-1).limit(limit))
-    return jsonify([_out(p) for p in posts])
+    try:
+        posts = list(posts_col.find(filt).sort("created_at",-1).limit(limit))
+        return jsonify([_out(p) for p in posts])
+    except Exception as e:
+        print(f"[posts] list error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 # ── Create post ───────────────────────────────────────────
 @posts_bp.route("", methods=["POST"])
