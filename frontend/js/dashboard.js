@@ -81,27 +81,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 function renderHeader() {
   const av      = document.getElementById("header-avatar");
   const initial = (currentUser.name||"A")[0].toUpperCase();
-  const saved   = localStorage.getItem("sangam_profile_avatar");
-  const url     = currentUser.avatar_url || saved;
+  
+  // Avatar URL — backend se aata hai, Netlify se nahi
+  let url = currentUser.avatar_url || localStorage.getItem("sangam_profile_avatar");
+  
+  // Agar relative URL hai toh backend prefix lagao
+  if (url && url.startsWith("/uploads/")) {
+    url = "https://sangam-z93f.onrender.com" + url;
+  }
+  
   if (!av) return;
   if (url) {
-    av.innerHTML = `<img src="${escHtml(url)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+    av.innerHTML = `<img src="${escHtml(url)}" alt="" 
+      style="width:100%;height:100%;border-radius:50%;object-fit:cover"
+      onerror="this.parentElement.innerHTML='${initial}';this.parentElement.style.background='${getColor(initial)}'">`;
     av.style.background = "none";
   } else {
     av.textContent = initial;
     av.style.background = getColor(initial);
   }
 
-  // Compose avatar
   const ca = document.getElementById("compose-av");
   if (ca) { ca.textContent = initial; ca.style.background = getColor(initial); }
 
-  // Show post-job button for alumni/teachers/admins
   if (["alumni","teacher","admin"].includes(currentUser.role)) {
     document.getElementById("post-job-btn-wrap")?.classList.remove("hidden");
   }
-
-  // Show admin panel link for admins only
   if (currentUser.role === "admin") {
     document.getElementById("admin-sidebar-link").style.display = "block";
   }

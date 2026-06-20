@@ -21,7 +21,7 @@ CORS(app, origins=[cfg.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:
                    "null"],  # allow file:// for local dev
      supports_credentials=True)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 # ── Serve uploaded files ──────────────────────────────────
 @app.route("/uploads/<path:filename>")
@@ -180,18 +180,12 @@ def on_stop_typing(data):
 # ════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     os.makedirs(cfg.UPLOAD_FOLDER, exist_ok=True)
-    os.makedirs(f"{cfg.UPLOAD_FOLDER}/avatars", exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/avatars",    exist_ok=True)
     os.makedirs(f"{cfg.UPLOAD_FOLDER}/wallpapers", exist_ok=True)
-    os.makedirs(f"{cfg.UPLOAD_FOLDER}/media", exist_ok=True)
-
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/media",      exist_ok=True)
     print(f"\n{'='*50}")
     print(f"  Sangam Backend starting on port {cfg.PORT}")
     print(f"  Frontend: {cfg.FRONTEND_URL}")
     print(f"  OTP mode: {cfg.OTP_MODE}")
     print(f"{'='*50}\n")
-
-    socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    async_mode="eventlet"
-)
+    socketio.run(app, host="0.0.0.0", port=cfg.PORT, debug=False)
