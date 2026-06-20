@@ -48,27 +48,17 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
   display:flex;align-items:center;gap:10px;padding:10px 18px;
   font-size:13px;color:var(--text-2);cursor:pointer;
   transition:all .15s;border-left:3px solid transparent;
-  position:relative;
 }
 .nav-item:hover{background:rgba(124,58,237,0.08);color:#fff}
-.nav-item.active{
-  color:var(--purple-3);background:rgba(124,58,237,0.12);
-  border-left-color:var(--purple-2);
-}
+.nav-item.active{color:var(--purple-3);background:rgba(124,58,237,0.12);border-left-color:var(--purple-2);}
 .nav-item i{font-size:17px;width:20px;flex-shrink:0}
 .nav-badge{
   margin-left:auto;background:var(--purple);color:#fff;
-  font-size:9px;font-weight:700;border-radius:999px;
-  padding:2px 7px;
+  font-size:9px;font-weight:700;border-radius:999px;padding:2px 7px;
 }
 
-.sidebar-footer{
-  padding:14px 18px;border-top:1px solid var(--border);
-  font-size:11px;color:var(--text-3);
-}
-.sidebar-user{
-  display:flex;align-items:center;gap:10px;margin-bottom:10px;
-}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3);}
+.sidebar-user{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .sidebar-av{
   width:34px;height:34px;border-radius:50%;
   background:linear-gradient(135deg,var(--purple),var(--purple-2));
@@ -79,10 +69,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
 .sidebar-urole{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px}
 
 /* ── MAIN ── */
-.admin-main{
-  margin-left:var(--sidebar-w);flex:1;
-  display:flex;flex-direction:column;min-height:100vh;
-}
+.admin-main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
 
 /* ── TOPBAR ── */
 .admin-topbar{
@@ -95,8 +82,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
 .topbar-right{display:flex;align-items:center;gap:10px}
 .topbar-btn{
   display:flex;align-items:center;gap:6px;padding:7px 14px;
-  border-radius:var(--r);font-size:12px;font-weight:600;
-  cursor:pointer;transition:all .15s;
+  border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
 }
 .btn-primary{background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;border:none}
 .btn-primary:hover{opacity:.9}
@@ -117,15 +103,10 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 .stat-card{
   background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r-lg);
-  padding:18px;display:flex;align-items:flex-start;gap:14px;
-  transition:border-color .15s;
+  padding:18px;display:flex;align-items:flex-start;gap:14px;transition:border-color .15s;
 }
 .stat-card:hover{border-color:rgba(124,58,237,0.35)}
-.stat-icon{
-  width:42px;height:42px;border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
-}
-.stat-body{}
+.stat-icon{width:42px;height:42px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#fff;line-height:1}
 .stat-label{font-size:11px;color:var(--text-3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
 .stat-change{font-size:11px;margin-top:6px;font-weight:600}
@@ -150,15 +131,11 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
   width:32px;height:32px;border-radius:50%;
   background:linear-gradient(135deg,var(--purple),var(--purple-2));
   display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:700;color:#fff;flex-shrink:0;
-  font-family:'Playfair Display',serif;
+  font-size:13px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Playfair Display',serif;
 }
 .table-name{font-size:13px;font-weight:600;color:#fff}
 .table-meta{font-size:11px;color:var(--text-3);margin-top:1px}
-.badge{
-  display:inline-block;font-size:10px;font-weight:600;
-  padding:3px 9px;border-radius:999px;
-}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 9px;border-radius:999px;}
 .badge-green{background:rgba(22,163,74,0.18);color:#4ADE80}
 .badge-purple{background:rgba(124,58,237,0.18);color:var(--purple-3)}
 .badge-gold{background:rgba(180,83,9,0.18);color:#FCD34D}
@@ -200,25 +177,16 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
   background:var(--ink-3);border:1px solid var(--border);border-radius:var(--r);
   padding:9px 13px;margin-bottom:16px;
 }
-.search-bar input{
-  background:none;border:none;outline:none;color:#fff;font-size:13px;flex:1;
-  font-family:'DM Sans',sans-serif;
-}
+.search-bar input{background:none;border:none;outline:none;color:#fff;font-size:13px;flex:1;font-family:'DM Sans',sans-serif;}
 .search-bar input::placeholder{color:var(--text-3)}
 
 /* ── BROADCAST ── */
-.broadcast-preview{
-  background:var(--ink-3);border:1px solid rgba(124,58,237,0.25);border-radius:var(--r-lg);
-  padding:18px;margin-top:14px;
-}
+.broadcast-preview{background:var(--ink-3);border:1px solid rgba(124,58,237,0.25);border-radius:var(--r-lg);padding:18px;margin-top:14px;}
 .bp-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--purple-3);margin-bottom:10px}
 .bp-msg{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.7}
 
-/* ── CHARTS PLACEHOLDER ── */
-.chart-card{
-  background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r-lg);
-  padding:20px;
-}
+/* ── CHARTS ── */
+.chart-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;}
 .chart-bar-wrap{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .chart-row{display:flex;align-items:center;gap:12px}
 .chart-lbl{font-size:12px;color:var(--text-2);width:100px;flex-shrink:0;text-align:right}
@@ -249,15 +217,9 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
 .toast.error{background:#7F1D1D;border-color:#DC2626;color:#FCA5A5}
 
 /* ── MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:800;
-  display:none;align-items:center;justify-content:center;
-}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:800;display:none;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex}
-.modal-box{
-  background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r-lg);
-  padding:24px;width:min(480px,94vw);max-height:90vh;overflow-y:auto;
-}
+.modal-box{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;width:min(480px,94vw);max-height:90vh;overflow-y:auto;}
 .modal-title{font-family:'Playfair Display',serif;font-size:18px;color:#fff;margin-bottom:18px}
 
 /* ── RESPONSIVE ── */
@@ -369,12 +331,8 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: DASHBOARD
-  ══════════════════════════════════ -->
+  <!-- ══ DASHBOARD ══ -->
   <div class="admin-panel active" id="panel-dashboard">
-
-    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon" style="background:rgba(124,58,237,0.15)"><i class="ti ti-users" style="color:var(--purple-3);font-size:22px"></i></div>
@@ -405,12 +363,11 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
         <div class="stat-body">
           <div class="stat-val" id="stat-alumni">—</div>
           <div class="stat-label">Alumni</div>
-          <div class="stat-change up">Active</div>
+          <div class="stat-change up" id="stat-alumni-change">Active</div>
         </div>
       </div>
     </div>
 
-    <!-- Quick actions -->
     <div class="section-hd"><div><div class="section-title">Quick Actions</div><div class="section-sub">Common admin tasks</div></div></div>
     <div class="quick-grid">
       <div class="quick-card" onclick="showPanel('broadcast',null)">
@@ -445,7 +402,6 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
       </div>
     </div>
 
-    <!-- Branch distribution -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div class="chart-card">
         <div class="section-title" style="font-size:16px">Users by Branch</div>
@@ -462,9 +418,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: USERS
-  ══════════════════════════════════ -->
+  <!-- ══ USERS ══ -->
   <div class="admin-panel" id="panel-users">
     <div class="section-hd">
       <div><div class="section-title">User Management</div><div class="section-sub" id="users-count-label">Loading…</div></div>
@@ -493,9 +447,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
-          <tr>
-            <th>User</th><th>Roll No.</th><th>Branch</th><th>Role</th><th>Trust</th><th>Joined</th><th>Actions</th>
-          </tr>
+          <tr><th>User</th><th>Roll No.</th><th>Branch</th><th>Role</th><th>Trust</th><th>Joined</th><th>Actions</th></tr>
         </thead>
         <tbody id="users-tbody">
           <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">Loading users…</td></tr>
@@ -504,9 +456,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: POSTS
-  ══════════════════════════════════ -->
+  <!-- ══ POSTS ══ -->
   <div class="admin-panel" id="panel-posts">
     <div class="section-hd">
       <div><div class="section-title">Feed Posts</div><div class="section-sub">Moderate and manage all posts</div></div>
@@ -531,15 +481,10 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: JOBS
-  ══════════════════════════════════ -->
+  <!-- ══ JOBS ══ -->
   <div class="admin-panel" id="panel-jobs">
     <div class="section-hd">
       <div><div class="section-title">Jobs &amp; Internships</div><div class="section-sub">All job listings</div></div>
-      <button class="topbar-btn btn-primary" onclick="openJobModal()">
-        <i class="ti ti-plus" style="font-size:14px"></i> Post Job
-      </button>
     </div>
     <div class="admin-table-wrap">
       <table class="admin-table">
@@ -553,14 +498,11 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: BROADCAST
-  ══════════════════════════════════ -->
+  <!-- ══ BROADCAST ══ -->
   <div class="admin-panel" id="panel-broadcast">
     <div class="section-hd">
       <div><div class="section-title">Broadcast Message</div><div class="section-sub">Send message to all users or specific group</div></div>
     </div>
-
     <div class="form-card">
       <div class="form-grid">
         <div class="form-group">
@@ -599,13 +541,10 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
           <textarea id="bc-body" class="form-textarea" placeholder="Write the full message here…" oninput="updateBroadcastPreview()"></textarea>
         </div>
       </div>
-
-      <!-- Preview -->
       <div class="broadcast-preview" id="bc-preview">
         <div class="bp-label">Preview</div>
         <div class="bp-msg" id="bc-preview-text">Fill in the fields above to see preview…</div>
       </div>
-
       <div class="form-foot">
         <button class="topbar-btn btn-ghost" onclick="clearBroadcast()">Clear</button>
         <button class="topbar-btn btn-primary" id="bc-send-btn" onclick="sendBroadcast()">
@@ -613,8 +552,6 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
         </button>
       </div>
     </div>
-
-    <!-- Broadcast history -->
     <div class="section-hd" style="margin-top:8px">
       <div><div class="section-title" style="font-size:16px">Sent Broadcasts</div></div>
     </div>
@@ -628,14 +565,11 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: EVENTS
-  ══════════════════════════════════ -->
+  <!-- ══ EVENTS ══ -->
   <div class="admin-panel" id="panel-events">
     <div class="section-hd">
       <div><div class="section-title">Events</div><div class="section-sub">Add and manage college events</div></div>
     </div>
-
     <div class="form-card">
       <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:14px">Create New Event</div>
       <div class="form-grid">
@@ -682,8 +616,6 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
         </button>
       </div>
     </div>
-
-    <!-- Events list -->
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Venue</th><th>Actions</th></tr></thead>
@@ -694,9 +626,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: NOTIFICATIONS
-  ══════════════════════════════════ -->
+  <!-- ══ NOTIFICATIONS ══ -->
   <div class="admin-panel" id="panel-notifications">
     <div class="section-hd">
       <div><div class="section-title">Push Notification</div><div class="section-sub">Send targeted notifications</div></div>
@@ -733,22 +663,18 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: CSV
-  ══════════════════════════════════ -->
+  <!-- ══ CSV ══ -->
   <div class="admin-panel" id="panel-csv">
     <div class="section-hd">
       <div><div class="section-title">CSV / Roll Numbers</div><div class="section-sub">Manage student database</div></div>
     </div>
-
     <div class="form-card">
       <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">Upload New CSV</div>
       <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">
         Required columns: <code style="background:var(--ink-4);padding:2px 6px;border-radius:4px;color:var(--purple-3)">roll_number, name, branch, batch_year, mobile, role</code>
       </div>
       <div style="border:2px dashed var(--border);border-radius:var(--r-lg);padding:32px;text-align:center;cursor:pointer;transition:border-color .15s"
-           onclick="document.getElementById('csv-upload').click()"
-           id="csv-drop-zone">
+           onclick="document.getElementById('csv-upload').click()" id="csv-drop-zone">
         <div style="font-size:32px;margin-bottom:10px"><i class="ti ti-file-spreadsheet" style="font-size:40px;color:var(--purple-3)"></i></div>
         <div style="font-size:14px;color:#fff;margin-bottom:4px">Click to upload CSV</div>
         <div style="font-size:12px;color:var(--text-3)">or drag and drop here</div>
@@ -765,8 +691,6 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
         </div>
       </div>
     </div>
-
-    <!-- Add single student -->
     <div class="form-card">
       <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:14px">Add Single Student</div>
       <div class="form-grid">
@@ -810,9 +734,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PANEL: SETTINGS
-  ══════════════════════════════════ -->
+  <!-- ══ SETTINGS ══ -->
   <div class="admin-panel" id="panel-settings">
     <div class="section-hd">
       <div><div class="section-title">Settings</div><div class="section-sub">App configuration</div></div>
@@ -867,17 +789,18 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
 <script src="../js/api.js"></script>
 <script>
 /* ============================================================
-   Admin Panel JS
+   Admin Panel JS — Fixed version
+   All admin route URLs corrected to /admin/users/... prefix
    ============================================================ */
 
-// const API = API_BASE || "http://localhost:5000/api";
-const API=API_BASE ||"https://sangam-z93f.onrender.com/api";
-let allUsers = [], allPosts = [], allJobs = [], allEvents = [];
-let csvData = null;
+const API = API_BASE; // e.g. http://localhost:5000/api
+let allUsers = [], allPosts = [], allJobs = [];
+let csvData  = null;
+let broadcastHistory = JSON.parse(localStorage.getItem("admin_broadcasts") || "[]");
+let events           = JSON.parse(localStorage.getItem("admin_events")     || "[]");
 
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
-  // Auth check
   if (!Auth.isLoggedIn()) { window.location.href = "auth.html"; return; }
   const user = Auth.getUser();
   if (user?.role !== "admin") {
@@ -885,7 +808,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "dashboard.html";
     return;
   }
-  document.getElementById("admin-av").textContent   = (user.name||"A")[0].toUpperCase();
+  document.getElementById("admin-av").textContent   = (user.name || "A")[0].toUpperCase();
   document.getElementById("admin-name").textContent = user.name || "Admin";
   loadDashboard();
 });
@@ -905,19 +828,16 @@ function showPanel(name, navEl) {
   };
   document.getElementById("panel-title").textContent = titles[name] || name;
 
-  // Load data for panel
-  if (name === "dashboard")     loadDashboard();
-  if (name === "users")         loadUsers();
-  if (name === "posts")         loadPosts();
-  if (name === "jobs")          loadJobsAdmin();
-  if (name === "events")        loadEvents();
-  if (name === "broadcast")     loadBroadcastHistory();
+  if (name === "dashboard")  loadDashboard();
+  if (name === "users")      loadUsers();
+  if (name === "posts")      loadPosts();
+  if (name === "jobs")       loadJobsAdmin();
+  if (name === "events")     loadEvents();
+  if (name === "broadcast")  loadBroadcastHistory();
 
-  // Close sidebar on mobile
   if (window.innerWidth < 768) toggleSidebar(false);
 }
 
-/* ── Sidebar toggle ────────────────────────────────────── */
 function toggleSidebar(force) {
   const sb = document.getElementById("admin-sidebar");
   if (force === false) sb.classList.remove("open");
@@ -927,49 +847,60 @@ function toggleSidebar(force) {
 /* ── Dashboard ─────────────────────────────────────────── */
 async function loadDashboard() {
   try {
-    const [users, posts, jobs] = await Promise.all([
-      _adminGet("/users?limit=200"),
-      _adminGet("/posts?limit=200"),
-      _adminGet("/jobs?limit=200"),
-    ]);
-    allUsers = users; allPosts = posts; allJobs = jobs;
+    // Single stats call — counts aate hain ek hi request mein
+    const stats = await _adminGet("/admin/stats");
 
-    setText("stat-users",  users.length);
-    setText("stat-posts",  posts.length);
-    setText("stat-jobs",   jobs.length);
+    setText("stat-users",        stats.users);
+    setText("stat-posts",        stats.posts);
+    setText("stat-jobs",         stats.jobs);
+    setText("stat-alumni",       stats.alumni);
+    setText("badge-users",       stats.users);
+    setText("stat-users-change", `${stats.alumni} alumni`);
+    setText("stat-posts-change", `${stats.students} students`);
+    setText("stat-jobs-change",  `${stats.teachers} teachers`);
+
+    // Users list for branch chart
+    const users = await _adminGet("/users?limit=200");
+    allUsers = users;
     setText("badge-users", users.length);
-    setText("stat-users-change", `${users.filter(u=>u.role==="alumni").length} alumni`);
-    setText("stat-posts-change", `${posts.filter(p=>p.post_type==="job").length} job posts`);
-    setText("stat-jobs-change",  `${jobs.filter(j=>j.referral).length} with referral`);
-    setText("stat-alumni", users.filter(u=>u.role==="alumni").length);
 
-    // Branch chart
     const branches = {};
-    users.forEach(u => { branches[u.branch||"Other"] = (branches[u.branch||"Other"]||0)+1; });
+    users.forEach(u => {
+      const b = u.branch || "Other";
+      branches[b] = (branches[b] || 0) + 1;
+    });
     const maxB = Math.max(...Object.values(branches), 1);
     document.getElementById("branch-chart").innerHTML = Object.entries(branches)
-      .sort((a,b)=>b[1]-a[1]).slice(0,6)
-      .map(([b,n])=>`
+      .sort((a, b) => b[1] - a[1]).slice(0, 6)
+      .map(([b, n]) => `
         <div class="chart-row">
           <div class="chart-lbl">${b}</div>
           <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${Math.round(n/maxB*100)}%"></div></div>
           <div class="chart-num">${n}</div>
         </div>`).join("");
 
-    // Recent activity
-    const recent = [...posts].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
-    document.getElementById("recent-activity").innerHTML = recent.map(p=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">
-          ${(p.author?.name||"?")[0]}
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;color:#fff">${esc(p.author?.name||"?")} posted</div>
-          <div style="font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.content||"").slice(0,45)}</div>
-        </div>
-        <div style="font-size:10px;color:var(--text-3);flex-shrink:0">${timeAgo(p.created_at)}</div>
-      </div>`).join("");
-  } catch(e) { showToast("Could not load dashboard data","error"); }
+    // Recent posts
+    const posts = await _adminGet("/posts?limit=5");
+    allPosts = posts;
+    const recent = [...posts].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,5);
+    document.getElementById("recent-activity").innerHTML = recent.length
+      ? recent.map(p => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">
+              ${(p.author?.name || "?")[0]}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;color:#fff">${esc(p.author?.name || "?")} posted</div>
+              <div style="font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc((p.content||"").slice(0,45))}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text-3);flex-shrink:0">${timeAgo(p.created_at)}</div>
+          </div>`).join("")
+      : `<div style="color:var(--text-3);font-size:13px;text-align:center;padding:20px 0">No recent posts</div>`;
+
+  } catch(e) {
+    console.error("Dashboard load error:", e);
+    showToast("Could not load dashboard data", "error");
+  }
 }
 
 /* ── Users ─────────────────────────────────────────────── */
@@ -977,19 +908,19 @@ async function loadUsers() {
   const role   = document.getElementById("filter-role")?.value   || "";
   const branch = document.getElementById("filter-branch")?.value || "";
   try {
-    const params = new URLSearchParams({limit:200});
+    const params = new URLSearchParams({ limit: 200 });
     if (role)   params.set("role",   role);
     if (branch) params.set("branch", branch);
     allUsers = await _adminGet(`/users?${params}`);
     renderUsers(allUsers);
     setText("users-count-label", `${allUsers.length} users found`);
-  } catch { showToast("Could not load users","error"); }
+  } catch { showToast("Could not load users", "error"); }
 }
 
 function searchUsers(q) {
   if (!q) { renderUsers(allUsers); return; }
   const f = q.toLowerCase();
-  renderUsers(allUsers.filter(u=>
+  renderUsers(allUsers.filter(u =>
     (u.name||"").toLowerCase().includes(f) ||
     (u.roll_number||"").toLowerCase().includes(f) ||
     (u.company||"").toLowerCase().includes(f)
@@ -998,7 +929,10 @@ function searchUsers(q) {
 
 function renderUsers(users) {
   const tbody = document.getElementById("users-tbody");
-  if (!users.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">No users found</td></tr>`; return; }
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">No users found</td></tr>`;
+    return;
+  }
   tbody.innerHTML = users.map(u => `
     <tr>
       <td>
@@ -1015,7 +949,7 @@ function renderUsers(users) {
       <td>
         <div class="action-btns">
           <button class="act-btn" onclick="openUserModal('${u.id}')" title="Edit"><i class="ti ti-edit"></i></button>
-          <button class="act-btn" onclick="verifyUser('${u.id}','${u.trust_level}')" title="Verify"><i class="ti ti-badge-check"></i></button>
+          <button class="act-btn" onclick="verifyUser('${u.id}','${u.trust_level||"new"}')" title="Verify"><i class="ti ti-badge-check"></i></button>
           <button class="act-btn danger" onclick="deleteUser('${u.id}','${esc(u.name||"")}')"><i class="ti ti-trash"></i></button>
         </div>
       </td>
@@ -1023,7 +957,7 @@ function renderUsers(users) {
 }
 
 function openUserModal(uid) {
-  const u = allUsers.find(x=>x.id===uid);
+  const u = allUsers.find(x => x.id === uid);
   if (!u) return;
   document.getElementById("user-modal-title").textContent = u.name;
   document.getElementById("user-modal-body").innerHTML = `
@@ -1057,39 +991,45 @@ async function saveUserEdit(uid) {
   const role  = document.getElementById("edit-role")?.value;
   const trust = document.getElementById("edit-trust")?.value;
   try {
-    await _adminPut(`/users/${uid}/admin-update`, {role, trust_level: trust});
-    showToast("User updated!","success");
+    // FIXED: /admin/users/ prefix
+    await _adminPut(`/admin/users/${uid}/admin-update`, { role, trust_level: trust });
+    showToast("User updated!", "success");
     closeModal("user-modal");
     loadUsers();
-  } catch { showToast("Update failed","error"); }
+  } catch { showToast("Update failed", "error"); }
 }
 
 async function verifyUser(uid, current) {
   const newTrust = current === "verified" ? "partial" : "verified";
   try {
-    await _adminPut(`/users/${uid}/admin-update`, {trust_level: newTrust});
+    // FIXED: /admin/users/ prefix
+    await _adminPut(`/admin/users/${uid}/admin-update`, { trust_level: newTrust });
     showToast(`User ${newTrust === "verified" ? "verified ✓" : "unverified"}`, "success");
     loadUsers();
-  } catch { showToast("Could not update trust","error"); }
+  } catch { showToast("Could not update trust", "error"); }
 }
 
 async function deleteUser(uid, name) {
   if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
   try {
-    await _adminDelete(`/users/${uid}`);
-    showToast("User deleted","success");
+    // FIXED: /admin/users/ prefix
+    await _adminDelete(`/admin/users/${uid}`);
+    showToast("User deleted", "success");
     loadUsers();
-  } catch { showToast("Could not delete user","error"); }
+  } catch { showToast("Could not delete user", "error"); }
 }
 
 /* ── Posts ─────────────────────────────────────────────── */
 async function loadPosts() {
   const type = document.getElementById("filter-post-type")?.value || "";
   try {
-    allPosts = await _adminGet(`/posts${type?`?type=${type}`:""}`);
+    allPosts = await _adminGet(`/posts${type ? `?type=${type}` : ""}`);
     const tbody = document.getElementById("posts-tbody");
-    if (!allPosts.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">No posts</td></tr>`; return; }
-    tbody.innerHTML = allPosts.map(p=>`
+    if (!allPosts.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">No posts</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = allPosts.map(p => `
       <tr>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
@@ -1105,16 +1045,16 @@ async function loadPosts() {
           <button class="act-btn danger" onclick="deletePost('${p.id}')"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`).join("");
-  } catch { showToast("Could not load posts","error"); }
+  } catch { showToast("Could not load posts", "error"); }
 }
 
 async function deletePost(id) {
   if (!confirm("Delete this post?")) return;
   try {
     await _adminDelete(`/posts/${id}`);
-    showToast("Post deleted","success");
+    showToast("Post deleted", "success");
     loadPosts();
-  } catch { showToast("Could not delete","error"); }
+  } catch { showToast("Could not delete", "error"); }
 }
 
 /* ── Jobs ──────────────────────────────────────────────── */
@@ -1122,37 +1062,44 @@ async function loadJobsAdmin() {
   try {
     allJobs = await _adminGet("/jobs?limit=100");
     const tbody = document.getElementById("jobs-tbody");
-    if (!allJobs.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">No jobs</td></tr>`; return; }
-    tbody.innerHTML = allJobs.map(j=>`
+    if (!allJobs.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">No jobs</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = allJobs.map(j => `
       <tr>
         <td><div class="table-name">${esc(j.title||"—")}</div></td>
         <td>${esc(j.company||"—")}</td>
         <td><span class="badge badge-blue">${esc(j.job_type||"—")}</span></td>
-        <td>${j.referral?'<span class="badge badge-green">Yes</span>':'<span style="color:var(--text-3)">No</span>'}</td>
+        <td>${j.referral ? '<span class="badge badge-green">Yes</span>' : '<span style="color:var(--text-3)">No</span>'}</td>
         <td style="font-size:12px">${esc(j.posted_by?.name||"—")}</td>
         <td style="font-size:11px;color:var(--text-3)">${formatDate(j.created_at)}</td>
         <td>
           <button class="act-btn danger" onclick="deleteJobAdmin('${j.id}')"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`).join("");
-  } catch { showToast("Could not load jobs","error"); }
+  } catch { showToast("Could not load jobs", "error"); }
 }
 
 async function deleteJobAdmin(id) {
   if (!confirm("Delete this job?")) return;
-  try { await _adminDelete(`/jobs/${id}`); showToast("Job deleted","success"); loadJobsAdmin(); }
-  catch { showToast("Could not delete","error"); }
+  try {
+    await _adminDelete(`/jobs/${id}`);
+    showToast("Job deleted", "success");
+    loadJobsAdmin();
+  } catch { showToast("Could not delete", "error"); }
 }
 
-/* ── Events ────────────────────────────────────────────── */
-let events = JSON.parse(localStorage.getItem("admin_events")||"[]");
-
+/* ── Events (localStorage) ─────────────────────────────── */
 function loadEvents() {
   const tbody = document.getElementById("events-tbody");
-  if (!events.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-3)">No events yet. Create one above.</td></tr>`; return; }
-  tbody.innerHTML = events.map((e,i)=>`
+  if (!events.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-3)">No events yet. Create one above.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = events.map((e, i) => `
     <tr>
-      <td><div class="table-name">${esc(e.title)}</div><div class="table-meta" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.desc||"")}</div></td>
+      <td><div class="table-name">${esc(e.title)}</div><div class="table-meta">${esc(e.desc||"").slice(0,50)}</div></td>
       <td><span class="badge badge-gold">${esc(e.type)}</span></td>
       <td style="font-size:12px">${e.date} ${e.time||""}</td>
       <td style="font-size:12px">${esc(e.venue||"—")}</td>
@@ -1176,14 +1123,13 @@ async function createEvent() {
     desc:  document.getElementById("ev-desc").value.trim(),
     created_at: new Date().toISOString(),
   };
-  if (!ev.title || !ev.date) { showToast("Title and date required","error"); return; }
+  if (!ev.title || !ev.date) { showToast("Title and date required", "error"); return; }
   events.unshift(ev);
   localStorage.setItem("admin_events", JSON.stringify(events));
-  // Also post to feed
   await postEventToFeed(0);
   clearEvent();
   loadEvents();
-  showToast("Event created and posted to feed! ✓","success");
+  showToast("Event created and posted to feed! ✓", "success");
 }
 
 async function postEventToFeed(idx) {
@@ -1192,19 +1138,19 @@ async function postEventToFeed(idx) {
   try {
     await PostsAPI.create({
       post_type: "event",
-      content: `${ev.title}\n\n${ev.desc||""}\n\n${ev.venue||""}\n${ev.date} ${ev.time||""}\n${ev.link?""+ev.link:""}`.trim(),
+      content: `${ev.title}\n\n${ev.desc||""}\n\n${ev.venue||""}\n${ev.date} ${ev.time||""}\n${ev.link ? ev.link : ""}`.trim(),
       tags: [ev.type, "Event"],
     });
-    showToast("Posted to feed! ✓","success");
-  } catch { showToast("Could not post to feed","error"); }
+    showToast("Posted to feed! ✓", "success");
+  } catch { showToast("Could not post to feed", "error"); }
 }
 
 function deleteEvent(idx) {
   if (!confirm("Delete this event?")) return;
-  events.splice(idx,1);
+  events.splice(idx, 1);
   localStorage.setItem("admin_events", JSON.stringify(events));
   loadEvents();
-  showToast("Event deleted","success");
+  showToast("Event deleted", "success");
 }
 
 function clearEvent() {
@@ -1215,15 +1161,13 @@ function clearEvent() {
 }
 
 /* ── Broadcast ─────────────────────────────────────────── */
-let broadcastHistory = JSON.parse(localStorage.getItem("admin_broadcasts")||"[]");
-
 function updateBroadcastPreview() {
   const title  = document.getElementById("bc-title")?.value || "";
   const body   = document.getElementById("bc-body")?.value  || "";
   const target = document.getElementById("bc-target")?.value || "all";
-  document.getElementById("bc-preview-text").innerHTML =
-    title ? `<strong style="color:#fff">${esc(title)}</strong><br><span style="color:var(--text-2)">${esc(body)}</span><br><small style="color:var(--purple-3)">→ Sending to: ${target}</small>`
-          : "Fill in the fields above to see preview…";
+  document.getElementById("bc-preview-text").innerHTML = title
+    ? `<strong style="color:#fff">${esc(title)}</strong><br><span style="color:var(--text-2)">${esc(body)}</span><br><small style="color:var(--purple-3)">→ Sending to: ${target}</small>`
+    : "Fill in the fields above to see preview…";
 }
 
 async function sendBroadcast() {
@@ -1231,34 +1175,34 @@ async function sendBroadcast() {
   const body   = document.getElementById("bc-body")?.value.trim();
   const target = document.getElementById("bc-target")?.value;
   const type   = document.getElementById("bc-type")?.value;
-
-  if (!title || !body) { showToast("Title and body required","error"); return; }
+  if (!title || !body) { showToast("Title and body required", "error"); return; }
 
   const btn = document.getElementById("bc-send-btn");
   btn.innerHTML = `<i class="ti ti-loader" style="font-size:14px"></i> Sending…`;
-  btn.disabled = true;
+  btn.disabled  = true;
 
   try {
-    await _adminPost("/admin/broadcast", {title, body, target, notif_type: type});
-    showToast(`Broadcast sent to ${target}! ✓`, "success");
+    const res = await _adminPost("/admin/broadcast", { title, body, target, notif_type: type });
+    showToast(`Broadcast sent to ${res.sent_to} users! ✓`, "success");
   } catch {
-    // Fallback — save locally
     showToast("Broadcast queued (backend offline)", "info");
   }
 
-  // Save to history
-  broadcastHistory.unshift({title, body, target, type, sent_at: new Date().toISOString()});
+  broadcastHistory.unshift({ title, body, target, type, sent_at: new Date().toISOString() });
   localStorage.setItem("admin_broadcasts", JSON.stringify(broadcastHistory.slice(0,50)));
   loadBroadcastHistory();
   clearBroadcast();
   btn.innerHTML = `<i class="ti ti-send" style="font-size:14px"></i> Send Broadcast`;
-  btn.disabled = false;
+  btn.disabled  = false;
 }
 
 function loadBroadcastHistory() {
   const tbody = document.getElementById("broadcast-history");
-  if (!broadcastHistory.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-3)">No broadcasts yet</td></tr>`; return; }
-  tbody.innerHTML = broadcastHistory.slice(0,20).map(b=>`
+  if (!broadcastHistory.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-3)">No broadcasts yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = broadcastHistory.slice(0,20).map(b => `
     <tr>
       <td><div class="table-name">${esc(b.title)}</div></td>
       <td><span class="badge badge-purple">${esc(b.target||"all")}</span></td>
@@ -1269,7 +1213,7 @@ function loadBroadcastHistory() {
 }
 
 function clearBroadcast() {
-  ["bc-title","bc-body"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["bc-title","bc-body"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
   updateBroadcastPreview();
 }
 
@@ -1279,11 +1223,11 @@ async function sendNotification() {
   const title  = document.getElementById("notif-title")?.value.trim();
   const body   = document.getElementById("notif-body")?.value.trim();
   const type   = document.getElementById("notif-type")?.value;
-  if (!target || !title) { showToast("Target and title required","error"); return; }
+  if (!target || !title) { showToast("Target and title required", "error"); return; }
   try {
-    await _adminPost("/admin/notify", {target, title, body, notif_type: type});
-    showToast("Notification sent! ✓","success");
-  } catch { showToast("Sent locally (backend offline)","info"); }
+    const res = await _adminPost("/admin/notify", { target, title, body, notif_type: type });
+    showToast(`Notification sent to ${res.sent_to} user(s)! ✓`, "success");
+  } catch { showToast("Could not send notification", "error"); }
 }
 
 /* ── CSV ───────────────────────────────────────────────── */
@@ -1293,13 +1237,14 @@ function handleCSVUpload(input) {
   reader.onload = (e) => {
     const lines = e.target.result.trim().split("\n");
     csvData = lines;
-    const preview = lines.slice(0,6).map((l,i)=>{
+    const preview = lines.slice(0,6).map((l, i) => {
       const cols = l.split(",");
-      if (i===0) return `<tr>${cols.map(c=>`<th style="background:var(--ink-3);padding:6px 10px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)">${esc(c)}</th>`).join("")}</tr>`;
+      if (i === 0) return `<tr>${cols.map(c=>`<th style="background:var(--ink-3);padding:6px 10px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)">${esc(c)}</th>`).join("")}</tr>`;
       return `<tr>${cols.map(c=>`<td style="padding:6px 10px;font-size:12px;border-bottom:1px solid var(--border)">${esc(c)}</td>`).join("")}</tr>`;
     }).join("");
-    document.getElementById("csv-preview-table").innerHTML = `<table style="width:100%;border-collapse:collapse;background:var(--ink-3);border-radius:var(--r)">${preview}</table>`;
-    document.getElementById("csv-preview-table").insertAdjacentHTML("beforeend",`<div style="font-size:12px;color:var(--text-3);margin-top:8px">${lines.length-1} students in file</div>`);
+    document.getElementById("csv-preview-table").innerHTML =
+      `<table style="width:100%;border-collapse:collapse;background:var(--ink-3);border-radius:var(--r)">${preview}</table>
+       <div style="font-size:12px;color:var(--text-3);margin-top:8px">${lines.length-1} students in file</div>`;
     document.getElementById("csv-preview").style.display = "block";
   };
   reader.readAsText(input.files[0]);
@@ -1308,12 +1253,18 @@ function handleCSVUpload(input) {
 async function uploadCSV() {
   if (!csvData) return;
   try {
-    const fd = new FormData();
-    fd.append("file", document.getElementById("csv-upload").files[0]);
+    const fd    = new FormData();
     const token = Auth.getToken();
-    await fetch(`${API}/admin/upload-csv`, {method:"POST",headers:{Authorization:`Bearer ${token}`},body:fd});
-    showToast(`CSV uploaded! ${csvData.length-1} students processed ✓`,"success");
-  } catch { showToast("Saved locally (backend offline)","info"); }
+    fd.append("file", document.getElementById("csv-upload").files[0]);
+    const res = await fetch(`${API}/admin/upload-csv`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showToast(`CSV uploaded! ${data.rows} students processed ✓`, "success");
+  } catch(e) { showToast(e.message || "Upload failed", "error"); }
   document.getElementById("csv-preview").style.display = "none";
   csvData = null;
 }
@@ -1325,52 +1276,80 @@ async function addSingleStudent() {
   const batch  = document.getElementById("add-batch")?.value;
   const mobile = document.getElementById("add-mobile")?.value.trim();
   const role   = document.getElementById("add-role")?.value;
-  if (!roll||!name) { showToast("Roll number and name required","error"); return; }
+  if (!roll || !name) { showToast("Roll number and name required", "error"); return; }
   try {
-    await _adminPost("/admin/add-student", {roll_number:roll, name, branch, batch_year:batch, mobile, role});
-    showToast(`${name} added! ✓`,"success");
-    ["add-roll","add-name","add-batch","add-mobile"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
-  } catch { showToast("Could not add student","error"); }
+    await _adminPost("/admin/add-student", { roll_number: roll, name, branch, batch_year: batch, mobile, role });
+    showToast(`${name} added! ✓`, "success");
+    ["add-roll","add-name","add-batch","add-mobile"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
+  } catch { showToast("Could not add student", "error"); }
 }
 
 /* ── Modal ─────────────────────────────────────────────── */
-function openModal(id) { document.getElementById(id).classList.add("open"); }
+function openModal(id)  { document.getElementById(id).classList.add("open"); }
 function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
 /* ── HTTP helpers ──────────────────────────────────────── */
 async function _adminGet(path) {
   const token = Auth.getToken();
-  const res = await fetch(`${API}${path}`, {headers:{Authorization:`Bearer ${token}`}});
-  if (!res.ok) throw new Error("Request failed");
+  const res = await fetch(`${API}${path}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
+
 async function _adminPost(path, body) {
   const token = Auth.getToken();
-  const res = await fetch(`${API}${path}`, {method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
-  if (!res.ok) throw new Error("Request failed");
+  const res = await fetch(`${API}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
+
 async function _adminPut(path, body) {
   const token = Auth.getToken();
-  const res = await fetch(`${API}${path}`, {method:"PUT",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
-  if (!res.ok) throw new Error("Request failed");
+  const res = await fetch(`${API}${path}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
+
 async function _adminDelete(path) {
   const token = Auth.getToken();
-  const res = await fetch(`${API}${path}`, {method:"DELETE",headers:{Authorization:`Bearer ${token}`}});
-  if (!res.ok) throw new Error("Request failed");
+  const res = await fetch(`${API}${path}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
 /* ── Utils ─────────────────────────────────────────────── */
 function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function setText(id,v) { const el=document.getElementById(id); if(el) el.textContent=v; }
-function formatDate(iso) { if(!iso)return"—"; return new Date(iso).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); }
+function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function formatDate(iso) { if (!iso) return "—"; return new Date(iso).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); }
 function timeAgo(iso) { if(!iso)return""; const d=(Date.now()-new Date(iso))/1000; if(d<60)return"just now"; if(d<3600)return Math.floor(d/60)+"m ago"; if(d<86400)return Math.floor(d/3600)+"h ago"; return Math.floor(d/86400)+"d ago"; }
-function roleBadge(r) { return {student:"badge-blue",alumni:"badge-green",teacher:"badge-gold",admin:"badge-purple"}[r]||"badge-blue"; }
+function roleBadge(r)  { return {student:"badge-blue",alumni:"badge-green",teacher:"badge-gold",admin:"badge-purple"}[r]||"badge-blue"; }
 function trustBadge(t) { return {verified:"badge-green",partial:"badge-gold",new:"badge-red"}[t]||"badge-red"; }
-function showToast(msg,type="info") { const t=document.getElementById("toast"); t.textContent=msg; t.className=`toast show ${type}`; clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),3000); }
+function showToast(msg, type="info") { const t=document.getElementById("toast"); t.textContent=msg; t.className=`toast show ${type}`; clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),3000); }
 function refreshData() { const active=document.querySelector(".admin-panel.active")?.id?.replace("panel-",""); if(active)showPanel(active,null); }
 function adminLogout() { Auth.clear(); window.location.href="auth.html"; }
 </script>
