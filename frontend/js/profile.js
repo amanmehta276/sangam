@@ -9,6 +9,14 @@ const STORAGE_KEYS = {
   data:      "sangam_profile_data",
 };
 
+const BACKEND_URL = "https://sangam-z93f.onrender.com";
+
+function fixUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("/uploads/")) return BACKEND_URL + url;
+  return url;
+}
+
 /* ══ Load & render profile ══════════════════════════════ */
 async function loadProfile() {
   let u = currentUser;
@@ -78,12 +86,19 @@ async function loadProfile() {
   _set("display-github",   u.github_url   || "Not added");
   _set("display-email",    u.email        || "Not added");
 
-  // Restore avatar
-  const avatarUrl = u.avatar_url || localStorage.getItem(STORAGE_KEYS.avatar);
-  const avImg     = document.getElementById("profile-av-img");
-  const avInit    = document.getElementById("profile-av-initial");
+  // ── Avatar (FIXED — relative URL ko absolute banao) ──
+  let avatarUrl = u.avatar_url || localStorage.getItem(STORAGE_KEYS.avatar);
+  avatarUrl = fixUrl(avatarUrl);
+
+  const avImg  = document.getElementById("profile-av-img");
+  const avInit = document.getElementById("profile-av-initial");
   if (avatarUrl && avImg) {
-    avImg.src = avatarUrl; avImg.style.display = "block";
+    avImg.src = avatarUrl;
+    avImg.style.display = "block";
+    avImg.onerror = () => {
+      avImg.style.display = "none";
+      if (avInit) { avInit.textContent = (u.name||"A")[0].toUpperCase(); avInit.style.display = "block"; }
+    };
     if (avInit) avInit.style.display = "none";
   } else if (avInit) {
     avInit.textContent = (u.name||"A")[0].toUpperCase();
@@ -91,11 +106,14 @@ async function loadProfile() {
     if (avImg) avImg.style.display = "none";
   }
 
-  // Restore wallpaper
-  const wp = localStorage.getItem(STORAGE_KEYS.wallpaper);
-  if (wp) {
-    const wb = document.getElementById("profile-wallpaper");
-    if (wb) { wb.style.backgroundImage=`url('${wp}')`;wb.style.backgroundSize="cover";wb.style.backgroundPosition="center"; }
+  // ── Wallpaper (FIXED) ──
+  const savedWp = u.wallpaper_url || localStorage.getItem(STORAGE_KEYS.wallpaper);
+  const wpUrl   = fixUrl(savedWp);
+  const wb = document.getElementById("profile-wallpaper");
+  if (wb && wpUrl) {
+    wb.style.backgroundImage    = `url('${wpUrl}')`;
+    wb.style.backgroundSize     = "cover";
+    wb.style.backgroundPosition = "center";
   }
 
   // ID card
@@ -105,7 +123,6 @@ async function loadProfile() {
 
 /* ══ DRAWER open / close ════════════════════════════════ */
 function openEditDrawer() {
-  // Prefill all fields from currentUser + localStorage
   const u = currentUser || {};
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.data)||"null");
@@ -130,16 +147,13 @@ function openEditDrawer() {
 
   renderSkillChips(skills);
 
-  // Show alumni section for alumni role
   const alumniSec = document.getElementById("alumni-section");
   if (alumniSec) alumniSec.style.display = u.role==="alumni" ? "block" : "none";
 
-  // Open drawer
   document.getElementById("edit-drawer-overlay")?.classList.add("open");
   document.getElementById("edit-drawer")?.classList.add("open");
   document.body.style.overflow = "hidden";
 
-  // Focus first field
   setTimeout(() => document.getElementById("pe-bio")?.focus(), 300);
 }
 
@@ -149,7 +163,6 @@ function closeEditDrawer() {
   document.body.style.overflow = "";
 }
 
-// Close on Escape
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeEditDrawer();
 });
@@ -179,7 +192,6 @@ async function saveProfile() {
     skills,
   };
 
-  // Always save locally first
   try {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.data)||"{}");
     localStorage.setItem(STORAGE_KEYS.data, JSON.stringify({...existing,...payload}));
@@ -188,7 +200,6 @@ async function saveProfile() {
   currentUser = { ...currentUser, ...payload };
   Auth.setUser(currentUser);
 
-  // Try server
   try {
     const updated = await UsersAPI.update(payload);
     currentUser = { ...currentUser, ...updated };
@@ -207,31 +218,42 @@ async function saveProfile() {
   loadProfile();
 }
 
-/* ══ Avatar upload ══════════════════════════════════════ */
+/* ══ Avatar upload (FIXED) ══════════════════════════════ */
 async function uploadAvatar(input) {
   if (!input.files[0]) return;
   const file = input.files[0];
   const reader = new FileReader();
   reader.onload = async (e) => {
     const dataUrl = e.target.result;
-    // Show immediately
+
+    // Turant local preview dikhao
     localStorage.setItem(STORAGE_KEYS.avatar, dataUrl);
-    const avImg = document.getElementById("profile-av-img");
+    const avImg  = document.getElementById("profile-av-img");
     const avInit = document.getElementById("profile-av-initial");
-    if (avImg) { avImg.src=dataUrl; avImg.style.display="block"; }
+    if (avImg)  { avImg.src = dataUrl; avImg.style.display = "block"; }
     if (avInit) avInit.style.display = "none";
-    // Update header too
+
+    // Header bhi update karo
     const hav = document.getElementById("header-avatar");
     if (hav) {
       hav.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
       hav.style.background = "none";
     }
-    // Try server
+
+    // Server pe upload karo
     try {
       const res = await UsersAPI.uploadAvatar(file);
-      currentUser = { ...currentUser, avatar_url: res.avatar_url };
+      let serverUrl = fixUrl(res.avatar_url);
+
+      currentUser = { ...currentUser, avatar_url: serverUrl };
       Auth.setUser(currentUser);
-      localStorage.setItem(STORAGE_KEYS.avatar, res.avatar_url);
+      localStorage.setItem(STORAGE_KEYS.avatar, serverUrl);
+
+      // Profile avatar update karo server URL se
+      if (avImg) { avImg.src = serverUrl; avImg.style.display = "block"; }
+      if (hav)   hav.innerHTML = `<img src="${serverUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+
+      updateIDCard();
       showToast("Photo updated! ✓", "success");
     } catch {
       showToast("Photo saved locally ✓", "info");
@@ -241,20 +263,33 @@ async function uploadAvatar(input) {
   input.value = "";
 }
 
-/* ══ Wallpaper upload ═══════════════════════════════════ */
+/* ══ Wallpaper upload (FIXED) ═══════════════════════════ */
 async function uploadWallpaper(input) {
   if (!input.files[0]) return;
+  const file   = input.files[0];
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     const dataUrl = e.target.result;
+
+    // Turant local preview
     localStorage.setItem(STORAGE_KEYS.wallpaper, dataUrl);
     const wb = document.getElementById("profile-wallpaper");
     if (wb) {
-      wb.style.backgroundImage = `url('${dataUrl}')`;
-      wb.style.backgroundSize = "cover";
+      wb.style.backgroundImage    = `url('${dataUrl}')`;
+      wb.style.backgroundSize     = "cover";
       wb.style.backgroundPosition = "center";
     }
-    showToast("Cover updated! ✓", "success");
+
+    // Server pe upload karo
+    try {
+      const res = await UsersAPI.uploadWallpaper(file);
+      let serverUrl = fixUrl(res.wallpaper_url);
+      localStorage.setItem(STORAGE_KEYS.wallpaper, serverUrl);
+      if (wb) wb.style.backgroundImage = `url('${serverUrl}')`;
+      showToast("Cover updated! ✓", "success");
+    } catch {
+      showToast("Cover saved locally ✓", "info");
+    }
   };
   reader.readAsDataURL(input.files[0]);
   input.value = "";
@@ -282,7 +317,7 @@ document.addEventListener("input", e => {
     renderSkillChips(e.target.value.split(",").map(s=>s.trim()).filter(Boolean));
 });
 
-/* ══ ID Card ════════════════════════════════════════════ */
+/* ══ ID Card (FIXED — avatar dikhao) ═══════════════════ */
 let currentCardType = "student";
 
 function switchCardType(type) {
@@ -296,11 +331,25 @@ function switchCardType(type) {
 
 function updateIDCard() {
   const u = currentUser || {};
-  _set("card-name",         u.name || "Your Name");
-  _set("card-batch",        `${u.branch||"CSE"} · Batch ${u.batch_year||2024}`);
-  _set("card-id",           `SAG-${String(u.id||u.roll_number||"000000").padStart(6,"0").slice(-6)}`);
-  _set("card-type-label",   currentCardType==="alumni" ? "Alumni" : "Student");
-  _set("card-avatar-letter",(u.name||"A")[0].toUpperCase());
+  _set("card-name",       u.name || "Your Name");
+  _set("card-batch",      `${u.branch||"CSE"} · Batch ${u.batch_year||2024}`);
+  _set("card-id",         `SAG-${String(u.id||u.roll_number||"000000").padStart(6,"0").slice(-6)}`);
+  _set("card-type-label", currentCardType==="alumni" ? "Alumni" : "Student");
+
+  // ID card mein avatar dikhao
+  const cardAv = document.getElementById("card-avatar-letter");
+  if (cardAv) {
+    let avatarUrl = u.avatar_url || localStorage.getItem(STORAGE_KEYS.avatar);
+    avatarUrl = fixUrl(avatarUrl);
+    const initial = (u.name||"A")[0].toUpperCase();
+    if (avatarUrl) {
+      cardAv.innerHTML = `<img src="${avatarUrl}"
+        style="width:100%;height:100%;border-radius:50%;object-fit:cover"
+        onerror="this.parentElement.innerHTML='${initial}'">`;
+    } else {
+      cardAv.textContent = initial;
+    }
+  }
 }
 
 function generateIDCard() {
@@ -317,10 +366,12 @@ function generateIDCard() {
   if (modal) modal.style.display = "flex";
   showToast("QR generated!", "success");
 }
+
 function closeQRModal() {
   const m = document.getElementById("qr-modal");
   if (m) m.style.display = "none";
 }
+
 function downloadQRCode() {
   const img = document.getElementById("qr-code-large")?.querySelector("img");
   if (!img) { showToast("Generate QR first","error"); return; }
