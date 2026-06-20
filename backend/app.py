@@ -17,11 +17,11 @@ app = Flask(__name__, static_folder=None)
 app.config["SECRET_KEY"]       = cfg.SECRET_KEY
 app.config["MAX_CONTENT_LENGTH"] = cfg.MAX_CONTENT_LEN
 
-CORS(app, origins=[cfg.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:5500",
+CORS(app, origins=[cfg.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:5500","https://cgitsangam.netlify.app/",
                    "null"],  # allow file:// for local dev
      supports_credentials=True)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ── Serve uploaded files ──────────────────────────────────
 @app.route("/uploads/<path:filename>")
