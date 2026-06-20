@@ -1,6 +1,6 @@
 /* ============================================================
    profile.js — Profile tab (Sangam)
-   Edit via right-side drawer, localStorage persistence
+   Edit via right-side drawer, server-first persistence
    ============================================================ */
 
 const STORAGE_KEYS = {
@@ -11,21 +11,34 @@ const STORAGE_KEYS = {
 
 const BACKEND_URL = "https://sangam-z93f.onrender.com";
 
+/* Turns any relative/partial path the backend may return into a full,
+   absolute URL that will work the same on every device/browser. */
 function fixUrl(url) {
   if (!url) return "";
-  if (url.startsWith("/uploads/")) return BACKEND_URL + url;
-  return url;
+  url = String(url).trim();
+  if (!url) return "";
+  // Already absolute (http/https/data URI) — leave it alone
+  if (/^(https?:)?\/\//i.test(url) || url.startsWith("data:")) return url;
+  // Backend sometimes returns "/uploads/xxx" or just "uploads/xxx"
+  const path = url.startsWith("/") ? url : "/" + url;
+  return BACKEND_URL + path;
 }
 
 /* ══ Load & render profile ══════════════════════════════ */
 async function loadProfile() {
   let u = currentUser;
-  try { u = await AuthAPI.me(); currentUser = u; Auth.setUser(u); } catch(e) {}
+  try {
+    u = await AuthAPI.me();
+    currentUser = u;
+    Auth.setUser(u);
+  } catch (e) {
+    console.warn("[Sangam] Could not refresh profile from server, using cached copy.", e);
+  }
 
-  // Merge locally saved edits
+  // Merge locally saved edits (only fills gaps the server didn't return)
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.data)||"null");
-    if (saved) u = { ...u, ...saved };
+    if (saved) u = { ...saved, ...u };
   } catch(e) {}
 
   renderHeader();
@@ -86,9 +99,14 @@ async function loadProfile() {
   _set("display-github",   u.github_url   || "Not added");
   _set("display-email",    u.email        || "Not added");
 
-  // ── Avatar (FIXED — relative URL ko absolute banao) ──
-  let avatarUrl = u.avatar_url || localStorage.getItem(STORAGE_KEYS.avatar);
-  avatarUrl = fixUrl(avatarUrl);
+  // ── Avatar — ALWAYS prefer the server URL so every device matches ──
+  // localStorage is only a fallback for instant preview before the first
+  // successful server sync ever happens (e.g. offline / first load).
+  let avatarUrl = u.avatar_url ? fixUrl(u.avatar_url) : "";
+  if (!avatarUrl) {
+    const cached = localStorage.getItem(STORAGE_KEYS.avatar);
+    if (cached) avatarUrl = fixUrl(cached);
+  }
 
   const avImg  = document.getElementById("profile-av-img");
   const avInit = document.getElementById("profile-av-initial");
@@ -106,14 +124,21 @@ async function loadProfile() {
     if (avImg) avImg.style.display = "none";
   }
 
-  // ── Wallpaper (FIXED) ──
-  const savedWp = u.wallpaper_url || localStorage.getItem(STORAGE_KEYS.wallpaper);
-  const wpUrl   = fixUrl(savedWp);
+  // ── Wallpaper — same server-first rule as avatar ──
+  let wpUrl = u.wallpaper_url ? fixUrl(u.wallpaper_url) : "";
+  if (!wpUrl) {
+    const cachedWp = localStorage.getItem(STORAGE_KEYS.wallpaper);
+    if (cachedWp) wpUrl = fixUrl(cachedWp);
+  }
   const wb = document.getElementById("profile-wallpaper");
-  if (wb && wpUrl) {
-    wb.style.backgroundImage    = `url('${wpUrl}')`;
-    wb.style.backgroundSize     = "cover";
-    wb.style.backgroundPosition = "center";
+  if (wb) {
+    if (wpUrl) {
+      wb.style.backgroundImage    = `url('${wpUrl}')`;
+      wb.style.backgroundSize     = "cover";
+      wb.style.backgroundPosition = "center";
+    } else {
+      wb.style.backgroundImage = "";
+    }
   }
 
   // ID card
@@ -205,8 +230,9 @@ async function saveProfile() {
     currentUser = { ...currentUser, ...updated };
     Auth.setUser(currentUser);
     showToast("Profile saved! ✓", "success");
-  } catch {
-    showToast("Saved locally ✓", "info");
+  } catch (err) {
+    console.error("[Sangam] Profile save failed — this will NOT appear on other devices until it succeeds.", err);
+    showToast("Saved on this device only — server update failed", "error");
   }
 
   if (saveBtn) {
@@ -218,7 +244,7 @@ async function saveProfile() {
   loadProfile();
 }
 
-/* ══ Avatar upload (FIXED) ══════════════════════════════ */
+/* ══ Avatar upload ══════════════════════════════════════ */
 async function uploadAvatar(input) {
   if (!input.files[0]) return;
   const file = input.files[0];
@@ -226,44 +252,46 @@ async function uploadAvatar(input) {
   reader.onload = async (e) => {
     const dataUrl = e.target.result;
 
-    // Turant local preview dikhao
-    localStorage.setItem(STORAGE_KEYS.avatar, dataUrl);
+    // Instant local preview only — NOT treated as the source of truth
     const avImg  = document.getElementById("profile-av-img");
     const avInit = document.getElementById("profile-av-initial");
     if (avImg)  { avImg.src = dataUrl; avImg.style.display = "block"; }
     if (avInit) avInit.style.display = "none";
 
-    // Header bhi update karo
     const hav = document.getElementById("header-avatar");
     if (hav) {
       hav.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
       hav.style.background = "none";
     }
 
-    // Server pe upload karo
+    // Upload to server — this is the ONLY thing that makes the photo show
+    // up on other devices, so we surface failures clearly instead of
+    // silently treating "saved locally" as success.
     try {
       const res = await UsersAPI.uploadAvatar(file);
-      let serverUrl = fixUrl(res.avatar_url);
+      const serverUrl = fixUrl(res.avatar_url);
+      if (!serverUrl) throw new Error("Server did not return an avatar_url");
 
       currentUser = { ...currentUser, avatar_url: serverUrl };
       Auth.setUser(currentUser);
+      // Cache only as a fallback for this device — never the source of truth
       localStorage.setItem(STORAGE_KEYS.avatar, serverUrl);
 
-      // Profile avatar update karo server URL se
       if (avImg) { avImg.src = serverUrl; avImg.style.display = "block"; }
       if (hav)   hav.innerHTML = `<img src="${serverUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
 
       updateIDCard();
-      showToast("Photo updated! ✓", "success");
-    } catch {
-      showToast("Photo saved locally ✓", "info");
+      showToast("Photo updated everywhere ✓", "success");
+    } catch (err) {
+      console.error("[Sangam] Avatar upload to server failed — photo will NOT show on other devices.", err);
+      showToast("Upload failed — won't show on other devices. Check connection & retry.", "error");
     }
   };
   reader.readAsDataURL(file);
   input.value = "";
 }
 
-/* ══ Wallpaper upload (FIXED) ═══════════════════════════ */
+/* ══ Wallpaper upload ═══════════════════════════════════ */
 async function uploadWallpaper(input) {
   if (!input.files[0]) return;
   const file   = input.files[0];
@@ -271,8 +299,7 @@ async function uploadWallpaper(input) {
   reader.onload = async (e) => {
     const dataUrl = e.target.result;
 
-    // Turant local preview
-    localStorage.setItem(STORAGE_KEYS.wallpaper, dataUrl);
+    // Instant local preview only — NOT treated as the source of truth
     const wb = document.getElementById("profile-wallpaper");
     if (wb) {
       wb.style.backgroundImage    = `url('${dataUrl}')`;
@@ -280,15 +307,23 @@ async function uploadWallpaper(input) {
       wb.style.backgroundPosition = "center";
     }
 
-    // Server pe upload karo
+    // Upload to server — this is the ONLY thing that makes the cover
+    // show up on other devices.
     try {
       const res = await UsersAPI.uploadWallpaper(file);
-      let serverUrl = fixUrl(res.wallpaper_url);
+      const serverUrl = fixUrl(res.wallpaper_url);
+      if (!serverUrl) throw new Error("Server did not return a wallpaper_url");
+
+      currentUser = { ...currentUser, wallpaper_url: serverUrl };
+      Auth.setUser(currentUser);
+      // Cache only as a fallback for this device — never the source of truth
       localStorage.setItem(STORAGE_KEYS.wallpaper, serverUrl);
+
       if (wb) wb.style.backgroundImage = `url('${serverUrl}')`;
-      showToast("Cover updated! ✓", "success");
-    } catch {
-      showToast("Cover saved locally ✓", "info");
+      showToast("Cover updated everywhere ✓", "success");
+    } catch (err) {
+      console.error("[Sangam] Wallpaper upload to server failed — cover will NOT show on other devices.", err);
+      showToast("Upload failed — won't show on other devices. Check connection & retry.", "error");
     }
   };
   reader.readAsDataURL(input.files[0]);
@@ -317,7 +352,7 @@ document.addEventListener("input", e => {
     renderSkillChips(e.target.value.split(",").map(s=>s.trim()).filter(Boolean));
 });
 
-/* ══ ID Card (FIXED — avatar dikhao) ═══════════════════ */
+/* ══ ID Card ═════════════════════════════════════════════ */
 let currentCardType = "student";
 
 function switchCardType(type) {
@@ -336,11 +371,14 @@ function updateIDCard() {
   _set("card-id",         `SAG-${String(u.id||u.roll_number||"000000").padStart(6,"0").slice(-6)}`);
   _set("card-type-label", currentCardType==="alumni" ? "Alumni" : "Student");
 
-  // ID card mein avatar dikhao
+  // ID card avatar — same server-first rule
   const cardAv = document.getElementById("card-avatar-letter");
   if (cardAv) {
-    let avatarUrl = u.avatar_url || localStorage.getItem(STORAGE_KEYS.avatar);
-    avatarUrl = fixUrl(avatarUrl);
+    let avatarUrl = u.avatar_url ? fixUrl(u.avatar_url) : "";
+    if (!avatarUrl) {
+      const cached = localStorage.getItem(STORAGE_KEYS.avatar);
+      if (cached) avatarUrl = fixUrl(cached);
+    }
     const initial = (u.name||"A")[0].toUpperCase();
     if (avatarUrl) {
       cardAv.innerHTML = `<img src="${avatarUrl}"

@@ -558,12 +558,19 @@
   display:grid;grid-template-columns:1fr 300px;
   gap:12px;padding:12px 12px 0;
 }
-@media(max-width:680px){
-  .profile-body{grid-template-columns:1fr}
-  .profile-right{order:-1}
-}
 .profile-left{display:flex;flex-direction:column;gap:10px;min-width:0}
 .profile-right{display:flex;flex-direction:column;gap:10px}
+
+/* Mobile: stack single column, ID Card + People You May Know go LAST */
+@media(max-width:900px){
+  .profile-body{
+    grid-template-columns:1fr;
+    display:flex;
+    flex-direction:column;
+  }
+  .profile-left{order:1}
+  .profile-right{order:2}
+}
 
 /* ── pcard (universal card) ── */
 .pcard{
