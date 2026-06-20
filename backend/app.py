@@ -190,9 +190,8 @@ if __name__ == "__main__":
     print(f"  OTP mode: {cfg.OTP_MODE}")
     print(f"{'='*50}\n")
 
-    socketio.run(
+    socketio = SocketIO(
     app,
-    host="0.0.0.0",
-    port=cfg.PORT,
-    allow_unsafe_werkzeug=True
+    cors_allowed_origins="*",
+    async_mode="eventlet"
 )
