@@ -180,12 +180,14 @@ def on_stop_typing(data):
 # ════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     os.makedirs(cfg.UPLOAD_FOLDER, exist_ok=True)
-    os.makedirs(f"{cfg.UPLOAD_FOLDER}/avatars",    exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/avatars", exist_ok=True)
     os.makedirs(f"{cfg.UPLOAD_FOLDER}/wallpapers", exist_ok=True)
-    os.makedirs(f"{cfg.UPLOAD_FOLDER}/media",      exist_ok=True)
+    os.makedirs(f"{cfg.UPLOAD_FOLDER}/media", exist_ok=True)
+
     print(f"\n{'='*50}")
     print(f"  Sangam Backend starting on port {cfg.PORT}")
     print(f"  Frontend: {cfg.FRONTEND_URL}")
     print(f"  OTP mode: {cfg.OTP_MODE}")
     print(f"{'='*50}\n")
-    socketio.run(app, host="0.0.0.0", port=cfg.PORT, debug=True)
+
+    socketio.run(app, host="0.0.0.0", port=cfg.PORT)
