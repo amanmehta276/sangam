@@ -708,7 +708,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
       </div>
       <div class="form-foot">
         <button class="topbar-btn btn-ghost" onclick="clearEvent()">Clear</button>
-        <button class="topbar-btn btn-primary" onclick="createEvent()">
+        <button class="topbar-btn btn-primary" onclick="adminCreateEvent()">
           <i class="ti ti-calendar-plus" style="font-size:14px"></i> Create Event
         </button>
       </div>
@@ -1264,14 +1264,17 @@ function loadEvents() {
       <td style="font-size:12px">${esc(e.venue||"—")}</td>
       <td>
         <div class="action-btns">
+          <button class="act-btn" onclick="editEvent(${i})" title="Edit"><i class="ti ti-edit"></i></button>
           <button class="act-btn" onclick="postEventToFeed(${i})" title="Post to Feed"><i class="ti ti-send"></i></button>
-          <button class="act-btn danger" onclick="deleteEvent(${i})"><i class="ti ti-trash"></i></button>
+          <button class="act-btn danger" onclick="deleteEvent(${i})" title="Delete"><i class="ti ti-trash"></i></button>
         </div>
       </td>
     </tr>`).join("");
 }
 
-async function createEvent() {
+let editingEventIdx = -1; // -1 = new, >=0 = editing
+
+async function adminCreateEvent() {
   const ev = {
     title: document.getElementById("ev-title").value.trim(),
     type:  document.getElementById("ev-type").value,
@@ -1283,12 +1286,51 @@ async function createEvent() {
     created_at: new Date().toISOString(),
   };
   if (!ev.title || !ev.date) { showToast("Title and date required", "error"); return; }
-  events.unshift(ev);
-  localStorage.setItem("admin_events", JSON.stringify(events));
-  await postEventToFeed(0);
-  clearEvent();
-  loadEvents();
-  showToast("Event created and posted to feed! ✓", "success");
+
+  if (editingEventIdx >= 0) {
+    // Edit mode — update existing
+    events[editingEventIdx] = { ...events[editingEventIdx], ...ev };
+    localStorage.setItem("admin_events", JSON.stringify(events));
+    editingEventIdx = -1;
+    // Reset button
+    const btn = document.querySelector("#panel-events .form-foot .btn-primary");
+    if (btn) btn.innerHTML = `<i class="ti ti-calendar-plus" style="font-size:14px"></i> Create Event`;
+    clearEvent();
+    loadEvents();
+    showToast("Event updated! ✓", "success");
+  } else {
+    // New event
+    events.unshift(ev);
+    localStorage.setItem("admin_events", JSON.stringify(events));
+    await postEventToFeed(0);
+    clearEvent();
+    loadEvents();
+    showToast("Event created and posted to feed! ✓", "success");
+  }
+}
+
+function editEvent(idx) {
+  const e = events[idx];
+  if (!e) return;
+  editingEventIdx = idx;
+
+  // Prefill form
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ""; };
+  set("ev-title", e.title);
+  set("ev-date",  e.date);
+  set("ev-time",  e.time);
+  set("ev-venue", e.venue);
+  set("ev-link",  e.link);
+  set("ev-desc",  e.desc);
+  document.getElementById("ev-type").value = e.type || "event";
+
+  // Change button text
+  const btn = document.querySelector("#panel-events .form-foot .btn-primary");
+  if (btn) btn.innerHTML = `<i class="ti ti-check" style="font-size:14px"></i> Update Event`;
+
+  // Scroll to form
+  document.getElementById("panel-events").scrollTo({ top: 0, behavior: "smooth" });
+  showToast("Editing event — make changes and save", "info");
 }
 
 async function postEventToFeed(idx) {
@@ -1317,6 +1359,9 @@ function clearEvent() {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
+  editingEventIdx = -1;
+  const btn = document.querySelector("#panel-events .form-foot .btn-primary");
+  if (btn) btn.innerHTML = `<i class="ti ti-calendar-plus" style="font-size:14px"></i> Create Event`;
 }
 
 /* ── Broadcast ─────────────────────────────────────────── */
