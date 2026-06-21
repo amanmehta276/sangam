@@ -123,6 +123,7 @@ def like_post(post_id):
     return jsonify({"likes": updated["likes"], "liked": liked})
 
 # ── Delete post ───────────────────────────────────────────
+
 @posts_bp.route("/<post_id>", methods=["DELETE"])
 @login_required
 def delete_post(post_id):
@@ -136,7 +137,9 @@ def delete_post(post_id):
     if not post:
         return jsonify({"error": "Not found"}), 404
 
-    if post["author"]["id"] != uid and role != "admin":
+    # FIXED: author field missing ho sakta hai purane posts mein
+    author_id = (post.get("author") or {}).get("id", "")
+    if author_id != uid and role != "admin":
         return jsonify({"error": "Not authorized"}), 403
 
     posts_col.delete_one({"_id": ObjectId(post_id)})
