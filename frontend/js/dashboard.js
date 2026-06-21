@@ -81,15 +81,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 function renderHeader() {
   const av      = document.getElementById("header-avatar");
   const initial = (currentUser.name||"A")[0].toUpperCase();
-  
-  // Avatar URL — backend se aata hai, Netlify se nahi
-  let url = currentUser.avatar_url || localStorage.getItem("sangam_profile_avatar");
-  
-  // Agar relative URL hai toh backend prefix lagao
-  if (url && url.startsWith("/uploads/")) {
-    url = "https://sangam-z93f.onrender.com" + url;
-  }
-  
+
+  // Avatar URL — server value hamesha priority, localStorage sirf fallback.
+  // fixUrl() (defined in profile.js) handles every relative-path shape the
+  // backend might return, not just "/uploads/..." — keeps this in sync with
+  // loadProfile()/updateIDCard() instead of duplicating partial logic here.
+  let url = currentUser.avatar_url
+    ? fixUrl(currentUser.avatar_url)
+    : fixUrl(localStorage.getItem("sangam_profile_avatar"));
+
   if (!av) return;
   if (url) {
     av.innerHTML = `<img src="${escHtml(url)}" alt="" 
@@ -184,10 +184,22 @@ function renderPost(p) {
   const trustL   = {verified:"Verified",partial:"Partial",new:"New"}[a.trust_level]||"";
   const typeL    = {job:"Job",question:"Question",win:"Win 🎉",event:"Event",tip:"Tip",update:"Update"}[p.post_type]||"Post";
   const tags     = (p.tags||[]).map(t=>`<span class="ptag ptag-pu">${escHtml(t)}</span>`).join("");
+
+  // Author avatar — reuse the shared fixUrl() so feed avatars follow the
+  // same server-first, all-relative-formats rule as profile/header avatars.
+  const avatarUrl = a.avatar_url ? fixUrl(a.avatar_url) : "";
+  const avatarHtml = avatarUrl
+    ? `<div class="post-av" style="background:${color};padding:0;overflow:hidden">
+         <img src="${escHtml(avatarUrl)}" alt=""
+           style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+           onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+       </div>`
+    : `<div class="post-av" style="background:${color}">${initial}</div>`;
+
   return `
   <div class="post-card">
     <div class="post-head">
-      <div class="post-av" style="background:${color}">${initial}</div>
+      ${avatarHtml}
       <div class="post-meta">
         <div class="post-name">${escHtml(a.name||"?")} ${trustL?`<span class="vbadge ${badgeC}">${trustL}</span>`:""}
         </div>
@@ -262,9 +274,20 @@ function renderAlumni(u) {
   const initial = (u.name||"?")[0].toUpperCase();
   const roleL   = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
   const skills  = (u.skills||[]).slice(0,3).map(s=>`<span class="ptag ptag-pu">${escHtml(s)}</span>`).join("");
+
+  // Reuse fixUrl() so alumni-directory avatars follow the same rule as everywhere else.
+  const avatarUrl = u.avatar_url ? fixUrl(u.avatar_url) : "";
+  const avatarHtml = avatarUrl
+    ? `<div class="alumni-av" style="background:${color};padding:0;overflow:hidden;cursor:pointer" onclick="startDMWith('${u.roll_number}')">
+         <img src="${escHtml(avatarUrl)}" alt=""
+           style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+           onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+       </div>`
+    : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`;
+
   return `
   <div class="alumni-card">
-    <div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>
+    ${avatarHtml}
     <div class="alumni-info">
       <div class="alumni-name">
         <span onclick="startDMWith('${u.roll_number}')" style="cursor:pointer">${escHtml(u.name)}</span>
