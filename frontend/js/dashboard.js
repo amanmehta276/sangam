@@ -194,7 +194,13 @@ function renderPost(p) {
            style="width:100%;height:100%;object-fit:cover;border-radius:50%"
            onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
        </div>`
-    : `<div class="post-av" style="background:${color}">${initial}</div>`;
+    : `${a.avatar_url
+  ? `<div class="post-av" style="background:${color};padding:0;overflow:hidden">
+       <img src="${escHtml(fixUrl(a.avatar_url))}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+         onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+     </div>`
+  : `<div class="post-av" style="background:${color}">${initial}</div>`
+}`;
 
   return `
   <div class="post-card">
@@ -526,7 +532,7 @@ async function sendChatMessage() {
 function connectSocket(room) {
   if (typeof io==="undefined") return;
   if (chatSocket) { try{chatSocket.disconnect();}catch(e){} }
-  chatSocket = io("http://localhost:5000",{auth:{token:`Bearer ${Auth.getToken()||""}`}});
+  chatSocket = io("https://sangam-z93f.onrender.com", {auth:{token:`Bearer ${Auth.getToken()||""}`}});
   chatSocket.emit("join",{token:`Bearer ${Auth.getToken()||""}`,room});
   chatSocket.on("new_message",msg=>{
     const update=arr=>arr.map(r=>((r.id||r.room)===msg.room)?{...r,last_message:msg.content,last_time:msg.created_at}:r);
