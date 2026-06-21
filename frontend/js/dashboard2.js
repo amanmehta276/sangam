@@ -738,7 +738,3 @@ function showToast(msg, type="info") {
 
 /* ── Logout ───────────────────────────────────────────────── */
 function logout(){ Auth.clear(); window.location.href="auth.html"; }
-
-
-
-

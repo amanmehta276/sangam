@@ -830,6 +830,63 @@ async function apiCall(path,options={}){
     }
   }catch(e){}
 })();
+
+// Page load pe dynamic events fetch karo
+async function loadIndexEvents() {
+  const BACKEND = "https://sangam-z93f.onrender.com/api";
+  const token = Auth.getToken();
+  if (!token) return; // login nahi hai toh skip
+
+  try {
+    const res = await fetch(`${BACKEND}/posts?type=event&limit=5`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const posts = await res.json();
+    if (!posts.length) return;
+
+    // Desktop table update
+    const tbody = document.querySelector(".events-table tbody");
+    if (tbody) {
+      tbody.innerHTML = posts.map(p => {
+        const date = new Date(p.created_at);
+        const dateStr = date.toLocaleDateString("en-IN", {day:"numeric", month:"short"});
+        return `<tr>
+          <td class="event-date-cell">${dateStr}</td>
+          <td>
+            <div class="event-name">${p.content.split("\n")[0]}</div>
+            <div class="event-detail">${p.content.split("\n").slice(1,3).join(" ")}</div>
+          </td>
+          <td class="col-venue event-venue">${p.content.split("\n")[3] || "—"}</td>
+          <td><span class="event-badge">${p.tags?.[0] || "Event"}</span></td>
+        </tr>`;
+      }).join("");
+    }
+
+    // Mobile cards update
+    const cards = document.querySelector(".event-cards");
+    if (cards) {
+      cards.innerHTML = posts.map(p => {
+        const date = new Date(p.created_at);
+        const dateStr = date.toLocaleDateString("en-IN", {day:"numeric", month:"short"});
+        return `<div class="event-card">
+          <div class="event-card-head">
+            <div>
+              <div class="event-card-date">${dateStr}</div>
+              <div class="event-name" style="margin-top:6px">${p.content.split("\n")[0]}</div>
+            </div>
+            <span class="event-badge">${p.tags?.[0] || "Event"}</span>
+          </div>
+          <div class="event-detail">${p.content.split("\n").slice(1,3).join(" ")}</div>
+        </div>`;
+      }).join("");
+    }
+  } catch(e) {
+    console.warn("Events load failed, showing static events");
+  }
+}
+
+// Call karo
+loadIndexEvents();
 </script>
 </body>
 </html>
