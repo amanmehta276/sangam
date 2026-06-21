@@ -289,7 +289,13 @@ function renderAlumni(u) {
            style="width:100%;height:100%;object-fit:cover;border-radius:50%"
            onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
        </div>`
-    : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`;
+    : `${u.avatar_url
+  ? `<div class="alumni-av" style="background:${color};padding:0;overflow:hidden;cursor:pointer" onclick="startDMWith('${u.roll_number}')">
+       <img src="${escHtml(fixUrl(u.avatar_url))}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+         onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+     </div>`
+  : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`
+}`;
 
   return `
   <div class="alumni-card">
