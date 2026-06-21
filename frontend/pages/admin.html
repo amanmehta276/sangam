@@ -460,6 +460,44 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
   <div class="admin-panel" id="panel-posts">
     <div class="section-hd">
       <div><div class="section-title">Feed Posts</div><div class="section-sub">Moderate and manage all posts</div></div>
+      <button class="topbar-btn btn-primary" onclick="toggleCreatePost()">
+        <i class="ti ti-plus" style="font-size:14px"></i> Create Post
+      </button>
+    </div>
+
+    <!-- Create Post Form -->
+    <div class="form-card" id="create-post-form" style="display:none">
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:14px">New Post</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Post Type</label>
+          <select id="np-type" class="form-select">
+            <option value="update">Update</option>
+            <option value="event">Event</option>
+            <option value="job">Job</option>
+            <option value="win">Win / Achievement</option>
+            <option value="tip">Tip / Advice</option>
+            <option value="question">Question</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags (comma separated)</label>
+          <input type="text" id="np-tags" class="form-input" placeholder="e.g. Placement, CSE, Event">
+        </div>
+        <div class="form-group span-2">
+          <label class="form-label">Content</label>
+          <textarea id="np-content" class="form-textarea" rows="4" placeholder="Write your post content here…"></textarea>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="topbar-btn btn-ghost" onclick="toggleCreatePost()">Cancel</button>
+        <button class="topbar-btn btn-primary" onclick="adminCreatePost()">
+          <i class="ti ti-send" style="font-size:14px"></i> Post to Feed
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
       <select id="filter-post-type" class="form-select" style="padding:7px 12px;font-size:12px" onchange="loadPosts()">
         <option value="">All Types</option>
         <option value="job">Jobs</option>
@@ -485,7 +523,66 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
   <div class="admin-panel" id="panel-jobs">
     <div class="section-hd">
       <div><div class="section-title">Jobs &amp; Internships</div><div class="section-sub">All job listings</div></div>
+      <button class="topbar-btn btn-primary" onclick="toggleCreateJob()">
+        <i class="ti ti-plus" style="font-size:14px"></i> Post Job
+      </button>
     </div>
+
+    <!-- Create Job Form -->
+    <div class="form-card" id="create-job-form" style="display:none">
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:14px">Post New Job</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Job Title</label>
+          <input type="text" id="nj-title" class="form-input" placeholder="e.g. SWE Intern">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input type="text" id="nj-company" class="form-input" placeholder="e.g. Google">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input type="text" id="nj-location" class="form-input" placeholder="e.g. Bangalore / Remote">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job Type</label>
+          <select id="nj-type" class="form-select">
+            <option value="internship">Internship</option>
+            <option value="fulltime">Full-Time</option>
+            <option value="parttime">Part-Time</option>
+            <option value="contract">Contract</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Salary / Stipend</label>
+          <input type="text" id="nj-salary" class="form-input" placeholder="e.g. ₹80k/mo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apply Link (optional)</label>
+          <input type="text" id="nj-link" class="form-input" placeholder="https://...">
+        </div>
+        <div class="form-group span-2">
+          <label class="form-label">Description</label>
+          <textarea id="nj-desc" class="form-textarea" placeholder="Job description, requirements…"></textarea>
+        </div>
+        <div class="form-group span-2">
+          <label class="form-label">Skills (comma separated)</label>
+          <input type="text" id="nj-skills" class="form-input" placeholder="e.g. DSA, Python, React">
+        </div>
+        <div class="form-group span-2">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px">
+            <input type="checkbox" id="nj-referral"> I can provide referral
+          </label>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="topbar-btn btn-ghost" onclick="toggleCreateJob()">Cancel</button>
+        <button class="topbar-btn btn-primary" onclick="adminCreateJob()">
+          <i class="ti ti-briefcase" style="font-size:14px"></i> Post Job
+        </button>
+      </div>
+    </div>
+
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
@@ -1017,6 +1114,68 @@ async function deleteUser(uid, name) {
     showToast("User deleted", "success");
     loadUsers();
   } catch { showToast("Could not delete user", "error"); }
+}
+
+/* ── Create Post (Admin) ───────────────────────────────── */
+function toggleCreatePost() {
+  const f = document.getElementById("create-post-form");
+  f.style.display = f.style.display === "none" ? "block" : "none";
+}
+
+async function adminCreatePost() {
+  const content = document.getElementById("np-content")?.value.trim();
+  const type    = document.getElementById("np-type")?.value || "update";
+  const tags    = (document.getElementById("np-tags")?.value || "")
+    .split(",").map(t => t.trim()).filter(Boolean);
+
+  if (!content) { showToast("Content required", "error"); return; }
+
+  try {
+    await _adminPost("/posts", { post_type: type, content, tags });
+    showToast("Post created! ✓", "success");
+    document.getElementById("np-content").value = "";
+    document.getElementById("np-tags").value = "";
+    toggleCreatePost();
+    loadPosts();
+  } catch(e) { showToast(e.message || "Could not create post", "error"); }
+}
+
+/* ── Create Job (Admin) ────────────────────────────────── */
+function toggleCreateJob() {
+  const f = document.getElementById("create-job-form");
+  f.style.display = f.style.display === "none" ? "block" : "none";
+}
+
+async function adminCreateJob() {
+  const title   = document.getElementById("nj-title")?.value.trim();
+  const company = document.getElementById("nj-company")?.value.trim();
+  if (!title || !company) { showToast("Title and company required", "error"); return; }
+
+  const skills = (document.getElementById("nj-skills")?.value || "")
+    .split(",").map(s => s.trim()).filter(Boolean);
+
+  const payload = {
+    title,
+    company,
+    location:    document.getElementById("nj-location")?.value.trim(),
+    job_type:    document.getElementById("nj-type")?.value,
+    salary:      document.getElementById("nj-salary")?.value.trim(),
+    apply_link:  document.getElementById("nj-link")?.value.trim(),
+    description: document.getElementById("nj-desc")?.value.trim(),
+    referral:    document.getElementById("nj-referral")?.checked,
+    skills,
+  };
+
+  try {
+    await _adminPost("/jobs", payload);
+    showToast("Job posted! ✓", "success");
+    // Clear form
+    ["nj-title","nj-company","nj-location","nj-salary","nj-link","nj-desc","nj-skills"]
+      .forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+    document.getElementById("nj-referral").checked = false;
+    toggleCreateJob();
+    loadJobsAdmin();
+  } catch(e) { showToast(e.message || "Could not post job", "error"); }
 }
 
 /* ── Posts ─────────────────────────────────────────────── */
