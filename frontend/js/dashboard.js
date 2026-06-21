@@ -2,6 +2,15 @@
    dashboard.js — Sangam Dashboard (rewritten for new HTML/CSS)
    ============================================================ */
 
+var _DASH_BACKEND_URL = "https://sangam-z93f.onrender.com";
+
+function fixAvatarUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("/uploads/") || (!url.startsWith("http") && !url.startsWith("data:")))
+    return _DASH_BACKEND_URL + (url.startsWith("/") ? url : "/" + url);
+  return url;
+}
+
 /* ── Global State ────────────────────────────────────────── */
 let currentUser    = null;
 let currentTab     = "home";
@@ -55,21 +64,19 @@ function formatRoomTime(iso) {
    INIT
 ════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", async () => {
-  // Load or use demo user
   currentUser = Auth.getUser() || {
     id:"demo", name:"Arjun Sharma", roll_number:"CSE22101",
     branch:"CSE", batch_year:2022, role:"student", trust_level:"partial",
     skills:["React","Python","DSA"],
   };
 
-  // Merge locally saved profile data
   try {
     const saved = JSON.parse(localStorage.getItem("sangam_profile_data")||"null");
     if (saved) currentUser = {...currentUser,...saved};
   } catch(e){}
 
   renderHeader();
-  showTab("home");   // ← always open home first
+  showTab("home");
   loadNotifBadge();
 
   window.addEventListener("popstate", e => {
@@ -82,19 +89,13 @@ function renderHeader() {
   const av      = document.getElementById("header-avatar");
   const initial = (currentUser.name||"A")[0].toUpperCase();
 
-  // Avatar URL — server value hamesha priority, localStorage sirf fallback.
-  // fixUrl() (defined in profile.js) handles every relative-path shape the
-  // backend might return, not just "/uploads/..." — keeps this in sync with
-  // loadProfile()/updateIDCard() instead of duplicating partial logic here.
-  let url = currentUser.avatar_url
-    ? fixUrl(currentUser.avatar_url)
-    : fixUrl(localStorage.getItem("sangam_profile_avatar"));
+  let url = fixAvatarUrl(currentUser.avatar_url || localStorage.getItem("sangam_profile_avatar"));
 
   if (!av) return;
   if (url) {
-    av.innerHTML = `<img src="${escHtml(url)}" alt="" 
+    av.innerHTML = `<img src="${escHtml(url)}" alt=""
       style="width:100%;height:100%;border-radius:50%;object-fit:cover"
-      onerror="this.parentElement.innerHTML='${initial}';this.parentElement.style.background='${getColor(initial)}'">`;
+      onerror="this.parentElement.textContent='${initial}';this.parentElement.style.background='${getColor(initial)}'">`;
     av.style.background = "none";
   } else {
     av.textContent = initial;
@@ -117,23 +118,17 @@ function renderHeader() {
 ════════════════════════════════════════════════════════════ */
 function showTab(tab) {
   currentTab = tab;
-
-  // Hide all tabs, deactivate all nav items
   document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".bnav-item").forEach(n => n.classList.remove("active"));
   document.body.classList.remove("chat-panel-open");
-
-  // Activate chosen tab
   document.getElementById(`tab-${tab}`)?.classList.add("active");
   document.querySelector(`.bnav-item[data-tab="${tab}"]`)?.classList.add("active");
 
-  // FAB only on feed
   const fab = document.getElementById("fab-btn");
   if (fab) fab.style.display = tab === "feed" ? "flex" : "none";
 
-  // Load tab content
   switch (tab) {
-    case "home":    /* iframe already loaded */ break;
+    case "home":    break;
     case "feed":    loadFeed();    break;
     case "alumni":  loadAlumni();  break;
     case "jobs":    loadJobs();    break;
@@ -152,7 +147,7 @@ function toggleSearch() {
   sb.classList.toggle("hidden");
   if (!sb.classList.contains("hidden")) sb.querySelector("input")?.focus();
 }
-function handleSearch(q) { /* TODO: filter by currentTab */ }
+function handleSearch(q) {}
 
 /* ════════════════════════════════════════════════════════════
    FEED
@@ -176,31 +171,23 @@ async function loadFeed(filter=null) {
 }
 
 function renderPost(p) {
-  const a = p.author || {};
-  const color    = getColor((a.name||"A")[0]);
-  const initial  = (a.name||"?")[0].toUpperCase();
+  const a       = p.author || {};
+  const color   = getColor((a.name||"A")[0]);
+  const initial = (a.name||"?")[0].toUpperCase();
+  const avatarUrl = fixAvatarUrl(a.avatar_url || "");
+
   const badgeMap = {verified:"vb-g",partial:"vb-b",new:"vb-y"};
   const badgeC   = badgeMap[a.trust_level] || "";
   const trustL   = {verified:"Verified",partial:"Partial",new:"New"}[a.trust_level]||"";
   const typeL    = {job:"Job",question:"Question",win:"Win 🎉",event:"Event",tip:"Tip",update:"Update"}[p.post_type]||"Post";
   const tags     = (p.tags||[]).map(t=>`<span class="ptag ptag-pu">${escHtml(t)}</span>`).join("");
 
-  // Author avatar — reuse the shared fixUrl() so feed avatars follow the
-  // same server-first, all-relative-formats rule as profile/header avatars.
-  const avatarUrl = a.avatar_url ? fixUrl(a.avatar_url) : "";
   const avatarHtml = avatarUrl
     ? `<div class="post-av" style="background:${color};padding:0;overflow:hidden">
-         <img src="${escHtml(avatarUrl)}" alt=""
-           style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-           onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+         <img src="${escHtml(avatarUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+           onerror="this.parentElement.style.background='${color}';this.parentElement.innerHTML='${initial}'">
        </div>`
-    : `${a.avatar_url
-  ? `<div class="post-av" style="background:${color};padding:0;overflow:hidden">
-       <img src="${escHtml(fixUrl(a.avatar_url))}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-         onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
-     </div>`
-  : `<div class="post-av" style="background:${color}">${initial}</div>`
-}`;
+    : `<div class="post-av" style="background:${color}">${initial}</div>`;
 
   return `
   <div class="post-card">
@@ -276,33 +263,25 @@ async function loadAlumni(params={}) {
 }
 
 function renderAlumni(u) {
-  const color   = getColor((u.name||"A")[0]);
-  const initial = (u.name||"?")[0].toUpperCase();
-  const roleL   = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
-  const skills  = (u.skills||[]).slice(0,3).map(s=>`<span class="ptag ptag-pu">${escHtml(s)}</span>`).join("");
+  const color      = getColor((u.name||"A")[0]);
+  const initial    = (u.name||"?")[0].toUpperCase();
+  const avatarUrl  = fixAvatarUrl(u.avatar_url || "");
+  const roleL      = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
+  const skills     = (u.skills||[]).slice(0,3).map(s=>`<span class="ptag ptag-pu">${escHtml(s)}</span>`).join("");
 
-  // Reuse fixUrl() so alumni-directory avatars follow the same rule as everywhere else.
-  const avatarUrl = u.avatar_url ? fixUrl(u.avatar_url) : "";
   const avatarHtml = avatarUrl
     ? `<div class="alumni-av" style="background:${color};padding:0;overflow:hidden;cursor:pointer" onclick="startDMWith('${u.roll_number}')">
-         <img src="${escHtml(avatarUrl)}" alt=""
-           style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-           onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
+         <img src="${escHtml(avatarUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+           onerror="this.parentElement.style.background='${color}';this.parentElement.innerHTML='${initial}'">
        </div>`
-    : `${u.avatar_url
-  ? `<div class="alumni-av" style="background:${color};padding:0;overflow:hidden;cursor:pointer" onclick="startDMWith('${u.roll_number}')">
-       <img src="${escHtml(fixUrl(u.avatar_url))}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-         onerror="this.style.display='none';this.parentElement.textContent='${initial}'">
-     </div>`
-  : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`
-}`;
+    : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`;
 
   return `
   <div class="alumni-card">
     ${avatarHtml}
     <div class="alumni-info">
       <div class="alumni-name">
-        <span onclick="startDMWith('${u.roll_number}')" style="cursor:pointer">${escHtml(u.name)}</span>
+        <span onclick="viewProfile('${u.roll_number}')" style="cursor:pointer">${escHtml(u.name)}</span>
         <span class="vbadge vb-g">${roleL}</span>
       </div>
       <div class="alumni-meta">${escHtml(u.branch||"")} · Batch ${u.batch_year||""}</div>
@@ -538,7 +517,7 @@ async function sendChatMessage() {
 function connectSocket(room) {
   if (typeof io==="undefined") return;
   if (chatSocket) { try{chatSocket.disconnect();}catch(e){} }
-  chatSocket = io("https://sangam-z93f.onrender.com", {auth:{token:`Bearer ${Auth.getToken()||""}`}});
+  chatSocket = io(_DASH_BACKEND_URL,{auth:{token:`Bearer ${Auth.getToken()||""}`}});
   chatSocket.emit("join",{token:`Bearer ${Auth.getToken()||""}`,room});
   chatSocket.on("new_message",msg=>{
     const update=arr=>arr.map(r=>((r.id||r.room)===msg.room)?{...r,last_message:msg.content,last_time:msg.created_at}:r);
@@ -758,3 +737,78 @@ function showToast(msg, type="info") {
 
 /* ── Logout ───────────────────────────────────────────────── */
 function logout(){ Auth.clear(); window.location.href="auth.html"; }
+
+/* ════════════════════════════════════════════════════════════
+   VIEW USER PROFILE — Bottom sheet modal
+════════════════════════════════════════════════════════════ */
+async function viewProfile(rollNumber) {
+  if (!rollNumber) return;
+
+  openModal(`
+    <div style="color:#fff;min-height:200px;display:flex;align-items:center;justify-content:center">
+      <div style="text-align:center;color:rgba(255,255,255,0.4)">
+        <i class="ti ti-loader" style="font-size:28px;animation:spin 1s linear infinite"></i>
+        <div style="margin-top:10px;font-size:13px">Loading profile…</div>
+      </div>
+    </div>`);
+
+  try {
+    const u = await UsersAPI.get(rollNumber);
+    const color     = getColor((u.name||"A")[0]);
+    const initial   = (u.name||"A")[0].toUpperCase();
+    const avatarUrl = u.avatar_url ? fixUrl(u.avatar_url) : "";
+    const skills    = Array.isArray(u.skills) ? u.skills : (u.skills||"").split(",").map(s=>s.trim()).filter(Boolean);
+    const roleL     = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
+    const trustL    = {verified:"Verified ✓",partial:"Partial",new:"New"}[u.trust_level]||"";
+    const trustC    = {verified:"#4ADE80",partial:"#FCD34D",new:"#F87171"}[u.trust_level]||"#888";
+    const isMe      = u.roll_number === currentUser?.roll_number;
+
+    document.getElementById("modal-content").innerHTML = `<div style="color:#fff">
+      <div style="height:80px;background:linear-gradient(135deg,#7C3AED,#9333EA);border-radius:8px 8px 0 0;margin:-18px -18px 0;position:relative;overflow:hidden">
+        ${u.wallpaper_url ? `<img src="${escHtml(fixUrl(u.wallpaper_url))}" style="width:100%;height:100%;object-fit:cover">` : ""}
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:-28px;margin-bottom:14px">
+        <div style="width:58px;height:58px;border-radius:50%;border:3px solid #13131A;overflow:hidden;background:${color};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:#fff;flex-shrink:0">
+          ${avatarUrl ? `<img src="${escHtml(avatarUrl)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='${initial}'">` : initial}
+        </div>
+        ${!isMe ? `<button onclick="closeModal();startDMWith('${escHtml(u.roll_number)}')"
+          style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.35);color:#A855F7;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          <i class="ti ti-message-2"></i> DM
+        </button>` : `<button onclick="closeModal();showTab('profile')"
+          style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          <i class="ti ti-pencil"></i> Edit Profile
+        </button>`}
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:4px">${escHtml(u.name||"—")}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px">${escHtml(u.branch||"")} · Batch ${u.batch_year||""} · ${escHtml(roleL)}</div>
+        ${trustL ? `<span style="font-size:11px;font-weight:600;color:${trustC}">${trustL}</span>` : ""}
+      </div>
+      <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.5)">
+        <span style="font-family:monospace;font-size:13px;color:#fff">${escHtml(u.roll_number||"—")}</span>
+        <span style="margin-left:8px">Roll Number</span>
+      </div>
+      ${u.bio ? `<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08)">${escHtml(u.bio)}</div>` : ""}
+      ${u.company ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+        <div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏢</div>
+        <div><div style="font-size:13px;font-weight:600;color:#fff">${escHtml(u.company)}</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Current employer</div></div>
+      </div>` : ""}
+      ${skills.length ? `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+        <div style="font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px">Skills</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${skills.map(s=>`<span style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.25);color:#A855F7;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600">${escHtml(s)}</span>`).join("")}</div>
+      </div>` : ""}
+      ${(u.linkedin_url||u.github_url||u.email) ? `<div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Contact & Links</div>
+        ${u.linkedin_url ? `<a href="${escHtml(u.linkedin_url)}" target="_blank" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);text-decoration:none"><i class="ti ti-brand-linkedin" style="font-size:16px;color:#0A66C2;width:20px"></i><span style="font-size:13px;color:rgba(255,255,255,0.6)">LinkedIn</span><i class="ti ti-external-link" style="font-size:12px;color:rgba(255,255,255,0.25);margin-left:auto"></i></a>` : ""}
+        ${u.github_url ? `<a href="${escHtml(u.github_url)}" target="_blank" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);text-decoration:none"><i class="ti ti-brand-github" style="font-size:16px;color:#fff;width:20px"></i><span style="font-size:13px;color:rgba(255,255,255,0.6)">GitHub</span><i class="ti ti-external-link" style="font-size:12px;color:rgba(255,255,255,0.25);margin-left:auto"></i></a>` : ""}
+        ${u.email ? `<div style="display:flex;align-items:center;gap:10px;padding:8px 0"><i class="ti ti-mail" style="font-size:16px;color:#A855F7;width:20px"></i><span style="font-size:13px;color:rgba(255,255,255,0.6)">${escHtml(u.email)}</span></div>` : ""}
+      </div>` : ""}
+    </div>`;
+  } catch(e) {
+    document.getElementById("modal-content").innerHTML = `
+      <div style="color:rgba(255,255,255,0.4);text-align:center;padding:32px 0">
+        <i class="ti ti-user-off" style="font-size:32px"></i>
+        <div style="margin-top:10px;font-size:13px">Could not load profile</div>
+      </div>`;
+  }
+}
