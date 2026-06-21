@@ -2,15 +2,6 @@
    dashboard.js — Sangam Dashboard (rewritten for new HTML/CSS)
    ============================================================ */
 
-const BACKEND_URL = "https://sangam-z93f.onrender.com";
-
-function fixAvatarUrl(url) {
-  if (!url) return "";
-  if (url.startsWith("/uploads/") || (!url.startsWith("http") && !url.startsWith("data:")))
-    return BACKEND_URL + (url.startsWith("/") ? url : "/" + url);
-  return url;
-}
-
 /* ── Global State ────────────────────────────────────────── */
 let currentUser    = null;
 let currentTab     = "home";
@@ -64,19 +55,21 @@ function formatRoomTime(iso) {
    INIT
 ════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", async () => {
+  // Load or use demo user
   currentUser = Auth.getUser() || {
     id:"demo", name:"Arjun Sharma", roll_number:"CSE22101",
     branch:"CSE", batch_year:2022, role:"student", trust_level:"partial",
     skills:["React","Python","DSA"],
   };
 
+  // Merge locally saved profile data
   try {
     const saved = JSON.parse(localStorage.getItem("sangam_profile_data")||"null");
     if (saved) currentUser = {...currentUser,...saved};
   } catch(e){}
 
   renderHeader();
-  showTab("home");
+  showTab("home");   // ← always open home first
   loadNotifBadge();
 
   window.addEventListener("popstate", e => {
@@ -88,14 +81,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 function renderHeader() {
   const av      = document.getElementById("header-avatar");
   const initial = (currentUser.name||"A")[0].toUpperCase();
-
-  let url = fixAvatarUrl(currentUser.avatar_url || localStorage.getItem("sangam_profile_avatar"));
-
+  
+  // Avatar URL — backend se aata hai, Netlify se nahi
+  let url = currentUser.avatar_url || localStorage.getItem("sangam_profile_avatar");
+  
+  // Agar relative URL hai toh backend prefix lagao
+  if (url && url.startsWith("/uploads/")) {
+    url = "https://sangam-z93f.onrender.com" + url;
+  }
+  
   if (!av) return;
   if (url) {
-    av.innerHTML = `<img src="${escHtml(url)}" alt=""
+    av.innerHTML = `<img src="${escHtml(url)}" alt="" 
       style="width:100%;height:100%;border-radius:50%;object-fit:cover"
-      onerror="this.parentElement.textContent='${initial}';this.parentElement.style.background='${getColor(initial)}'">`;
+      onerror="this.parentElement.innerHTML='${initial}';this.parentElement.style.background='${getColor(initial)}'">`;
     av.style.background = "none";
   } else {
     av.textContent = initial;
@@ -118,17 +117,23 @@ function renderHeader() {
 ════════════════════════════════════════════════════════════ */
 function showTab(tab) {
   currentTab = tab;
+
+  // Hide all tabs, deactivate all nav items
   document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".bnav-item").forEach(n => n.classList.remove("active"));
   document.body.classList.remove("chat-panel-open");
+
+  // Activate chosen tab
   document.getElementById(`tab-${tab}`)?.classList.add("active");
   document.querySelector(`.bnav-item[data-tab="${tab}"]`)?.classList.add("active");
 
+  // FAB only on feed
   const fab = document.getElementById("fab-btn");
   if (fab) fab.style.display = tab === "feed" ? "flex" : "none";
 
+  // Load tab content
   switch (tab) {
-    case "home":    break;
+    case "home":    /* iframe already loaded */ break;
     case "feed":    loadFeed();    break;
     case "alumni":  loadAlumni();  break;
     case "jobs":    loadJobs();    break;
@@ -147,7 +152,7 @@ function toggleSearch() {
   sb.classList.toggle("hidden");
   if (!sb.classList.contains("hidden")) sb.querySelector("input")?.focus();
 }
-function handleSearch(q) {}
+function handleSearch(q) { /* TODO: filter by currentTab */ }
 
 /* ════════════════════════════════════════════════════════════
    FEED
@@ -171,28 +176,18 @@ async function loadFeed(filter=null) {
 }
 
 function renderPost(p) {
-  const a       = p.author || {};
-  const color   = getColor((a.name||"A")[0]);
-  const initial = (a.name||"?")[0].toUpperCase();
-  const avatarUrl = fixAvatarUrl(a.avatar_url || "");
-
+  const a = p.author || {};
+  const color    = getColor((a.name||"A")[0]);
+  const initial  = (a.name||"?")[0].toUpperCase();
   const badgeMap = {verified:"vb-g",partial:"vb-b",new:"vb-y"};
   const badgeC   = badgeMap[a.trust_level] || "";
   const trustL   = {verified:"Verified",partial:"Partial",new:"New"}[a.trust_level]||"";
   const typeL    = {job:"Job",question:"Question",win:"Win 🎉",event:"Event",tip:"Tip",update:"Update"}[p.post_type]||"Post";
   const tags     = (p.tags||[]).map(t=>`<span class="ptag ptag-pu">${escHtml(t)}</span>`).join("");
-
-  const avatarHtml = avatarUrl
-    ? `<div class="post-av" style="background:${color};padding:0;overflow:hidden">
-         <img src="${escHtml(avatarUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-           onerror="this.parentElement.style.background='${color}';this.parentElement.innerHTML='${initial}'">
-       </div>`
-    : `<div class="post-av" style="background:${color}">${initial}</div>`;
-
   return `
   <div class="post-card">
     <div class="post-head">
-      ${avatarHtml}
+      <div class="post-av" style="background:${color}">${initial}</div>
       <div class="post-meta">
         <div class="post-name">${escHtml(a.name||"?")} ${trustL?`<span class="vbadge ${badgeC}">${trustL}</span>`:""}
         </div>
@@ -263,22 +258,13 @@ async function loadAlumni(params={}) {
 }
 
 function renderAlumni(u) {
-  const color      = getColor((u.name||"A")[0]);
-  const initial    = (u.name||"?")[0].toUpperCase();
-  const avatarUrl  = fixAvatarUrl(u.avatar_url || "");
-  const roleL      = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
-  const skills     = (u.skills||[]).slice(0,3).map(s=>`<span class="ptag ptag-pu">${escHtml(s)}</span>`).join("");
-
-  const avatarHtml = avatarUrl
-    ? `<div class="alumni-av" style="background:${color};padding:0;overflow:hidden;cursor:pointer" onclick="startDMWith('${u.roll_number}')">
-         <img src="${escHtml(avatarUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"
-           onerror="this.parentElement.style.background='${color}';this.parentElement.innerHTML='${initial}'">
-       </div>`
-    : `<div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>`;
-
+  const color   = getColor((u.name||"A")[0]);
+  const initial = (u.name||"?")[0].toUpperCase();
+  const roleL   = {alumni:"Alumni",teacher:"Teacher",admin:"Admin",student:"Student"}[u.role]||u.role;
+  const skills  = (u.skills||[]).slice(0,3).map(s=>`<span class="ptag ptag-pu">${escHtml(s)}</span>`).join("");
   return `
   <div class="alumni-card">
-    ${avatarHtml}
+    <div class="alumni-av" style="background:${color};cursor:pointer" onclick="startDMWith('${u.roll_number}')">${initial}</div>
     <div class="alumni-info">
       <div class="alumni-name">
         <span onclick="startDMWith('${u.roll_number}')" style="cursor:pointer">${escHtml(u.name)}</span>
@@ -517,7 +503,7 @@ async function sendChatMessage() {
 function connectSocket(room) {
   if (typeof io==="undefined") return;
   if (chatSocket) { try{chatSocket.disconnect();}catch(e){} }
-  chatSocket = io(BACKEND_URL,{auth:{token:`Bearer ${Auth.getToken()||""}`}});
+  chatSocket = io("http://localhost:5000",{auth:{token:`Bearer ${Auth.getToken()||""}`}});
   chatSocket.emit("join",{token:`Bearer ${Auth.getToken()||""}`,room});
   chatSocket.on("new_message",msg=>{
     const update=arr=>arr.map(r=>((r.id||r.room)===msg.room)?{...r,last_message:msg.content,last_time:msg.created_at}:r);
@@ -735,10 +721,5 @@ function showToast(msg, type="info") {
   t._timer = setTimeout(()=>t.classList.remove("show"),3000);
 }
 
-
 /* ── Logout ───────────────────────────────────────────────── */
 function logout(){ Auth.clear(); window.location.href="auth.html"; }
-
-
-
-
