@@ -1,0 +1,66 @@
+/* ============================================================
+   variables.css — Sangam Design Tokens
+   Theme: Professional slate + blue accent
+   ============================================================ */
+:root {
+  /* ── Brand / Accent ──────────────────────────────────── */
+  --purple:        #1D4ED8;
+  --purple-2:      #2563EB;
+  --purple-3:      #3B82F6;
+  --purple-dk:     #1E40AF;
+  --purple-deep:   #172554;
+  --purple-glow:   rgba(29,78,216,0.15);
+  --purple-light:  rgba(29,78,216,0.12);
+  --purple-light2: rgba(29,78,216,0.08);
+
+  /* ── Ink (dark surfaces) ─────────────────────────────── */
+  --ink:    #0C0C0F;
+  --ink-2:  #13131A;
+  --ink-3:  #1A1A24;
+  --ink-4:  #22222E;
+  --ink-5:  #2C2C3A;
+
+  /* ── App surfaces (neutral slate, not tinted) ──────────── */
+  --bg:     #F1F5F9;   /* page bg: cool neutral slate, not lavender       */
+  --white:  #FFFFFF;   /* only true white where necessary                */
+  --cream:  #F1F5F9;
+  --s2:     #E2E8F0;   /* card/section bg: muted slate                    */
+  --s3:     #CBD5E1;   /* slightly deeper                                 */
+  --s4:     #94A3B8;   /* borders, dividers on light bg                   */
+
+  /* ── Text (on light bg) ─────────────────────────────── */
+  --text:   #1E293B;
+  --text-2: #475569;
+  --text-3: #64748B;
+  --text-4: #94A3B8;
+
+  /* ── Borders ─────────────────────────────────────────── */
+  --border:    #CBD5E1;
+  --border-2:  #B0BCC9;
+  --border-dk: #2C2C3A;
+
+  /* ── Status ──────────────────────────────────────────── */
+  --green:  #16A34A;
+  --blue:   #2563EB;
+  --orange: #EA580C;
+  --red:    #DC2626;
+  --gold:   #B45309;
+
+  /* ── Radii ───────────────────────────────────────────── */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r:    8px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* ── Shadows ─────────────────────────────────────────── */
+  --sh:    0 1px 6px rgba(30,41,59,0.08);
+  --sh-md: 0 4px 18px rgba(30,41,59,0.12);
+  --sh-lg: 0 10px 36px rgba(30,41,59,0.16);
+  --sh-pu: 0 6px 24px rgba(29,78,216,0.35);
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --nav-h:     60px;
+  --top-nav-h: 56px;
+  --max-w:     480px;
+}

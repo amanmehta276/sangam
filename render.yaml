@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: sangam-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: ROLL_DB_PATH
+        value: data/students.csv
+      - key: OTP_MODE
+        value: sms
+      - key: OTP_EXPIRY
+        value: 300
+      - key: UPLOAD_FOLDER
+        value: uploads
+      - key: MAX_FILE_MB
+        value: 10
+      - key: FRONTEND_URL
+        sync: false

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sangam — Sign In</title>
+<link rel="icon" href="../favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="../css/auth.css">
+</head>
+<body class="auth-page">
+
+<div id="auth-frame">
+
+  <!-- ══════ SPLASH ══════ -->
+  <div class="auth-screen active" id="s-splash">
+    <div class="splash-top">
+      <div class="splash-ring"></div>
+      <div class="splash-ring"></div>
+      <div class="splash-ring"></div>
+      <div class="logo-lockup">
+        <div class="college-logos">
+          <div class="logo-slot">
+            <div class="logo-box">
+              <img src="../cgitlogo.jpg" onerror="this.outerHTML='<i class=\'ti ti-building-bank\' style=\'font-size:28px;color:rgba(255,255,255,0.3)\'></i>'" alt="CGIT">
+            </div>
+            <span class="logo-box-label">CGIT Raipur</span>
+          </div>
+          <div class="logo-divider"></div>
+          <div class="logo-slot">
+            <div class="logo-box">
+              <img src="../sangam.jpeg" onerror="this.outerHTML='<i class=\'ti ti-users\' style=\'font-size:28px;color:rgba(255,255,255,0.3)\'></i>'" alt="Sangam">
+            </div>
+            <span class="logo-box-label">Sangam</span>
+          </div>
+        </div>
+        <div class="app-wordmark">
+          <span class="wm-pre">Chhattisgarh Institute of Technology</span>
+          <span class="wm-main">San<em>gam</em></span>
+          <span class="wm-sub">विद्या नित्यं संयोजयति</span>
+        </div>
+        <div class="project-tag"><span>◆</span> Official College Network</div>
+      </div>
+    </div>
+    <div class="splash-bottom">
+      <p class="splash-tagline">Students. Alumni. Opportunities.<br>One trusted college network.</p>
+      <button class="btn-cta" onclick="showScreen('s-login')">
+        Sign In to Sangam <i class="ti ti-arrow-right" style="font-size:14px"></i>
+      </button>
+      <div class="splash-links">
+        <span onclick="showScreen('s-signup')">New here? Sign Up</span>
+        <span onclick="showScreen('s-login')">Alumni? Join here</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ LOGIN — Step 1: Roll + Name ══════ -->
+  <div class="auth-screen" id="s-login">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-splash')">←</button>
+      <div class="auth-title">Welcome <span>Back</span></div>
+      <div class="auth-step-badge">STEP 1 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="auth-college-strip">
+          <div class="auth-logo-mini"><i class="ti ti-building-bank" style="color:rgba(255,255,255,0.3)"></i></div>
+          <div class="auth-college-name">Chhattisgarh Institute of Technology</div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flabel">Roll Number</label>
+          <input type="text" class="finput" id="login-roll"
+            placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
+          <div class="roll-hint">Format: BRANCH + YEAR + ROLL (e.g. CSE22101)</div>
+        </div>
+        <div class="fgrp">
+          <label class="flabel">Full Name</label>
+          <input type="text" class="finput" id="login-name" placeholder="Your full name as on college ID">
+        </div>
+
+        <button class="btn-auth" id="btn-check-roll" onclick="doCheckRoll()">
+          Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
+
+        <div class="error-msg hidden" id="login-error"></div>
+
+        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-footer-link">
+          First time here? <a onclick="showScreen('s-signup')">Sign Up</a>
+        </div>
+
+        <div id="login-notfound" class="hidden">
+          <div class="notfound-box">
+            <div class="notfound-icon"><i class="ti ti-search" style="font-size:28px;color:rgba(255,255,255,0.2)"></i></div>
+            <div class="notfound-title">Not registered yet</div>
+            <p>Your roll number exists in our database but you haven't created an account.</p>
+            <button class="btn-auth" onclick="showScreen('s-signup')">
+              Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ LOGIN — Step 2: OTP ══════ -->
+  <div class="auth-screen" id="s-login-otp">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-login')">←</button>
+      <div class="auth-title">Enter <span>OTP</span></div>
+      <div class="auth-step-badge">STEP 2 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="otp-info">
+          OTP sent to <strong id="login-mobile-masked">XXXXXXX****</strong>
+        </div>
+        <div id="login-dev-otp-banner" class="dev-otp-banner hidden"></div>
+        <div class="otp-row">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,0,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,1,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,2,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,3,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,4,'login')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell login-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,5,'login')" onkeydown="otpBack(this,event)">
+        </div>
+        <button class="btn-auth" id="btn-login-verify" onclick="doLoginVerify()">
+          Verify &amp; Sign In <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
+        <div class="error-msg hidden" id="login-otp-error"></div>
+        <div class="otp-resend">Didn't get it? <span onclick="resendOtp('login')">Resend OTP</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SIGNUP — Step 1: Roll + Name ══════ -->
+  <div class="auth-screen" id="s-signup">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-splash')">←</button>
+      <div class="auth-title">Create <span>Account</span></div>
+      <div class="auth-step-badge">STEP 1 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="auth-college-strip">
+          <div class="auth-logo-mini"><i class="ti ti-building-bank" style="color:rgba(255,255,255,0.3)"></i></div>
+          <div class="auth-college-name">CGIT — Only for registered students</div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flabel">Roll Number</label>
+          <input type="text" class="finput" id="signup-roll"
+            placeholder="CSE22101" oninput="this.value=this.value.toUpperCase()">
+          <div class="roll-hint">Format: BRANCH + YEAR + ROLL e.g. CSE22101</div>
+        </div>
+        <div class="fgrp">
+          <label class="flabel">Full Name</label>
+          <input type="text" class="finput" id="signup-name" placeholder="Your name as on college ID">
+        </div>
+        <div class="fgrp">
+          <label class="flabel">
+            Mobile Number
+            <span style="color:rgba(255,255,255,0.2);font-weight:400;letter-spacing:0;text-transform:none;font-size:11px"> — optional if in DB</span>
+          </label>
+          <input type="tel" class="finput" id="signup-mobile" placeholder="10-digit mobile number">
+        </div>
+
+        <button class="btn-auth" id="btn-verify-roll" onclick="doVerifyRoll()">
+          Verify &amp; Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
+        <div class="error-msg hidden" id="signup-error"></div>
+
+        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-footer-link">Already registered? <a onclick="showScreen('s-login')">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SIGNUP — Step 2: OTP ══════ -->
+  <div class="auth-screen" id="s-signup-otp">
+    <div class="auth-header">
+      <button class="back-btn" onclick="showScreen('s-signup')">←</button>
+      <div class="auth-title">Verify <span>Mobile</span></div>
+      <div class="auth-step-badge">STEP 2 / 2</div>
+    </div>
+    <div class="auth-scroll">
+      <div class="auth-body">
+        <div class="prefill-strip" id="signup-info-strip">
+          <div class="prefill-av" id="signup-av">A</div>
+          <div>
+            <div class="prefill-name" id="signup-display-name">Loading…</div>
+            <div class="prefill-meta" id="signup-student-info"></div>
+          </div>
+        </div>
+
+        <div class="otp-info">
+          OTP sent to <strong id="signup-mobile-masked">XXXXXXX****</strong>
+        </div>
+        <div id="signup-dev-otp-banner" class="dev-otp-banner hidden"></div>
+
+        <div class="otp-row">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,0,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,1,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,2,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,3,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,4,'signup')" onkeydown="otpBack(this,event)">
+          <input class="otp-cell signup-otp-cell" maxlength="1" type="text" inputmode="numeric"
+            oninput="otpNext(this,5,'signup')" onkeydown="otpBack(this,event)">
+        </div>
+
+        <button class="btn-auth" id="btn-signup" onclick="doSignup()">
+          Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>
+        </button>
+        <div class="error-msg hidden" id="signup-otp-error"></div>
+        <div class="otp-resend">Didn't get it? <span onclick="resendOtp('signup')">Resend OTP</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #auth-frame -->
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>

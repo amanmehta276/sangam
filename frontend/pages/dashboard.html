@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Sangam</title>
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/components.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="icon" href="../favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<style>
+html,body{height:100%;overflow:hidden}
+.dashboard-page{
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  padding:0;background:var(--ink);
+}
+.top-navbar{position:fixed;top:0;left:0;right:0;height:var(--top-nav-h);z-index:500;flex-shrink:0}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:400}
+.dash-main{
+  position:fixed;top:var(--top-nav-h);bottom:var(--nav-h);
+  left:0;right:0;overflow:hidden;
+}
+.tab-view{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  opacity:0;pointer-events:none;transform:translateY(7px);
+  transition:opacity .2s ease,transform .2s ease;
+  -webkit-overflow-scrolling:touch;background:var(--ink);
+}
+.tab-view.active{opacity:1;pointer-events:all;transform:translateY(0)}
+#tab-chat{overflow:hidden !important}
+
+/* Bottom nav image icons */
+.bnav-icon{
+  width:22px;height:22px;object-fit:contain;
+  transition:transform .18s,filter .18s;
+  filter:grayscale(1) opacity(0.4);
+}
+.bnav-item.active .bnav-icon{filter:none;transform:scale(1.1)}
+.bnav-label{font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);transition:color .18s}
+.bnav-item.active .bnav-label{color:var(--purple-2);font-weight:600}
+
+/* Feed loading */
+.feed-loading{padding:36px 20px;text-align:center;color:rgba(255,255,255,0.28);font-size:13px}
+
+/* FAB */
+.fab-btn{
+  position:fixed;bottom:calc(var(--nav-h) + 14px);right:14px;
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--purple-2));
+  color:#fff;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--sh-pu);cursor:pointer;z-index:300;transition:all .18s;
+  border:none;
+}
+.fab-btn:hover{background:linear-gradient(135deg,var(--purple-2),var(--purple-3));transform:scale(1.07)}
+
+/* Search bar */
+.search-bar-wrap{
+  position:fixed;top:var(--top-nav-h);left:0;right:0;z-index:490;
+  background:var(--ink);padding:8px 14px;border-bottom:1px solid var(--border-dk);
+}
+.search-input{
+  width:100%;background:rgba(255,255,255,0.07);
+  border:1px solid var(--border-dk);border-radius:var(--r-sm);
+  padding:10px 16px;color:#fff;font-size:14px;outline:none;
+  font-family:'DM Sans',sans-serif;transition:border-color .15s;
+}
+.search-input::placeholder{color:rgba(255,255,255,0.25)}
+.search-input:focus{border-color:var(--purple-2)}
+
+/* Profile quick fields */
+.profile-quick-box{
+  background:var(--s2);border-radius:var(--r-sm);padding:16px;
+  display:flex;justify-content:space-between;gap:8px;
+}
+.pq-field{flex:1}
+.pq-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+.pq-val{margin-top:5px;font-size:14px;font-weight:600;color:var(--text)}
+
+/* ID Card */
+#id-card-preview{
+  width:100%;aspect-ratio:9/16;
+  background:linear-gradient(180deg,var(--purple),var(--purple-2));
+  border-radius:var(--r-lg);padding:24px;color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:var(--sh-md);position:relative;overflow:hidden;cursor:pointer;
+}
+#id-card-preview::before{
+  content:'';position:absolute;inset:0;opacity:0.04;
+  background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,0.3) 12px,rgba(255,255,255,0.3) 24px);
+}
+
+/* QR Modal */
+#qr-modal{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  z-index:9000;align-items:center;justify-content:center;
+}
+</style>
+</head>
+<body class="dashboard-page">
+
+<!-- ── Sidebar ── -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <img src="../favicon.ico" alt="" style="width:26px;height:26px;border-radius:var(--r-sm);flex-shrink:0">
+    <div>
+      <div class="sidebar-app-name">Sangam</div>
+      <div class="sidebar-college">CGIT Raipur</div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">College</div>
+    <a class="sidebar-item" href="../index.html">
+      <i class="ti ti-building-bank" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      About College
+    </a>
+    <a class="sidebar-item" href="#" onclick="showTab('alumni');closeSidebar()">
+      <i class="ti ti-users" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      Alumni Network
+    </a>
+    <a class="sidebar-item" href="#" onclick="showTab('jobs');closeSidebar()">
+      <i class="ti ti-briefcase" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      Placements &amp; Jobs
+    </a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="sidebar-item" href="#" onclick="showTab('profile');closeSidebar()">
+      <i class="ti ti-user" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      My Profile
+    </a>
+    <a class="sidebar-item" href="#" onclick="logout()">
+      <i class="ti ti-logout" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      Logout
+    </a>
+    <!-- Admin panel link — only shown for admin role -->
+    <div id="admin-sidebar-link" style="display:none">
+      <div class="sidebar-section-label">Admin</div>
+      <a class="sidebar-item" href="admin.html">
+        <i class="ti ti-shield-check" style="font-size:16px;width:20px;color:var(--purple-3)"></i>
+        Admin Panel
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">Made with care by VyomTech</div>
+</aside>
+
+<!-- ── Top Header ── -->
+<header class="top-navbar">
+  <button class="nav-hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-logo">
+    <img src="../favicon.ico" alt="" style="width:24px;height:24px;border-radius:var(--r-sm)">
+    <span class="nav-logo-text">San<em>gam</em></span>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-icon-btn" onclick="toggleSearch()" title="Search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="nav-icon-btn" id="chat-top-btn" onclick="showTab('chat')" title="Chat">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="nav-icon-btn" id="notif-btn" onclick="showTab('notifs')" title="Notifications" style="position:relative">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot" id="notif-dot" style="display:none"></span>
+    </button>
+    <div class="user-av-btn" id="header-avatar" onclick="showTab('profile')">A</div>
+  </div>
+</header>
+
+<!-- ── Search Bar ── -->
+<div class="search-bar-wrap hidden" id="search-bar">
+  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…" oninput="handleSearch(this.value)">
+</div>
+
+<!-- ── Main Content ── -->
+<main class="dash-main">
+
+  <!-- HOME TAB -->
+  <div class="tab-view active" id="tab-home">
+    <div style="height:100%;width:100%;overflow:hidden;display:flex;flex-direction:column">
+      <iframe src="../index.html?embedded=1" style="border:0;flex:1;width:100%;height:100%;min-height:300px" title="Home"></iframe>
+    </div>
+  </div>
+
+  <!-- FEED TAB -->
+  <div class="tab-view" id="tab-feed">
+    <div class="compose-row" onclick="openPostModal()">
+      <div class="compose-av" id="compose-av">A</div>
+      <div class="compose-ph">Share with your college network…</div>
+      <div class="compose-btns">
+        <div class="cpbtn"><i class="ti ti-photo" style="font-size:15px"></i></div>
+        <div class="cpbtn"><i class="ti ti-trophy" style="font-size:15px"></i></div>
+        <div class="cpbtn"><i class="ti ti-bulb" style="font-size:15px"></i></div>
+      </div>
+    </div>
+    <div class="chips-row">
+      <div class="chip on" onclick="filterFeed(null,this)">All</div>
+      <div class="chip" onclick="filterFeed('job',this)">Jobs</div>
+      <div class="chip" onclick="filterFeed('question',this)">Questions</div>
+      <div class="chip" onclick="filterFeed('win',this)">Wins</div>
+      <div class="chip" onclick="filterFeed('event',this)">Events</div>
+      <div class="chip" onclick="filterFeed('tip',this)">Tips</div>
+    </div>
+    <div class="sec-label">Latest from your network</div>
+    <div id="feed-list"><div class="feed-loading">Loading posts…</div></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- ALUMNI TAB -->
+  <div class="tab-view" id="tab-alumni">
+    <div class="search-hero">
+      <div class="search-hero-title">Find <em>Alumni</em></div>
+      <div class="search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input placeholder="Search by name, company, batch…" oninput="searchAlumni(this.value)">
+      </div>
+    </div>
+    <div class="filter-grid">
+      <div class="fcard" onclick="filterAlumniBy('branch','CSE')"><span class="fi"><i class="ti ti-cpu"></i></span><span class="fl">CSE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','EEE')"><span class="fi"><i class="ti ti-bolt"></i></span><span class="fl">EEE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','ECE')"><span class="fi"><i class="ti ti-antenna"></i></span><span class="fl">ECE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('role','alumni')"><span class="fi"><i class="ti ti-school"></i></span><span class="fl">Alumni</span></div>
+      <div class="fcard" onclick="filterAlumniBy('role','teacher')"><span class="fi"><i class="ti ti-chalkboard"></i></span><span class="fl">Teachers</span></div>
+      <div class="fcard" onclick="filterAlumniBy('referral','1')"><span class="fi"><i class="ti ti-file-check"></i></span><span class="fl">Referrals</span></div>
+      <div class="fcard" onclick="filterAlumniBy('mentors','1')"><span class="fi"><i class="ti ti-users"></i></span><span class="fl">Mentors</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','ME')"><span class="fi"><i class="ti ti-tool"></i></span><span class="fl">ME</span></div>
+    </div>
+    <div class="sec-label" style="margin-top:8px">Alumni Directory</div>
+    <div id="alumni-list"><div class="feed-loading">Loading alumni…</div></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div class="tab-view" id="tab-jobs">
+    <div class="search-hero">
+      <div class="search-hero-title">Jobs &amp; <em>Internships</em></div>
+      <div class="search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input placeholder="Role, company, skills…" oninput="searchJobs(this.value)">
+      </div>
+    </div>
+    <div class="chips-row">
+      <div class="chip on" onclick="chipSel(this)">All</div>
+      <div class="chip" onclick="chipSel(this)">With Referral</div>
+      <div class="chip" onclick="chipSel(this)">Internship</div>
+      <div class="chip" onclick="chipSel(this)">Full-Time</div>
+      <div class="chip" onclick="chipSel(this)">Remote</div>
+    </div>
+    <div id="post-job-btn-wrap" class="hidden" style="padding:8px 12px 0">
+      <button class="btn-primary w-full" onclick="openJobModal()">+ Post a Job / Internship</button>
+    </div>
+    <div class="sec-label" style="margin-top:8px">Latest Opportunities</div>
+    <div id="jobs-list"><div class="feed-loading">Loading jobs…</div></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div class="tab-view" id="tab-chat">
+    <div class="chat-layout">
+      <div class="chat-sidebar" id="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <div class="chat-sidebar-toprow">
+            <div class="chat-sidebar-title">Messages</div>
+            <div class="chat-header-actions">
+              <button class="chat-hdr-btn" onclick="openDMSearch()" title="New DM"><i class="ti ti-message-plus"></i></button>
+              <button class="chat-hdr-btn" onclick="openNewGroupModal()" title="New Group"><i class="ti ti-users-plus"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-rooms-list" id="chat-rooms-list">
+          <div class="feed-loading">Loading chats…</div>
+        </div>
+      </div>
+
+      <div class="chat-panel" id="chat-panel">
+        <div class="chat-empty-state" id="chat-empty-state">
+          <i class="ti ti-message-2" style="font-size:44px;opacity:.3"></i>
+          <h3>Select a conversation</h3>
+          <p>Pick a room from the left, or start a new DM or group chat.</p>
+        </div>
+
+        <div id="active-chat" style="display:none;flex-direction:column;height:100%;overflow:hidden">
+          <div class="chat-panel-header">
+            <button class="chat-back-btn" onclick="backToRoomList()"><i class="ti ti-chevron-left"></i></button>
+            <div class="chat-panel-av" id="cp-avatar" onclick="openActiveRoomProfile()" style="cursor:pointer">G</div>
+            <div class="chat-panel-info" onclick="openActiveRoomProfile()" style="cursor:pointer">
+              <div class="chat-panel-name" id="cp-name">Global Chat</div>
+              <div class="chat-panel-sub" id="cp-sub">Community group</div>
+            </div>
+          </div>
+
+          <div class="chat-messages-area" id="chat-messages-area"></div>
+
+          <div class="chat-input-wrap">
+            <div class="chat-input-row">
+              <textarea class="chat-text-input" id="chat-input" placeholder="Type a message…" rows="1"
+                oninput="autoGrow(this)"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+              <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">
+                <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div class="tab-view" id="tab-profile">
+    <div class="profile-page">
+
+      <!-- COVER -->
+      <div class="profile-cover">
+        <div class="profile-cover-bg" id="profile-wallpaper"></div>
+        <div class="profile-cover-grid"></div>
+        <label class="profile-cover-change-btn" for="wallpaper-input">
+          <i class="ti ti-camera"></i> Change Cover
+        </label>
+        <input id="wallpaper-input" type="file" accept="image/*" style="display:none" onchange="uploadWallpaper(this)">
+      </div>
+
+      <!-- AVATAR + EDIT BUTTON -->
+      <div class="profile-av-bar">
+        <div class="profile-av-ring" id="profile-avatar-btn" onclick="document.getElementById('avatar-input').click()">
+          <span id="profile-av-initial">A</span>
+          <img id="profile-av-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+          <div class="profile-av-edit-overlay"><i class="ti ti-camera" style="font-size:15px"></i></div>
+        </div>
+        <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        <div class="profile-av-actions">
+          <button class="profile-edit-btn" id="edit-btn" onclick="openEditDrawer()">
+            <i class="ti ti-pencil" style="font-size:13px"></i> Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- PROFILE DISPLAY BODY -->
+      <div class="profile-body">
+
+        <!-- LEFT -->
+        <div class="profile-left">
+
+          <!-- Identity card -->
+          <div class="pcard">
+            <div class="profile-name" id="profile-name-display">Loading…</div>
+            <div class="profile-headline" id="profile-meta-display">—</div>
+            <div class="profile-location" id="profile-location-display">
+              <i class="ti ti-map-pin" style="font-size:12px"></i>
+              <span>Raipur, Chhattisgarh, India</span>
+            </div>
+            <div class="profile-verified" id="profile-trust-display">
+              <i class="ti ti-rosette-discount-check" style="font-size:12px"></i> Verified Student · CGIT Raipur
+            </div>
+            <div class="profile-stats-row">
+              <div class="profile-stat">
+                <div class="profile-stat-label">Roll No.</div>
+                <div class="profile-stat-val" id="quick-roll">—</div>
+              </div>
+              <div class="profile-stat-div"></div>
+              <div class="profile-stat">
+                <div class="profile-stat-label">Branch</div>
+                <div class="profile-stat-val" id="quick-branch">—</div>
+              </div>
+              <div class="profile-stat-div"></div>
+              <div class="profile-stat">
+                <div class="profile-stat-label">Batch</div>
+                <div class="profile-stat-val" id="quick-batch">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="pcard">
+            <div class="pcard-title" style="margin-bottom:10px">About</div>
+            <div class="pcard-body profile-about" id="profile-bio-display" style="color:rgba(255,255,255,0.4);font-style:italic">
+              Click "Edit Profile" to add your bio…
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div class="pcard">
+            <div class="pcard-title" style="margin-bottom:10px">Experience</div>
+            <div id="company-role-display">
+              <div class="exp-empty">Click "Edit Profile" to add experience</div>
+            </div>
+          </div>
+
+          <!-- Skills -->
+          <div class="pcard">
+            <div class="pcard-title" style="margin-bottom:10px">Skills</div>
+            <div id="skills-display">
+              <div class="exp-empty">Click "Edit Profile" to add skills</div>
+            </div>
+          </div>
+
+          <!-- Links -->
+          <div class="pcard" style="padding-bottom:4px">
+            <div class="pcard-title" style="margin-bottom:4px">Contact &amp; Links</div>
+            <div class="plink-row">
+              <div class="plink-icon"><i class="ti ti-brand-linkedin"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">LinkedIn</div>
+                <div class="plink-val" id="display-linkedin">Not added</div>
+              </div>
+            </div>
+            <div class="plink-row">
+              <div class="plink-icon"><i class="ti ti-brand-github"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">GitHub</div>
+                <div class="plink-val" id="display-github">Not added</div>
+              </div>
+            </div>
+            <div class="plink-row" style="border:none">
+              <div class="plink-icon"><i class="ti ti-mail"></i></div>
+              <div class="plink-info">
+                <div class="plink-label">Email</div>
+                <div class="plink-val" id="display-email">Not added</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /profile-left -->
+
+        <!-- RIGHT -->
+        <div class="profile-right">
+
+          <!-- ID Card -->
+          <div class="pcard">
+            <div class="pcard-header">
+              <div class="pcard-title">Sangam ID Card</div>
+              <div class="pcard-type-btns">
+                <button id="btn-student" class="pcard-type-btn active" onclick="switchCardType('student')">Student</button>
+                <button id="btn-alumni"  class="pcard-type-btn"        onclick="switchCardType('alumni')">Alumni</button>
+              </div>
+            </div>
+            <div class="id-card" id="id-card-preview" onclick="generateIDCard()">
+              <div class="id-card-shimmer"></div>
+              <div class="id-card-top">
+                <div class="id-card-college">CGIT · Sangam</div>
+                <div id="card-type-label" class="id-card-type">Student</div>
+              </div>
+              <div class="id-card-mid">
+                <div class="id-card-av" id="card-avatar-letter">A</div>
+                <div id="card-name"  class="id-card-name">Your Name</div>
+                <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
+              </div>
+              <div class="id-card-bottom">
+                <div class="id-card-id-label">Sangam ID</div>
+                <div id="card-id" class="id-card-id">SAG-000000</div>
+                <div id="qr-code-small" class="id-card-qr">
+                  <i class="ti ti-qrcode" style="font-size:26px;opacity:.5"></i>
+                </div>
+              </div>
+            </div>
+            <button class="pcard-generate-btn" onclick="generateIDCard()">
+              <i class="ti ti-qrcode" style="font-size:15px"></i> Generate QR Code
+            </button>
+            <p class="pcard-hint" style="text-align:center;margin-top:6px;padding:0 0 4px">Tap card to preview QR</p>
+          </div>
+
+          <!-- People you may know -->
+          <div class="pcard" style="padding-bottom:4px">
+            <div class="pcard-header">
+              <div class="pcard-title">People you may know</div>
+              <span style="font-size:10px;color:rgba(255,255,255,0.25)">From CGIT</span>
+            </div>
+            <div id="pymk-list">
+              <div class="pymk-item">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#1D4ED8,#2563EB)">R</div>
+                <div class="pymk-info"><div class="pymk-name">Rahul Sharma</div><div class="pymk-meta">CSE · Batch 2023</div></div>
+                <button class="pymk-connect-btn">+ Connect</button>
+              </div>
+              <div class="pymk-item">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#0369A1,#0284C7)">P</div>
+                <div class="pymk-info"><div class="pymk-name">Priya Verma</div><div class="pymk-meta">EEE · Batch 2024</div></div>
+                <button class="pymk-connect-btn">+ Connect</button>
+              </div>
+              <div class="pymk-item" style="border:none">
+                <div class="pymk-av" style="background:linear-gradient(135deg,#B45309,#D97706)">A</div>
+                <div class="pymk-info"><div class="pymk-name">Ankit Patel</div><div class="pymk-meta">ME · Alumni 2022</div></div>
+                <button class="pymk-connect-btn">+ Connect</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /profile-right -->
+      </div><!-- /profile-body -->
+    </div><!-- /profile-page -->
+  </div>
+
+  <!-- ══ EDIT PROFILE DRAWER (slides from right) ══ -->
+  <div class="edit-drawer-overlay" id="edit-drawer-overlay" onclick="closeEditDrawer()"></div>
+  <div class="edit-drawer" id="edit-drawer">
+    <div class="edit-drawer-head">
+      <div class="edit-drawer-title">Edit Profile</div>
+      <button class="edit-drawer-close" onclick="closeEditDrawer()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="edit-drawer-body">
+
+      <div class="ef-section-label">Basic Info</div>
+      <div class="ef-field">
+        <label class="ef-label">Bio</label>
+        <textarea id="pe-bio" class="ef-input ef-textarea" placeholder="Tell your story in 2-3 lines…" rows="4"></textarea>
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Company / Current Role</label>
+        <input id="pe-company" class="ef-input" placeholder="e.g. Software Engineer @ Google">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Location</label>
+        <input id="pe-location" class="ef-input" placeholder="e.g. Raipur, India">
+      </div>
+
+      <div class="ef-section-label">Skills</div>
+      <div class="ef-field">
+        <label class="ef-label">Skills <span style="font-weight:300;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.2)">(comma separated)</span></label>
+        <input id="pe-skills" class="ef-input" placeholder="React, Python, DSA, Figma…">
+        <div id="pe-skills-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:10px"></div>
+      </div>
+
+      <div class="ef-section-label">Links &amp; Contact</div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-brand-linkedin" style="color:#0A66C2;font-size:14px"></i> LinkedIn</label>
+        <input id="pe-linkedin" class="ef-input" placeholder="https://linkedin.com/in/yourname">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-brand-github" style="font-size:14px"></i> GitHub</label>
+        <input id="pe-github" class="ef-input" placeholder="https://github.com/yourname">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-mail" style="color:var(--purple-3);font-size:14px"></i> Email</label>
+        <input id="pe-email" class="ef-input" type="email" placeholder="your@email.com">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label"><i class="ti ti-phone" style="font-size:14px"></i> Phone</label>
+        <input id="pe-phone" class="ef-input" type="tel" placeholder="10-digit number">
+      </div>
+
+      <!-- Alumni section (shows only for alumni role) -->
+      <div id="alumni-section" style="display:none">
+        <div class="ef-section-label">Alumni Details</div>
+        <div class="ef-field">
+          <label class="ef-label">Graduation Year</label>
+          <input id="pe-graduation-year" class="ef-input" type="number" placeholder="e.g. 2022" min="2000" max="2030">
+        </div>
+        <div class="ef-field">
+          <label class="ef-label">Current Position</label>
+          <input id="pe-alumni-position" class="ef-input" placeholder="e.g. SDE-2 at Microsoft">
+        </div>
+        <div class="ef-field">
+          <label class="ef-label">Current Company</label>
+          <input id="pe-alumni-company" class="ef-input" placeholder="e.g. Google">
+        </div>
+      </div>
+
+    </div><!-- /edit-drawer-body -->
+
+    <!-- Save footer — always at bottom -->
+    <div style="display:flex;gap:10px;padding:14px 18px;border-top:1px solid #2C2C3A;flex-shrink:0;background:#13131A;">
+      <button onclick="closeEditDrawer()" style="flex:1;padding:12px;border:1px solid #2C2C3A;border-radius:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
+        Cancel
+      </button>
+      <button onclick="saveProfile()" id="drawer-save-btn" style="flex:2;padding:12px;border:none;border-radius:6px;background:linear-gradient(135deg,#1E3A8A,#1D4ED8);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="ti ti-device-floppy" style="font-size:16px"></i> Save Changes
+      </button>
+    </div>
+
+  </div><!-- /edit-drawer -->
+
+  <!-- QR Modal -->
+  <div id="qr-modal" onclick="if(event.target===this)closeQRModal()">
+    <div class="qr-modal-box">
+      <div class="qr-modal-title">Your Sangam QR</div>
+      <div id="qr-code-large" class="qr-modal-canvas">Loading…</div>
+      <p class="qr-modal-sub">Scan to view your Sangam profile</p>
+      <button class="qr-modal-dl-btn" onclick="downloadQRCode()">
+        <i class="ti ti-download"></i> Download QR
+      </button>
+      <button class="qr-modal-close-btn" onclick="closeQRModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS TAB -->
+  <div class="tab-view" id="tab-notifs">
+    <div class="notifs-page">
+      <div class="notifs-header">
+        <div class="notifs-title">Notifications</div>
+        <button class="notifs-mark-btn" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div id="notifs-list"><div class="feed-loading">Loading…</div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Bottom Nav ── -->
+<nav class="bottom-nav">
+  <div class="bnav-item active" data-tab="home" onclick="showTab('home')">
+    <img src="../icons/home.png" class="bnav-icon" alt="Home" onerror="this.outerHTML='<i class=ti style=font-size:22px;color:var(--text-3)>🏠</i>'">
+    <span class="bnav-label">Home</span>
+  </div>
+  <div class="bnav-item" data-tab="alumni" onclick="showTab('alumni')">
+    <img src="../icons/alumni.png" class="bnav-icon" alt="Alumni" onerror="this.outerHTML='<i style=font-size:22px>🎓</i>'">
+    <span class="bnav-label">Alumni</span>
+  </div>
+  <div class="bnav-item" data-tab="feed" onclick="showTab('feed')">
+    <i class="ti ti-layout-list" style="font-size:22px;color:var(--text-3);transition:color .18s"></i>
+    <span class="bnav-label">Feed</span>
+  </div>
+  <div class="bnav-item" data-tab="jobs" onclick="showTab('jobs')">
+    <img src="../icons/jobs.png" class="bnav-icon" alt="Jobs" onerror="this.outerHTML='<i style=font-size:22px>💼</i>'">
+    <span class="bnav-label">Jobs</span>
+  </div>
+  <div class="bnav-item" data-tab="profile" onclick="showTab('profile')">
+    <img src="../icons/profile.png" class="bnav-icon" alt="Profile" onerror="this.outerHTML='<i style=font-size:22px>👤</i>'">
+    <span class="bnav-label">Profile</span>
+  </div>
+</nav>
+
+<!-- FAB -->
+<button class="fab-btn" id="fab-btn" onclick="openPostModal()">
+  <i class="ti ti-plus" style="font-size:22px"></i>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<!-- Modals -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:900" onclick="closeModal()"></div>
+<div id="modal-content" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:910;background:var(--ink-2);border:1px solid var(--border-dk);border-radius:16px 16px 0 0;padding:18px;height:90vh;overflow-y:auto"></div>
+<script src="../js/api.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="../js/profile.js"></script>
+<script src="../js/dashboard.js"></script>
+</body>
+</html>
