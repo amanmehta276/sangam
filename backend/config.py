@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    SECRET_KEY       = os.getenv("SECRET_KEY", "change-me")
+    SECRET_KEY       = os.getenv("SECRET_KEY")
     MONGO_URI        = os.getenv("MONGO_URI")
     ROLL_DB_PATH     = os.getenv("ROLL_DB_PATH", "data/students.csv")
     OTP_MODE         = os.getenv("OTP_MODE", "console")   # console | sms | email
