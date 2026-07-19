@@ -126,6 +126,15 @@ function toggleSearch() {
   sb.classList.toggle("hidden");
   if (!sb.classList.contains("hidden")) sb.querySelector("input")?.focus();
 }
+
+let _searchDebounceTimer = null;
+function debounce(fn, delay) {
+  return function(...args) {
+    clearTimeout(_searchDebounceTimer);
+    _searchDebounceTimer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function handleSearch(q) {
   q = (q || "").trim().toLowerCase();
   if (currentTab === "feed") {
@@ -148,6 +157,8 @@ function handleSearch(q) {
     searchAlumni(q);
   }
 }
+
+const debouncedSearch = debounce(handleSearch, 300);
 
 /* ════════════════════════════════════════════════════════════
    FEED
