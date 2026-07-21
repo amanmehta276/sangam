@@ -47,6 +47,30 @@ function setLoading(btnId, loading, text = "") {
   }
 }
 
+function startResendCountdown(seconds, selector) {
+  const btn = document.querySelector(selector);
+  if (!btn) return;
+
+  if (btn._countdownTimer) clearInterval(btn._countdownTimer);
+  btn.dataset.originalHtml = btn.dataset.originalHtml || btn.innerHTML;
+  btn.disabled = true;
+
+  let remaining = Math.max(1, parseInt(seconds, 10) || 30);
+  btn.innerHTML = `<span>Resend in ${remaining}s</span>`;
+
+  btn._countdownTimer = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(btn._countdownTimer);
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.originalHtml || btn.innerHTML;
+      delete btn._countdownTimer;
+      return;
+    }
+    btn.innerHTML = `<span>Resend in ${remaining}s</span>`;
+  }, 1000);
+}
+
 /* ── OTP input helpers ──────────────────────────────────── */
 function otpNext(el, idx, prefix) {
   el.value = el.value.replace(/\D/g, "").slice(0, 1);
@@ -118,6 +142,10 @@ async function doCheckRoll() {
 
   } catch (err) {
     const msg = err?.message || "Something went wrong";
+    const waitMatch = msg.match(/(\d+)s/);
+    if (waitMatch) {
+      startResendCountdown(parseInt(waitMatch[1], 10), "#btn-check-roll");
+    }
     if (err?.data?.error === "not_registered") {
       document.getElementById("login-notfound")?.classList.remove("hidden");
     } else {
@@ -204,6 +232,10 @@ async function doVerifyRoll() {
 
   } catch (err) {
     const msg = err?.message || "Something went wrong";
+    const waitMatch = msg.match(/(\d+)s/);
+    if (waitMatch) {
+      startResendCountdown(parseInt(waitMatch[1], 10), "#btn-verify-roll");
+    }
     if (err?.data?.error === "already_registered") {
       showError("signup-error", "Account already exists. Please sign in.");
       setTimeout(() => showScreen("s-login"), 2000);

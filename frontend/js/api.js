@@ -123,7 +123,7 @@ const JobsAPI = {
 ════════════════════════════════════════════════════════════ */
 const ChatAPI = {
   rooms:       ()               => _api("/chat/rooms"),
-  getMessages: (room, after)    => _api(`/chat/messages/${room}` + (after ? `?after=${encodeURIComponent(after)}` : "")),
+  getMessages: (room, afterId)  => _api(`/chat/messages/${room}` + (afterId ? `?after_id=${encodeURIComponent(afterId)}` : "")),
   sendMessage: (room, content)  => _api("/chat/messages", { method: "POST", body: { room, content } }),
   createGroup: (name, members)  => _api("/chat/rooms", { method: "POST", body: { name, members } }),
   startDM:     (roll)           => _api(`/chat/dm/${roll}`, { method: "POST" }),

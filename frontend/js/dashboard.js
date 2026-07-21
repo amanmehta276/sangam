@@ -18,7 +18,7 @@ let allPosts       = [];
 let activeRoom     = null;   // {id, type, name, dm_roll}
 let allRooms       = { system_groups:[], my_groups:[], dms:[] };
 let chatPollTimer  = null;
-let chatLastMsgTime = null;
+let chatLastMsgId = null;
 
 /* ── Colors ──────────────────────────────────────────────── */
 const AV_COLORS = ["#1D4ED8","#2563EB","#16A34A","#0288D1","#E91E63","#FF5722","#00796B","#5C6BC0"];
@@ -126,6 +126,15 @@ function toggleSearch() {
   sb.classList.toggle("hidden");
   if (!sb.classList.contains("hidden")) sb.querySelector("input")?.focus();
 }
+
+let _searchDebounceTimer = null;
+function debounce(fn, delay) {
+  return function(...args) {
+    clearTimeout(_searchDebounceTimer);
+    _searchDebounceTimer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function handleSearch(q) {
   q = (q || "").trim().toLowerCase();
   if (currentTab === "feed") {
@@ -148,6 +157,8 @@ function handleSearch(q) {
     searchAlumni(q);
   }
 }
+
+const debouncedSearch = debounce(handleSearch, 300);
 
 /* ════════════════════════════════════════════════════════════
    FEED
@@ -394,7 +405,7 @@ async function openRoom(room) {
     name: room.type === "dm" ? (room.dm_with?.name || room.dm_with?.roll_number) : room.name,
     dm_roll: room.dm_with?.roll_number || null,
   };
-  chatLastMsgTime = null;
+  chatLastMsgId = null;
 
   document.getElementById("chat-empty-state").style.display = "none";
   document.getElementById("active-chat").style.display = "flex";
@@ -415,11 +426,17 @@ async function openRoom(room) {
   area.innerHTML = `<div class="feed-loading">Loading messages…</div>`;
   try {
     const msgs = await ChatAPI.getMessages(room.id);
+    if (!Array.isArray(msgs)) {
+      console.error("Expected array of messages, got:", msgs);
+      area.innerHTML = `<div class="feed-loading">Unexpected server response — check console.</div>`;
+      return;
+    }
     area.innerHTML = "";
     msgs.forEach(appendChatMessage);
-    if (msgs.length) chatLastMsgTime = msgs[msgs.length - 1].created_at;
+    if (msgs.length) chatLastMsgId = msgs[msgs.length - 1].id;
     area.scrollTop = area.scrollHeight;
-  } catch {
+  } catch (err) {
+    console.error("loadMessages failed:", err);
     area.innerHTML = `<div class="feed-loading">Could not load messages.</div>`;
   }
 
@@ -436,14 +453,16 @@ function startChatPolling() {
   chatPollTimer = setInterval(async () => {
     if (!activeRoom) return;
     try {
-      const msgs = await ChatAPI.getMessages(activeRoom.id, chatLastMsgTime);
-      if (msgs.length) {
+      const msgs = await ChatAPI.getMessages(activeRoom.id, chatLastMsgId);
+      if (Array.isArray(msgs) && msgs.length) {
         msgs.forEach(appendChatMessage);
-        chatLastMsgTime = msgs[msgs.length - 1].created_at;
+        chatLastMsgId = msgs[msgs.length - 1].id;
         const area = document.getElementById("chat-messages-area");
         area.scrollTop = area.scrollHeight;
       }
-    } catch { /* silent — will retry next tick */ }
+    } catch (err) {
+      console.error("poll failed:", err);
+    }
   }, 4000);
 }
 function stopChatPolling() {
@@ -471,11 +490,12 @@ async function sendChatMessage() {
   try {
     const msg = await ChatAPI.sendMessage(activeRoom.id, content);
     appendChatMessage(msg);
-    chatLastMsgTime = msg.created_at;
+    chatLastMsgId = msg.id;
     const area = document.getElementById("chat-messages-area");
     area.scrollTop = area.scrollHeight;
     loadChat(); // refresh room list preview/order
-  } catch {
+  } catch (err) {
+    console.error("send failed:", err);
     showToast("Message failed to send", "error");
   }
 }

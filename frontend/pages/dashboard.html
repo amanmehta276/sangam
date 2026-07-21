@@ -175,7 +175,7 @@ html,body{height:100%;overflow:hidden}
 
 <!-- ── Search Bar ── -->
 <div class="search-bar-wrap hidden" id="search-bar">
-  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…" oninput="handleSearch(this.value)">
+  <input type="search" class="search-input" placeholder="Search alumni, posts, jobs…" oninput="debouncedSearch(this.value)">
 </div>
 
 <!-- ── Main Content ── -->
