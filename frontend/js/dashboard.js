@@ -126,15 +126,6 @@ function toggleSearch() {
   sb.classList.toggle("hidden");
   if (!sb.classList.contains("hidden")) sb.querySelector("input")?.focus();
 }
-
-let _searchDebounceTimer = null;
-function debounce(fn, delay) {
-  return function(...args) {
-    clearTimeout(_searchDebounceTimer);
-    _searchDebounceTimer = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
-
 function handleSearch(q) {
   q = (q || "").trim().toLowerCase();
   if (currentTab === "feed") {
@@ -157,8 +148,6 @@ function handleSearch(q) {
     searchAlumni(q);
   }
 }
-
-const debouncedSearch = debounce(handleSearch, 300);
 
 /* ════════════════════════════════════════════════════════════
    FEED
@@ -363,8 +352,9 @@ async function loadChat() {
   try {
     allRooms = await ChatAPI.rooms();
     renderRoomList();
-  } catch {
-    el.innerHTML = `<div class="feed-loading">Could not load chats. Check your connection.</div>`;
+  } catch (err) {
+    console.error("loadChat failed:", err);
+    el.innerHTML = `<div class="feed-loading">Could not load chats: ${escHtml(err.message||"unknown error")}</div>`;
   }
 }
 
@@ -428,7 +418,7 @@ async function openRoom(room) {
     const msgs = await ChatAPI.getMessages(room.id);
     if (!Array.isArray(msgs)) {
       console.error("Expected array of messages, got:", msgs);
-      area.innerHTML = `<div class="feed-loading">Unexpected server response — check console.</div>`;
+      area.innerHTML = `<div class="feed-loading">Unexpected server response — check console (F12).</div>`;
       return;
     }
     area.innerHTML = "";
@@ -437,7 +427,7 @@ async function openRoom(room) {
     area.scrollTop = area.scrollHeight;
   } catch (err) {
     console.error("loadMessages failed:", err);
-    area.innerHTML = `<div class="feed-loading">Could not load messages.</div>`;
+    area.innerHTML = `<div class="feed-loading">Could not load messages: ${escHtml(err.message||"unknown error")}</div>`;
   }
 
   startChatPolling();
@@ -461,7 +451,7 @@ function startChatPolling() {
         area.scrollTop = area.scrollHeight;
       }
     } catch (err) {
-      console.error("poll failed:", err);
+      console.error("chat poll failed:", err); // silent to user — will retry next tick
     }
   }, 4000);
 }
