@@ -87,22 +87,20 @@ def get_messages(room_id):
     if not room or not _is_member(room, me):
         return jsonify({"error": "Room not found or access denied"}), 404
 
-    after = request.args.get("after")   # ISO timestamp — used for polling only new messages
-    limit = min(int(request.args.get("limit", 50)), 100)
+    after_id = request.args.get("after_id")
+    limit    = min(int(request.args.get("limit", 50)), 100)
 
     filt = {"room": room["_id"]}
-    if after:
+    if after_id:
         try:
-            filt["created_at"] = {"$gt": datetime.datetime.fromisoformat(after)}
-        except ValueError:
+            filt["_id"] = {"$gt": ObjectId(after_id)}
+        except Exception:
             pass
 
-    if after:
-        # Polling for new messages — chronological, no need to reverse
-        msgs = list(messages_col.find(filt).sort("created_at", 1).limit(limit))
+    if after_id:
+        msgs = list(messages_col.find(filt).sort("_id", 1).limit(limit))
     else:
-        # Initial load — last N messages, oldest first
-        msgs = list(messages_col.find(filt).sort("created_at", -1).limit(limit))
+        msgs = list(messages_col.find(filt).sort("_id", -1).limit(limit))
         msgs.reverse()
 
     return jsonify([_msg_out(m) for m in msgs])
