@@ -197,11 +197,16 @@ def add_student():
     if not roll or not name:
         return jsonify({"error": "roll_number and name required"}), 400
 
+    branch = data.get("branch", "").strip()
+    batch_year = data.get("batch_year", "").strip()
+    mobile = data.get("mobile", "").strip()
+    role = data.get("role", "student").strip() or "student"
+
     path = cfg.ROLL_DB_PATH
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     if not os.path.exists(path):
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write("roll_number,name,branch,batch_year,mobile,role\n")
 
     with open(path, "a", newline="", encoding="utf-8") as f:
@@ -209,11 +214,39 @@ def add_student():
         writer.writerow([
             roll,
             name,
-            data.get("branch", ""),
-            data.get("batch_year", ""),
-            data.get("mobile", ""),
-            data.get("role", "student"),
+            branch,
+            batch_year,
+            mobile,
+            role,
         ])
+
+    existing_user = users_col.find_one({"roll_number": roll})
+    if not existing_user:
+        now = datetime.datetime.utcnow()
+        users_col.insert_one({
+            "roll_number": roll,
+            "name": name,
+            "mobile": mobile,
+            "branch": branch,
+            "batch_year": batch_year,
+            "role": role,
+            "trust_level": "new",
+            "bio": "",
+            "company": "",
+            "location": "",
+            "email": "",
+            "phone": "",
+            "skills": [],
+            "linkedin_url": "",
+            "github_url": "",
+            "avatar_url": "",
+            "wallpaper_url": "",
+            "graduation_year": "",
+            "alumni_position": "",
+            "alumni_company": "",
+            "created_at": now,
+            "updated_at": now,
+        })
 
     reload_csv()
     return jsonify({"ok": True, "roll_number": roll})
