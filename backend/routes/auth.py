@@ -104,6 +104,11 @@ def signup_step1():
     if not student:
         return jsonify({"error": "Roll number not found in college records"}), 404
 
+    # Name must loosely match the CSV record (case-insensitive, substring match)
+    csv_name = student.get("name", "").lower()
+    if csv_name and name.lower() not in csv_name and csv_name not in name.lower():
+        return jsonify({"error": "Name does not match college records for this roll number"}), 400
+
     # Already registered?
     if users_col.find_one({"roll_number": roll}):
         return jsonify({"error": "already_registered", "message": "Account already exists. Please sign in."}), 409

@@ -58,7 +58,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch(e){}
 
   renderHeader();
-  showTab("home");
+  const validTabs = ["home","feed","alumni","jobs","chat","profile","notifs"];
+  const startTab = validTabs.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";
+  history.replaceState({ tab: startTab }, "", `#${startTab}`); // anchor the first history entry
+  showTab(startTab, false);
   loadNotifBadge();
 });
 
@@ -94,7 +97,7 @@ function renderHeader() {
 /* ════════════════════════════════════════════════════════════
    TAB NAVIGATION
 ════════════════════════════════════════════════════════════ */
-function showTab(tab) {
+function showTab(tab, pushHistory = true) {
   currentTab = tab;
   document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".bnav-item").forEach(n => n.classList.remove("active"));
@@ -115,7 +118,25 @@ function showTab(tab) {
     case "profile": loadProfile(); break;
     case "notifs":  loadNotifs();  break;
   }
+
+  // Record this tab in browser history so the Back button moves between
+  // tabs instead of leaving the dashboard entirely.
+  if (pushHistory) {
+    const url = `#${tab}`;
+    if (location.hash !== url) {
+      history.pushState({ tab }, "", url);
+    } else {
+      history.replaceState({ tab }, "", url);
+    }
+  }
 }
+
+// Handle browser Back/Forward: restore whichever tab was open at that point
+// in history, instead of navigating away from the dashboard.
+window.addEventListener("popstate", (e) => {
+  const tab = (e.state && e.state.tab) || (location.hash ? location.hash.slice(1) : "home");
+  showTab(tab, false);
+});
 
 /* ════════════════════════════════════════════════════════════
    SEARCH
