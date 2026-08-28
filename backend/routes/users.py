@@ -116,3 +116,5 @@ def upload_wallpaper():
         {"$set": {"wallpaper_url": url, "updated_at": datetime.datetime.utcnow()}}
     )
     return jsonify({"wallpaper_url": url})
+
+a=b
