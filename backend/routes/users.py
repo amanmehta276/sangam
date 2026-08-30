@@ -117,3 +117,4 @@ def upload_wallpaper():
     )
     return jsonify({"wallpaper_url": url})
 
+print(mehta)
