@@ -46,6 +46,11 @@ function formatChatTime(iso) {
    INIT
 ════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", async () => {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = "auth.html";
+    return;
+  }
+
   currentUser = Auth.getUser() || {
     id:"demo", name:"Arjun Sharma", roll_number:"CSE22101",
     branch:"CSE", batch_year:2022, role:"student", trust_level:"partial",
@@ -56,6 +61,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const saved = JSON.parse(localStorage.getItem("sangam_profile_data")||"null");
     if (saved) currentUser = {...currentUser,...saved};
   } catch(e){}
+
+  try {
+    currentUser = await AuthAPI.me();
+    Auth.setUser(currentUser);
+  } catch (e) {
+    if (e?.status === 401) {
+      Auth.clear();
+      window.location.href = "auth.html";
+      return;
+    }
+  }
 
   renderHeader();
   const validTabs = ["home","feed","alumni","jobs","chat","profile","notifs"];

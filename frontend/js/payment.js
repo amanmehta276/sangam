@@ -10,7 +10,7 @@ async function loadMembershipStatus() {
   const offerEl = document.getElementById("membership-offer");
   const activeEl = document.getElementById("membership-active");
   const badgeEl = document.getElementById("membership-badge");
-  if (!offerEl) return;
+  if (!offerEl || !Auth.isLoggedIn()) return;
 
   try {
     const res = await PaymentAPI.myStatus();

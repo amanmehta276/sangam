@@ -899,7 +899,15 @@ let events           = JSON.parse(localStorage.getItem("admin_events")     || "[
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
   if (!Auth.isLoggedIn()) { window.location.href = "auth.html"; return; }
-  const user = Auth.getUser();
+  let user;
+  try {
+    user = await AuthAPI.me();
+    Auth.setUser(user);
+  } catch (e) {
+    Auth.clear();
+    window.location.href = "auth.html";
+    return;
+  }
   if (user?.role !== "admin") {
     alert("Access denied. Admin only.");
     window.location.href = "dashboard.html";
