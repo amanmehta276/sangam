@@ -21,6 +21,7 @@ def _load():
                     "branch":     row.get("branch","").strip(),
                     "batch_year": row.get("batch_year","").strip(),
                     "mobile":     row.get("mobile","").strip(),
+                    "email":      row.get("email","").strip(),
                     "role":       row.get("role","student").strip(),
                 }
     print(f"[CSV] Loaded {len(_students)} students")
@@ -30,6 +31,10 @@ _load()  # load on import
 def get_student(roll_number: str) -> dict | None:
     """Return student info dict if roll exists, else None"""
     return _students.get(roll_number.upper().strip())
+
+def get_all_students() -> dict:
+    """Return the full roll_number -> info map (used to sync into MongoDB)."""
+    return dict(_students)
 
 def reload():
     """Hot-reload CSV without restarting server"""
