@@ -14,7 +14,7 @@ import datetime, csv, os, io
 
 from models import users_col, posts_col, jobs_col, notifications_col
 from utils import login_required
-from utils.csv_checker import reload as reload_csv
+from utils.csv_checker import reload as reload_csv, get_all_students
 from config import cfg
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -30,6 +30,38 @@ def _admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+def _create_user_if_missing(roll: str, info: dict) -> bool:
+    """Create a MongoDB user document for a CSV-allowed roll number, if one
+    doesn't already exist. Returns True if a new user was created."""
+    if users_col.find_one({"roll_number": roll}):
+        return False
+    now = datetime.datetime.utcnow()
+    users_col.insert_one({
+        "roll_number": roll,
+        "name": info.get("name", ""),
+        "mobile": info.get("mobile", ""),
+        "branch": info.get("branch", ""),
+        "batch_year": info.get("batch_year", ""),
+        "role": info.get("role", "student") or "student",
+        "trust_level": "new",
+        "bio": "",
+        "company": "",
+        "location": "",
+        "email": info.get("email", ""),
+        "phone": "",
+        "skills": [],
+        "linkedin_url": "",
+        "github_url": "",
+        "avatar_url": "",
+        "wallpaper_url": "",
+        "graduation_year": "",
+        "alumni_position": "",
+        "alumni_company": "",
+        "created_at": now,
+        "updated_at": now,
+    })
+    return True
+
 # ── Stats ─────────────────────────────────────────────────
 @admin_bp.route("/stats", methods=["GET"])
 @_admin_required
@@ -42,33 +74,6 @@ def get_stats():
         "posts":    posts_col.count_documents({}),
         "jobs":     jobs_col.count_documents({}),
     })
-
-# ── Admin user list ───────────────────────────────────────
-@admin_bp.route("/users", methods=["GET"])
-@_admin_required
-def list_admin_users():
-    q      = request.args.get("q", "").strip()
-    role   = request.args.get("role", "").strip()
-    branch = request.args.get("branch", "").strip()
-    limit  = min(max(int(request.args.get("limit", 200)), 1), 500)
-
-    filt = {}
-    if role:
-        filt["role"] = role
-    if branch:
-        filt["branch"] = branch
-    if q:
-        filt["$or"] = [
-            {"name": {"$regex": q, "$options": "i"}},
-            {"roll_number": {"$regex": q, "$options": "i"}},
-            {"company": {"$regex": q, "$options": "i"}},
-        ]
-
-    users = []
-    for user in users_col.find(filt, {"password": 0}).sort("created_at", -1).limit(limit):
-        user["id"] = str(user.pop("_id"))
-        users.append(user)
-    return jsonify(users)
 
 # ── Update user role/trust ─────────────────────────────────
 # FIXED: route ab /api/admin/users/:id/admin-update hai
@@ -212,7 +217,16 @@ def upload_csv():
         f.write(content)
 
     reload_csv()
-    return jsonify({"ok": True, "rows": valid_rows})
+
+    # Create a MongoDB user for every roll number in the fresh CSV that
+    # doesn't have an account yet — so bulk-uploaded students show up in
+    # the admin panel immediately, not only after they sign up themselves.
+    created = 0
+    for roll, info in get_all_students().items():
+        if _create_user_if_missing(roll, info):
+            created += 1
+
+    return jsonify({"ok": True, "rows": valid_rows, "new_users_created": created})
 
 # ── Add single student ─────────────────────────────────────
 @admin_bp.route("/add-student", methods=["POST"])
@@ -247,33 +261,24 @@ def add_student():
             role,
         ])
 
-    existing_user = users_col.find_one({"roll_number": roll})
-    if not existing_user:
-        now = datetime.datetime.utcnow()
-        users_col.insert_one({
-            "roll_number": roll,
-            "name": name,
-            "mobile": mobile,
-            "branch": branch,
-            "batch_year": batch_year,
-            "role": role,
-            "trust_level": "new",
-            "bio": "",
-            "company": "",
-            "location": "",
-            "email": "",
-            "phone": "",
-            "skills": [],
-            "linkedin_url": "",
-            "github_url": "",
-            "avatar_url": "",
-            "wallpaper_url": "",
-            "graduation_year": "",
-            "alumni_position": "",
-            "alumni_company": "",
-            "created_at": now,
-            "updated_at": now,
-        })
+    _create_user_if_missing(roll, {
+        "name": name, "branch": branch, "batch_year": batch_year,
+        "mobile": mobile, "role": role, "email": "",
+    })
 
     reload_csv()
     return jsonify({"ok": True, "roll_number": roll})
+
+# ── Sync users from students.csv ────────────────────────────
+# Use this after editing data/students.csv directly on disk (outside the
+# admin panel) — it re-reads the file and creates a MongoDB user for every
+# roll number that doesn't have one yet, so they show up in the admin panel.
+@admin_bp.route("/sync-students", methods=["POST"])
+@_admin_required
+def sync_students():
+    reload_csv()
+    created = 0
+    for roll, info in get_all_students().items():
+        if _create_user_if_missing(roll, info):
+            created += 1
+    return jsonify({"ok": True, "total_in_csv": len(get_all_students()), "new_users_created": created})
