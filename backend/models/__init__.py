@@ -24,6 +24,7 @@ messages_col      = db["messages"]
 rooms_col         = db["rooms"]
 notifications_col = db["notifications"]
 otps_col          = db["otps"]
+subscriptions_col = db["subscriptions"]
 
 # ── Indexes ───────────────────────────────────────────────
 users_col.create_index([("roll_number", ASCENDING)], unique=True)
@@ -33,3 +34,5 @@ jobs_col.create_index([("created_at", DESCENDING)])
 messages_col.create_index([("room", ASCENDING), ("created_at", ASCENDING)])
 rooms_col.create_index([("members", ASCENDING)])
 otps_col.create_index([("expires_at", ASCENDING)], expireAfterSeconds=0)
+subscriptions_col.create_index([("user_id", ASCENDING)])
+subscriptions_col.create_index([("razorpay_subscription_id", ASCENDING)], unique=True)

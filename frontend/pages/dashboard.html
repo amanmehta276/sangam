@@ -11,6 +11,7 @@
 <link rel="icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
 html,body{height:100%;overflow:hidden}
@@ -376,6 +377,42 @@ html,body{height:100%;overflow:hidden}
             </div>
           </div>
 
+          <!-- Membership -->
+          <div class="pcard" id="membership-card">
+            <div class="pcard-header">
+              <div class="pcard-title">Sangam Membership</div>
+              <span class="membership-badge" id="membership-badge" style="display:none">
+                <i class="ti ti-crown" style="font-size:11px"></i> Member
+              </span>
+            </div>
+
+            <div id="membership-offer">
+              <div class="pcard-body" style="margin-bottom:12px">
+                Unlock priority job alerts, alumni contact details, and event passes.
+              </div>
+              <div class="membership-price-row">
+                <div>
+                  <div class="membership-price">₹116.82<span>/month</span></div>
+                  <div class="membership-price-sub">₹99 + 18% GST</div>
+                </div>
+                <button class="pcard-generate-btn membership-btn" onclick="subscribeMembership()" style="width:auto;padding:10px 18px">
+                  <i class="ti ti-crown" style="font-size:14px"></i> Get Membership
+                </button>
+              </div>
+            </div>
+
+            <div id="membership-active" style="display:none">
+              <div class="pcard-body" style="margin-bottom:12px">
+                You're a Sangam Member. Thanks for supporting the community!
+              </div>
+              <button class="pcard-generate-btn" style="background:transparent;border:1px solid var(--border-dk);color:rgba(255,255,255,0.5)" onclick="cancelMembership()">
+                Cancel Membership
+              </button>
+            </div>
+
+            <div class="pcard-hint" id="membership-hint" style="display:none">Payment processing… this can take a few seconds.</div>
+          </div>
+
           <!-- About -->
           <div class="pcard">
             <div class="pcard-title" style="margin-bottom:10px">About</div>
@@ -639,6 +676,7 @@ html,body{height:100%;overflow:hidden}
 <script src="../js/api.js"></script>
 <script src="../js/sidebar.js"></script>
 <script src="../js/profile.js"></script>
+<script src="../js/payment.js"></script>
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

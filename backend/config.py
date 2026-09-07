@@ -16,6 +16,9 @@ class Config:
     FRONTEND_URL     = os.getenv("FRONTEND_URL", "http://127.0.0.1:5500")
     ALLOWED_IMG_EXT  = {"png", "jpg", "jpeg", "gif", "webp"}
     ALLOWED_FILE_EXT = {"pdf", "doc", "docx", "mp4", "mov", "webm"}
+    RAZORPAY_KEY_ID         = os.getenv("RAZORPAY_KEY_ID")
+    RAZORPAY_KEY_SECRET     = os.getenv("RAZORPAY_KEY_SECRET")
+    RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
 cfg = Config()
 

@@ -368,6 +368,45 @@
 }
 .pymk-connect-btn:hover{background:var(--purple);border-color:var(--purple);color:#fff}
 
+/* ── Membership accents ── */
+.profile-cover,
+.profile-cover-bg{
+  background:linear-gradient(135deg,#123B4A 0%,#0F766E 52%,#155E75 100%);
+}
+.profile-av-ring{
+  background:linear-gradient(135deg,#0F766E,#14B8A6);
+  box-shadow:0 4px 16px rgba(20,184,166,0.28);
+}
+.pcard#membership-card{
+  border-color:rgba(245,158,11,0.38);
+  background:linear-gradient(145deg,rgba(120,70,12,0.22),var(--ink-2) 48%);
+}
+.pcard#membership-card:hover{border-color:rgba(245,158,11,0.65)}
+.membership-badge{
+  align-items:center;gap:5px;padding:4px 9px;border-radius:999px;
+  color:#FCD34D;background:rgba(245,158,11,0.14);
+  border:1px solid rgba(245,158,11,0.35);font-size:10px;font-weight:600;
+}
+.membership-price-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.membership-price{color:#FBBF24;font-size:22px;font-weight:700;line-height:1}
+.membership-price span{color:rgba(255,255,255,0.42);font-size:12px;font-weight:500;margin-left:4px}
+.membership-price-sub{color:rgba(255,255,255,0.35);font-size:11px;margin-top:6px}
+.membership-btn{
+  background:linear-gradient(135deg,#B45309,#F59E0B);
+  box-shadow:0 5px 16px rgba(245,158,11,0.22);
+}
+.membership-btn:hover{background:linear-gradient(135deg,#D97706,#FBBF24);transform:translateY(-1px)}
+.membership-btn i{color:#FFF7D6}
+.pcard#membership-card #membership-active .pcard-generate-btn:hover{
+  border-color:#F59E0B!important;color:#FCD34D!important;background:rgba(245,158,11,0.1)!important;
+}
+
+@media(max-width:480px){
+  .membership-price-row{align-items:flex-end}
+  .membership-price{font-size:19px}
+  .membership-btn{padding:10px 13px!important;white-space:nowrap}
+}
+
 /* ── QR Modal ── */
 #qr-modal{
   display:none;position:fixed;inset:0;

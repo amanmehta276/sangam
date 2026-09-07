@@ -5,6 +5,7 @@ Run: python app.py
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
+from routes.payment import payment_bp
 
 from config import cfg
 

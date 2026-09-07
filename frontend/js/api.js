@@ -138,6 +138,15 @@ const NotifsAPI = {
   readAll: () => _api("/notifications/read", { method: "POST" }),
 };
 
+const PaymentAPI = {
+  createSubscription: (plan_id) =>
+    _api("/payment/create-subscription", { method: "POST", body: { plan_id } }),
+  cancelSubscription: () =>
+    _api("/payment/cancel-subscription", { method: "POST" }),
+  myStatus: () =>
+    _api("/payment/my-subscription"),
+};
+
 /* ── Global toast (used by all JS files) ────────────────── */
 function showToast(msg, type = "info") {
   const t = document.getElementById("toast");
