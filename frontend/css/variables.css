@@ -59,6 +59,19 @@
   --sh-lg: 0 10px 36px rgba(30,41,59,0.16);
   --sh-pu: 0 6px 24px rgba(29,78,216,0.35);
 
+  /* ── Profile theme (Sangam merged palette) ───────────── */
+  --sg-indigo:      #152C36;
+  --sg-indigo-2:    #1F3A4A;
+  --sg-indigo-3:    #294A5C;
+  --sg-brass:       #B8863B;
+  --sg-brass-2:     #D3A15A;
+  --sg-clay:        #C1613A;
+  --sg-clay-2:      #D97A50;
+  --sg-ivory:       #F5EFE3;
+  --sg-ivory-dim:   rgba(245,239,227,0.55);
+  --sg-ivory-faint: rgba(245,239,227,0.25);
+  --sg-border:      rgba(245,239,227,0.12);
+
   /* ── Layout ──────────────────────────────────────────── */
   --nav-h:     60px;
   --top-nav-h: 56px;
