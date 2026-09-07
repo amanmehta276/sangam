@@ -43,6 +43,33 @@ def get_stats():
         "jobs":     jobs_col.count_documents({}),
     })
 
+# ── Admin user list ───────────────────────────────────────
+@admin_bp.route("/users", methods=["GET"])
+@_admin_required
+def list_admin_users():
+    q      = request.args.get("q", "").strip()
+    role   = request.args.get("role", "").strip()
+    branch = request.args.get("branch", "").strip()
+    limit  = min(max(int(request.args.get("limit", 200)), 1), 500)
+
+    filt = {}
+    if role:
+        filt["role"] = role
+    if branch:
+        filt["branch"] = branch
+    if q:
+        filt["$or"] = [
+            {"name": {"$regex": q, "$options": "i"}},
+            {"roll_number": {"$regex": q, "$options": "i"}},
+            {"company": {"$regex": q, "$options": "i"}},
+        ]
+
+    users = []
+    for user in users_col.find(filt, {"password": 0}).sort("created_at", -1).limit(limit):
+        user["id"] = str(user.pop("_id"))
+        users.append(user)
+    return jsonify(users)
+
 # ── Update user role/trust ─────────────────────────────────
 # FIXED: route ab /api/admin/users/:id/admin-update hai
 @admin_bp.route("/users/<uid>/admin-update", methods=["PUT"])

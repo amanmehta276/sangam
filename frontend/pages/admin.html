@@ -957,7 +957,7 @@ async function loadDashboard() {
     setText("stat-jobs-change",  `${stats.teachers} teachers`);
 
     // Users list for branch chart
-    const users = await _adminGet("/users?limit=200");
+    const users = await _adminGet("/admin/users?limit=200");
     allUsers = users;
     setText("badge-users", users.length);
 
@@ -1008,7 +1008,7 @@ async function loadUsers() {
     const params = new URLSearchParams({ limit: 200 });
     if (role)   params.set("role",   role);
     if (branch) params.set("branch", branch);
-    allUsers = await _adminGet(`/users?${params}`);
+    allUsers = await _adminGet(`/admin/users?${params}`);
     renderUsers(allUsers);
     setText("users-count-label", `${allUsers.length} users found`);
   } catch { showToast("Could not load users", "error"); }

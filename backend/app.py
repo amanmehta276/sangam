@@ -39,6 +39,7 @@ app.register_blueprint(jobs_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(notifs_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(payment_bp)
 
 # ── Health check ──────────────────────────────────────────
 @app.route("/api/health")
