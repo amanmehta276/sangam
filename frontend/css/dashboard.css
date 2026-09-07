@@ -407,6 +407,112 @@
   .membership-btn{padding:10px 13px!important;white-space:nowrap}
 }
 
+/* ══ PROFILE THEME — indigo, brass and clay ═══════════════ */
+.profile-page{
+  background:var(--sg-indigo);
+  color:var(--sg-ivory);
+  padding-bottom:40px;
+}
+.profile-cover,
+.profile-cover-bg{
+  background:
+    radial-gradient(circle at 82% 22%,rgba(211,161,90,.28),transparent 24%),
+    linear-gradient(120deg,var(--sg-indigo) 0%,var(--sg-indigo-2) 54%,var(--sg-indigo-3) 100%);
+}
+.profile-cover{height:210px}
+.profile-cover-bg{opacity:.9}
+.profile-cover-grid{
+  opacity:.16;
+  background-image:
+    linear-gradient(rgba(245,239,227,.32) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,239,227,.32) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(135deg,black,transparent 72%);
+}
+.profile-cover-change-btn{
+  background:rgba(21,44,54,.72);
+  border-color:var(--sg-border);
+  color:var(--sg-ivory-dim);
+}
+.profile-cover-change-btn:hover{background:var(--sg-brass);color:var(--sg-indigo);border-color:var(--sg-brass-2)}
+.profile-av-bar{
+  background:var(--sg-indigo);
+  border-bottom-color:var(--sg-border);
+}
+.profile-av-ring{
+  background:linear-gradient(145deg,var(--sg-brass),var(--sg-clay));
+  border-color:var(--sg-indigo);
+  box-shadow:0 0 0 1px var(--sg-brass),0 10px 26px rgba(0,0,0,.3);
+}
+.profile-edit-btn{
+  border-color:rgba(211,161,90,.55);
+  color:var(--sg-brass-2);
+}
+.profile-edit-btn:hover{background:rgba(184,134,59,.18);color:var(--sg-ivory);border-color:var(--sg-brass-2)}
+.profile-body{gap:16px;padding:16px 18px 0}
+.profile-left,.profile-right{gap:16px}
+.pcard{
+  background:rgba(31,58,74,.72);
+  border-color:var(--sg-border);
+  border-radius:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.12);
+}
+.pcard:hover{border-color:rgba(211,161,90,.42)}
+.pcard-title{color:var(--sg-ivory);letter-spacing:.01em}
+.pcard-body{color:var(--sg-ivory-dim)}
+.pcard-hint,.exp-empty{color:var(--sg-ivory-faint)}
+.profile-name{color:var(--sg-ivory);font-size:25px}
+.profile-headline{color:var(--sg-ivory-dim)}
+.profile-location{color:var(--sg-ivory-faint)}
+.profile-verified{
+  color:#D8F3DC;
+  background:rgba(46,125,85,.22);
+  border-color:rgba(111,190,126,.34);
+}
+.profile-stats-row{background:rgba(21,44,54,.8);border-color:var(--sg-border)}
+.profile-stat-label{color:var(--sg-ivory-faint)}
+.profile-stat-val{color:var(--sg-ivory)}
+.profile-stat-div,.plink-row{border-color:var(--sg-border);background-color:transparent}
+.plink-icon{
+  background:rgba(184,134,59,.14);
+  border-color:rgba(211,161,90,.3);
+  color:var(--sg-brass-2);
+}
+.plink-label{color:var(--sg-ivory-faint)}
+.plink-val{color:var(--sg-ivory-dim)}
+.pcard-type-btn{border-color:var(--sg-border);background:rgba(21,44,54,.7);color:var(--sg-ivory-faint)}
+.pcard-type-btn.active{background:var(--sg-brass);color:var(--sg-indigo);border-color:var(--sg-brass-2)}
+.id-card{
+  background:
+    radial-gradient(circle at 85% 16%,rgba(211,161,90,.3),transparent 24%),
+    linear-gradient(155deg,var(--sg-indigo-3),var(--sg-indigo) 68%,#0E222A);
+  box-shadow:0 14px 34px rgba(0,0,0,.3);
+}
+.id-card:hover{box-shadow:0 18px 42px rgba(0,0,0,.38)}
+.id-card-type{background:rgba(211,161,90,.2);color:var(--sg-brass-2)}
+.id-card-qr{color:var(--sg-indigo)}
+.pcard-generate-btn{background:linear-gradient(135deg,var(--sg-brass),var(--sg-clay));color:var(--sg-ivory)}
+.pcard-generate-btn:hover{background:linear-gradient(135deg,var(--sg-brass-2),var(--sg-clay-2))}
+.pymk-item{border-bottom-color:var(--sg-border)}
+.pymk-name{color:var(--sg-ivory)}
+.pymk-meta{color:var(--sg-ivory-faint)}
+.pymk-connect-btn{border-color:rgba(211,161,90,.45);color:var(--sg-brass-2)}
+.pymk-connect-btn:hover{background:var(--sg-brass);border-color:var(--sg-brass);color:var(--sg-indigo)}
+.pcard#membership-card{
+  border-color:rgba(211,161,90,.42);
+  background:linear-gradient(145deg,rgba(184,134,59,.18),rgba(31,58,74,.8) 58%);
+}
+.membership-price{color:var(--sg-brass-2)}
+.membership-price-sub{color:var(--sg-ivory-faint)}
+.membership-badge{color:#F7DFA9;background:rgba(184,134,59,.18);border-color:rgba(211,161,90,.4)}
+.membership-btn{background:linear-gradient(135deg,var(--sg-brass),var(--sg-clay));box-shadow:0 6px 18px rgba(184,134,59,.2)}
+
+@media(max-width:600px){
+  .profile-cover{height:170px}
+  .profile-body{padding:12px 12px 0}
+  .profile-av-bar{padding-inline:12px}
+}
+
 /* ── QR Modal ── */
 #qr-modal{
   display:none;position:fixed;inset:0;

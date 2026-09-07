@@ -7,9 +7,8 @@
 // Change ONLY here — API_ORIGIN below is derived from this automatically,
 // so dashboard.js/profile.js no longer need their own hardcoded copy.
 const API_BASE = (function() {
-  // Agar local mein chal raha hai
   if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    return "http://localhost:5000/api";
+    return "https://sangam-z93f.onrender.com/api";
   }
   // Production — apna Render URL yahan daalo
   return "https://sangam-z93f.onrender.com/api";
