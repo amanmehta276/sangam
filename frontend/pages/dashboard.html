@@ -20,7 +20,80 @@ html,body{height:100%;overflow:hidden}
   padding:0;background:var(--ink);
 }
 .top-navbar{position:fixed;top:0;left:0;right:0;height:var(--top-nav-h);z-index:500;flex-shrink:0}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:400}
+.top-navbar{
+  display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:var(--ink-2);border-bottom:1px solid var(--border-dk);
+}
+.nav-hamburger{
+  width:38px;height:38px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,0.07);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;flex-shrink:0;
+}
+.nav-hamburger span{display:block;width:18px;height:2px;background:#fff;border-radius:1px}
+.nav-logo{flex:1;display:flex;align-items:center;gap:8px}
+.nav-logo-text{font-family:'EB Garamond',serif;font-size:22px;color:#fff;letter-spacing:-.5px}
+.nav-logo-text em{color:var(--purple-2);font-style:italic}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.nav-icon-btn{
+  width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);
+  display:flex;align-items:center;justify-content:center;color:#fff;position:relative;
+}
+.nav-icon-btn:hover{background:rgba(255,255,255,0.14)}
+.user-av-btn{
+  width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:var(--purple);border:2px solid rgba(255,255,255,0.16);
+  color:#fff;font-family:'EB Garamond',serif;font-size:18px;cursor:pointer;
+}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:400;
+  display:flex;background:var(--ink-2);border-top:1px solid var(--border-dk);
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;padding:8px 4px;position:relative;
+}
+.bnav-item::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:0;height:3px;background:var(--purple-2);transition:width .2s ease;
+}
+.bnav-item.active::before{width:28px}
+.bnav-item.active .bnav-label{color:var(--purple-2)}
+#sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);
+  z-index:700;backdrop-filter:blur(3px);
+}
+#sidebar-overlay.open{display:block}
+#sidebar{
+  position:fixed;top:0;left:0;width:min(300px,84vw);height:100%;
+  background:var(--ink);z-index:800;transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;
+  flex-direction:column;border-right:1px solid var(--border-dk);overflow-y:auto;
+}
+#sidebar.open{transform:translateX(0)}
+.sidebar-header{
+  padding:20px 16px;background:linear-gradient(135deg,rgba(139,26,26,0.3),rgba(178,34,34,0.12));
+  display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border-dk);flex-shrink:0;
+}
+.sidebar-app-name{font-size:18px;font-weight:600;color:#fff}
+.sidebar-college{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sidebar-close{
+  margin-left:auto;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.6);font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.sidebar-nav{flex:1;padding:12px 0}
+.sidebar-section-label{
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,0.28);padding:10px 18px 4px;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:12px;padding:12px 18px;font-size:14px;font-weight:500;
+  color:rgba(255,255,255,0.55);transition:all .18s;cursor:pointer;
+}
+.sidebar-item:hover,.sidebar-item.active{background:rgba(139,26,26,0.18);color:#fff}
+.sidebar-footer{
+  padding:16px 18px;font-size:11px;color:rgba(255,255,255,0.2);
+  border-top:1px solid var(--border-dk);flex-shrink:0;
+}
 .dash-main{
   position:fixed;top:var(--top-nav-h);bottom:var(--nav-h);
   left:0;right:0;overflow:hidden;
@@ -416,8 +489,8 @@ html,body{height:100%;overflow:hidden}
           <!-- About -->
           <div class="pcard">
             <div class="pcard-title" style="margin-bottom:10px">About</div>
-            <div class="pcard-body profile-about" id="profile-bio-display" style="color:rgba(255,255,255,0.4);font-style:italic">
-              Click "Edit Profile" to add your bio…
+            <div class="pcard-body profile-about" id="profile-bio-display" style="color:#777;font-style:italic">
+              Add a short introduction about yourself from Edit Profile.
             </div>
           </div>
 
@@ -510,17 +583,17 @@ html,body{height:100%;overflow:hidden}
             </div>
             <div id="pymk-list">
               <div class="pymk-item">
-                <div class="pymk-av" style="background:linear-gradient(135deg,#1D4ED8,#2563EB)">R</div>
+                <div class="pymk-av" style="background:linear-gradient(135deg,var(--purple-deep),var(--purple))">R</div>
                 <div class="pymk-info"><div class="pymk-name">Rahul Sharma</div><div class="pymk-meta">CSE · Batch 2023</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
               <div class="pymk-item">
-                <div class="pymk-av" style="background:linear-gradient(135deg,#0369A1,#0284C7)">P</div>
+                <div class="pymk-av" style="background:linear-gradient(135deg,var(--purple-dk),var(--purple-2))">P</div>
                 <div class="pymk-info"><div class="pymk-name">Priya Verma</div><div class="pymk-meta">EEE · Batch 2024</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
               <div class="pymk-item" style="border:none">
-                <div class="pymk-av" style="background:linear-gradient(135deg,#B45309,#D97706)">A</div>
+                <div class="pymk-av" style="background:linear-gradient(135deg,var(--gold),var(--orange))">A</div>
                 <div class="pymk-info"><div class="pymk-name">Ankit Patel</div><div class="pymk-meta">ME · Alumni 2022</div></div>
                 <button class="pymk-connect-btn">+ Connect</button>
               </div>
@@ -602,11 +675,11 @@ html,body{height:100%;overflow:hidden}
     </div><!-- /edit-drawer-body -->
 
     <!-- Save footer — always at bottom -->
-    <div style="display:flex;gap:10px;padding:14px 18px;border-top:1px solid #2C2C3A;flex-shrink:0;background:#13131A;">
-      <button onclick="closeEditDrawer()" style="flex:1;padding:12px;border:1px solid #2C2C3A;border-radius:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
+    <div style="display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border-dk);flex-shrink:0;background:var(--ink-2);">
+      <button onclick="closeEditDrawer()" style="flex:1;padding:12px;border:1px solid var(--border-dk);border-radius:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.75);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;">
         Cancel
       </button>
-      <button onclick="saveProfile()" id="drawer-save-btn" style="flex:2;padding:12px;border:none;border-radius:6px;background:linear-gradient(135deg,#1E3A8A,#1D4ED8);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="saveProfile()" id="drawer-save-btn" style="flex:2;padding:12px;border:none;border-radius:6px;background:linear-gradient(135deg,var(--purple-deep),var(--purple));color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
         <i class="ti ti-device-floppy" style="font-size:16px"></i> Save Changes
       </button>
     </div>

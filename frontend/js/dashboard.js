@@ -21,7 +21,7 @@ let chatPollTimer  = null;
 let chatLastMsgId = null;
 
 /* ── Colors ──────────────────────────────────────────────── */
-const AV_COLORS = ["#1D4ED8","#2563EB","#16A34A","#0288D1","#E91E63","#FF5722","#00796B","#5C6BC0"];
+const AV_COLORS = ["#4A0E0E","#6B1414","#8B1A1A","#B22222","#C4453F","#8B6A1A","#A52A2A","#D3A9A9"];
 const getColor  = s => AV_COLORS[(s||"A").charCodeAt(0) % AV_COLORS.length];
 
 /* ── Helpers ─────────────────────────────────────────────── */

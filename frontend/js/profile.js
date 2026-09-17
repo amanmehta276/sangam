@@ -64,11 +64,11 @@ async function loadProfile() {
   if (bioEl) {
     if (u.bio) {
       bioEl.textContent = u.bio;
-      bioEl.style.color = "rgba(255,255,255,0.6)";
+      bioEl.style.color = "#444";
       bioEl.style.fontStyle = "normal";
     } else {
-      bioEl.textContent = 'Click "Edit Profile" to add your bio…';
-      bioEl.style.color = "rgba(255,255,255,0.28)";
+      bioEl.textContent = 'Add a short introduction about yourself from Edit Profile.';
+      bioEl.style.color = "#777";
       bioEl.style.fontStyle = "italic";
     }
   }
@@ -77,10 +77,10 @@ async function loadProfile() {
   const crEl = document.getElementById("company-role-display");
   if (crEl) crEl.innerHTML = u.company
     ? `<div style="display:flex;align-items:center;gap:12px;padding:4px 0">
-        <div style="width:40px;height:40px;border-radius:var(--r-sm);background:rgba(255,255,255,0.07);border:1px solid var(--border-dk);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏢</div>
+        <div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--purple-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏢</div>
         <div>
-          <div style="font-size:14px;font-weight:600;color:#fff">${escHtml(u.company)}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px">Current employer</div>
+          <div style="font-size:14px;font-weight:600;color:#171717">${escHtml(u.company)}</div>
+          <div style="font-size:11px;color:#777;margin-top:2px">Current employer</div>
         </div>
        </div>`
     : `<div class="exp-empty">Click "Edit Profile" to add experience</div>`;

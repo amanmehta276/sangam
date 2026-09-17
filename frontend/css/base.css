@@ -1,13 +1,13 @@
 /* ============================================================
    base.css — Reset, typography, layout (Sangam theme)
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;height:100%}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:none}
-input,textarea,select{font-family:'DM Sans',sans-serif}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none}
+input,textarea,select{font-family:'Inter',sans-serif}
 a{text-decoration:none;color:inherit}
 img{max-width:100%;display:block}
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -50,7 +50,7 @@ img{max-width:100%;display:block}
   letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;
 }
 .section-title{
-  font-family:'Playfair Display',serif;
+  font-family:'EB Garamond',serif;
   font-size:clamp(26px,5vw,42px);
   color:var(--text);line-height:1.1;
   letter-spacing:-.5px;margin-bottom:14px;

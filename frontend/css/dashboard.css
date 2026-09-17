@@ -633,7 +633,7 @@
   bottom:var(--nav-h);      /* bottom nav ke upar tak khatam */
   right:0;
   width:min(380px,100vw);
-  background:#13131A;
+  background:var(--ink-2);
   border-left:1px solid #2C2C3A;
   z-index:700;
   display:flex;
@@ -646,9 +646,9 @@
 .edit-drawer-head{
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 18px;
-  border-bottom:1px solid #2C2C3A;
+  border-bottom:1px solid var(--border-dk);
   flex-shrink:0;
-  background:#13131A;
+  background:var(--ink-2);
 }
 .edit-drawer-title{
   font-family:'Playfair Display',serif;
@@ -657,7 +657,7 @@
 .edit-drawer-close{
   width:32px;height:32px;border-radius:6px;
   background:rgba(255,255,255,0.07);
-  border:1px solid #2C2C3A;
+  border:1px solid var(--border-dk);
   display:flex;align-items:center;justify-content:center;
   color:rgba(255,255,255,0.5);font-size:15px;cursor:pointer;
 }
@@ -675,5 +675,231 @@
 }
 .edit-drawer-body::-webkit-scrollbar{width:3px}
 .edit-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* Editorial theme alignment */
+.dashboard-page,
+.dashboard-page button,
+.dashboard-page input,
+.dashboard-page textarea,
+.dashboard-page select{font-family:'Inter',sans-serif}
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page h3,
+.dashboard-page .chat-sidebar-title,
+.dashboard-page .chat-empty-state h3,
+.dashboard-page .pcard-title,
+.dashboard-page .profile-name,
+.dashboard-page .id-card-name,
+.dashboard-page .membership-price,
+.dashboard-page .notifs-title,
+.dashboard-page .edit-drawer-title{font-family:'EB Garamond',serif}
+.dashboard-page .profile-page,
+.dashboard-page .tab-view{background:var(--ink)}
+.dashboard-page .pcard,
+.dashboard-page .profile-section{border-color:var(--border-dk)}
+.dashboard-page .pcard:hover{border-color:rgba(178,34,34,0.45)}
+.dashboard-page .skill-chip,
+.dashboard-page .membership-badge,
+.dashboard-page .pcard-edit-icon,
+.dashboard-page .plink-icon{color:var(--purple);border-color:rgba(139,26,26,0.25)}
+.dashboard-page .skill-chip:hover,
+.dashboard-page .pcard-edit-icon:hover{background:var(--purple);color:#fff}
+.dashboard-page .profile-edit-btn,
+.dashboard-page .pymk-connect-btn{border-color:var(--purple);color:var(--purple)}
+.dashboard-page .profile-edit-btn:hover,
+.dashboard-page .pymk-connect-btn:hover{background:var(--purple);color:#fff}
+
+/* Feed, alumni and jobs surfaces */
+#tab-feed,
+#tab-alumni,
+#tab-jobs{background:var(--cream);color:var(--text);padding:16px 0}
+.compose-row,
+.post-card,
+.alumni-card,
+.job-card,
+.search-hero,
+.filter-grid,
+.chips-row,
+.sec-label{max-width:860px;margin-left:auto;margin-right:auto}
+.compose-row{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:10px;
+  background:var(--white);border:1px solid var(--border);cursor:pointer;
+}
+.compose-av,.post-av,.alumni-av{flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600}
+.compose-ph{flex:1;color:var(--text-3);font-size:13px}
+.compose-btns{display:flex;gap:6px}
+.cpbtn{color:var(--purple);padding:6px}
+.chips-row{display:flex;gap:7px;overflow-x:auto;padding:4px 16px 12px}
+.chip{border:1px solid var(--border-2);border-radius:999px;padding:6px 12px;color:var(--text-2);font-size:11px;white-space:nowrap;cursor:pointer;background:var(--white)}
+.chip.on,.chip:hover{background:var(--purple);border-color:var(--purple);color:#fff}
+.sec-label{padding:8px 16px;color:var(--text-3);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
+.post-card,.alumni-card,.job-card{margin-bottom:10px;background:var(--white);border:1px solid var(--border);padding:16px;box-shadow:var(--sh)}
+.post-head,.job-head{display:flex;align-items:center;gap:10px}
+.post-meta,.alumni-info{flex:1;min-width:0}
+.post-name,.alumni-name,.job-title{font-weight:600;color:var(--text);font-size:14px}
+.post-sub,.alumni-meta,.job-company{font-size:11px;color:var(--text-3);margin-top:3px}
+.post-type-chip,.vbadge{font-size:10px;color:var(--purple);background:var(--purple-light);padding:4px 8px;border-radius:999px;white-space:nowrap}
+.post-body,.job-desc{font-size:14px;color:var(--text-2);line-height:1.65;margin-top:14px}
+.post-divider{border-top:1px solid var(--border);margin:14px 0 8px}
+.post-actions{display:flex;gap:20px;color:var(--text-3);font-size:12px}
+.pact{display:flex;align-items:center;gap:5px;cursor:pointer}.pact:hover{color:var(--purple)}
+.pact svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8}
+.tag-row,.alumni-tags,.job-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ptag{font-size:10px;padding:4px 8px;border-radius:999px;background:var(--purple-light);color:var(--purple)}
+.filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 8px}
+.fcard{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;background:var(--white);border:1px solid var(--border);cursor:pointer;color:var(--text-2)}
+.fcard:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light)}
+.fi{font-size:18px}.fl{font-size:10px}
+.search-hero{padding:8px 16px 18px}.search-hero-title{font:26px 'EB Garamond',serif;color:var(--text);margin-bottom:10px}.search-hero-title em{color:var(--purple);font-style:italic}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);padding:10px 12px}.search-box input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font:13px 'Inter',sans-serif}.search-box input::placeholder{color:var(--text-4)}
+.alumni-card{display:flex;align-items:center;gap:12px}.alumni-name{display:flex;align-items:center;gap:7px}.alumni-name .vbadge{font-size:9px}.btn-outline-sm{padding:6px 10px;border:1px solid var(--purple);background:transparent;color:var(--purple);border-radius:var(--r-sm);font-size:11px;cursor:pointer}.btn-outline-sm:hover{background:var(--purple);color:#fff}
+.job-company-av{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;background:var(--purple-light);font-size:18px}.job-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:10px;border-top:1px solid var(--border)}
+.feed-loading{color:var(--text-3);padding:30px 16px;text-align:center}
+@media(max-width:600px){.filter-grid{grid-template-columns:repeat(4,1fr)}.post-card,.alumni-card,.job-card{margin-left:10px;margin-right:10px}.compose-row{margin-left:10px;margin-right:10px}.search-hero{margin:0}.alumni-card{align-items:flex-start}.alumni-name{flex-wrap:wrap}}
+
+/* White-first balance: maroon is reserved for navigation and emphasis. */
+.dashboard-page{background:var(--white);color:var(--text)}
+.dashboard-page .top-navbar{background:var(--white);border-bottom-color:var(--border)}
+.dashboard-page .nav-logo-text{color:var(--text)}
+.dashboard-page .nav-logo-text em{color:var(--purple)}
+.dashboard-page .nav-hamburger,
+.dashboard-page .nav-icon-btn{background:var(--purple-light);color:var(--purple);border:1px solid var(--border)}
+.dashboard-page .nav-hamburger span{background:var(--purple)}
+.dashboard-page .user-av-btn{background:var(--purple);color:#fff}
+.dashboard-page .bottom-nav{background:var(--white);border-top-color:var(--border);box-shadow:0 -4px 18px rgba(74,14,14,0.08)}
+.dashboard-page .bnav-label{color:var(--text-3)}
+.dashboard-page .bnav-item.active .bnav-label{color:var(--purple)}
+.dashboard-page .tab-view{background:var(--cream)}
+.dashboard-page #sidebar{background:var(--purple-deep);border-right-color:var(--purple)}
+.dashboard-page #sidebar-overlay{background:rgba(74,14,14,0.35)}
+.dashboard-page .chat-layout,.dashboard-page .chat-sidebar,.dashboard-page .chat-panel{background:var(--purple-deep);color:#fff}
+.dashboard-page .chat-sidebar-header,.dashboard-page .chat-panel-header,.dashboard-page .chat-input-wrap{border-color:rgba(255,255,255,0.18)}
+.dashboard-page .chat-room-item:hover,.dashboard-page .chat-room-item.active{background:rgba(255,255,255,0.12)}
+.dashboard-page .chat-msg.theirs{background:rgba(255,255,255,0.14)}
+.dashboard-page .search-bar-wrap{background:var(--white);border-bottom-color:var(--border)}
+.dashboard-page .search-input{background:var(--cream);border-color:var(--border);color:var(--text)}
+.dashboard-page .search-input::placeholder{color:var(--text-4)}
+.dashboard-page .profile-page{background:var(--cream)}
+.dashboard-page .profile-av-bar{background:var(--white);border-bottom-color:var(--border)}
+.dashboard-page .pcard{background:var(--white);border-color:var(--border)}
+.dashboard-page .profile-name,.dashboard-page .pcard-title{color:var(--text)}
+.dashboard-page .profile-headline{color:var(--text-2)}
+.dashboard-page .profile-location{color:var(--text-3)}
+.dashboard-page .profile-stats-row{background:var(--cream);border-color:var(--border)}
+.dashboard-page .profile-stat-val{color:var(--text)}
+.dashboard-page .edit-drawer{background:var(--white);border-left-color:var(--border)}
+.dashboard-page .edit-drawer-head{background:var(--white);border-bottom-color:var(--border)}
+.dashboard-page .edit-drawer-title{color:var(--text)}
+.dashboard-page .ef-input{background:var(--cream);border-color:var(--border);color:var(--text)}
+.dashboard-page .ef-label{color:var(--text-3)}
+
+/* Header/footer emphasis with a white drawer and black content text. */
+.dashboard-page .top-navbar,
+.dashboard-page .bottom-nav{
+  background:var(--purple-deep);
+  border-color:var(--purple);
+}
+.dashboard-page .nav-logo-text,
+.dashboard-page .bnav-label{color:#fff}
+.dashboard-page .nav-logo-text em,
+.dashboard-page .bnav-item.active .bnav-label{color:#F4C7C7}
+.dashboard-page .nav-hamburger,
+.dashboard-page .nav-icon-btn{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);color:#fff}
+.dashboard-page .nav-hamburger span{background:#fff}
+.dashboard-page .sidebar-header,
+.dashboard-page #sidebar{
+  background:var(--white);
+  color:#171717;
+}
+.dashboard-page #sidebar{border-right-color:var(--border)}
+.dashboard-page .sidebar-header{border-bottom-color:var(--border)}
+.dashboard-page .sidebar-app-name{color:#171717}
+.dashboard-page .sidebar-college,
+.dashboard-page .sidebar-section-label{color:#777}
+.dashboard-page .sidebar-item{color:#333}
+.dashboard-page .sidebar-item i{color:var(--purple)!important}
+.dashboard-page .sidebar-item:hover,
+.dashboard-page .sidebar-item.active{background:var(--purple-light);color:var(--purple)}
+.dashboard-page .sidebar-close{background:var(--purple-light);color:var(--purple)}
+.dashboard-page .sidebar-footer{border-top-color:var(--border);color:#777}
+.dashboard-page .dashboard-page,
+.dashboard-page .tab-view{color:#171717}
+.dashboard-page #tab-feed,
+.dashboard-page #tab-alumni,
+.dashboard-page #tab-jobs,
+.dashboard-page #tab-profile{color:#171717}
+.dashboard-page .post-name,
+.dashboard-page .alumni-name,
+.dashboard-page .job-title,
+.dashboard-page .pcard-title,
+.dashboard-page .profile-name{color:#171717}
+.dashboard-page .post-body,
+.dashboard-page .job-desc,
+.dashboard-page .pcard-body{color:#444}
+.dashboard-page .post-sub,
+.dashboard-page .alumni-meta,
+.dashboard-page .job-company,
+.dashboard-page .pymk-meta{color:#777}
+.dashboard-page .search-hero-title,
+.dashboard-page .sec-label{color:#171717}
+.dashboard-page .search-hero-title em{color:var(--purple)}
+.dashboard-page .profile-stat-label,
+.dashboard-page .plink-label{color:#777}
+.dashboard-page .plink-val{color:#555}
+.dashboard-page .exp-empty,
+.dashboard-page .pcard-hint{color:#777}
+.dashboard-page .notifs-title{color:#171717}
+.dashboard-page .chat-empty-state h3{color:#fff}
+
+/* Larger, easier-to-scan tab cards */
+#tab-feed .post-card,
+#tab-alumni .alumni-card,
+#tab-jobs .job-card{max-width:980px;padding:22px 24px;margin-bottom:14px}
+#tab-feed .compose-row{max-width:980px;padding:18px 20px;margin-bottom:14px}
+#tab-feed .post-name,
+#tab-alumni .alumni-name,
+#tab-jobs .job-title{font-size:16px}
+#tab-feed .post-body,
+#tab-jobs .job-desc{font-size:15px}
+#tab-alumni .alumni-av,
+#tab-feed .post-av{width:48px;height:48px}
+#tab-jobs .job-company-av{width:48px;height:48px}
+#tab-alumni .alumni-card{min-height:106px}
+#tab-jobs .job-card{min-height:150px}
+#tab-feed .post-actions{font-size:13px}
+
+/* Highlight the Sangam brand in the white burger drawer. */
+.dashboard-page .sidebar-header{background:var(--purple-light)}
+.dashboard-page .sidebar-app-name{font-family:'EB Garamond',serif;font-size:23px;color:var(--purple)}
+.dashboard-page .sidebar-header img{border:2px solid var(--purple)}
+
+/* Chat: white workspace with maroon controls and readable messages. */
+.dashboard-page .chat-layout{background:var(--white);color:#171717}
+.dashboard-page .chat-sidebar{background:var(--white);border-right-color:var(--border)}
+.dashboard-page .chat-sidebar-header{background:var(--purple-light);border-bottom-color:var(--border)}
+.dashboard-page .chat-sidebar-title{color:#171717}
+.dashboard-page .chat-hdr-btn{background:var(--white);border-color:var(--border);color:var(--purple)}
+.dashboard-page .chat-room-item{border-bottom-color:var(--border)}
+.dashboard-page .chat-room-item:hover,.dashboard-page .chat-room-item.active{background:var(--purple-light)}
+.dashboard-page .chat-room-name{color:#171717}
+.dashboard-page .chat-room-preview{color:#777}
+.dashboard-page .chat-panel{background:var(--white);color:#171717}
+.dashboard-page .chat-panel-header{background:var(--purple-deep);border-bottom-color:var(--purple)}
+.dashboard-page .chat-panel-name{color:#fff}
+.dashboard-page .chat-panel-sub{color:rgba(255,255,255,.72)}
+.dashboard-page .chat-back-btn{color:#fff}
+.dashboard-page .chat-messages-area{background:var(--cream)}
+.dashboard-page .chat-msg.theirs{background:var(--white);color:#333;border:1px solid var(--border)}
+.dashboard-page .chat-msg.mine{background:var(--purple);color:#fff}
+.dashboard-page .chat-input-wrap{background:var(--white);border-top-color:var(--border)}
+.dashboard-page .chat-text-input{background:var(--cream);border-color:var(--border);color:#171717}
+.dashboard-page .chat-text-input::placeholder{color:#888}
+
+@media(max-width:700px){
+  #tab-feed .post-card,#tab-alumni .alumni-card,#tab-jobs .job-card{padding:18px 16px}
+  #tab-alumni .alumni-card{align-items:flex-start}
+  #tab-alumni .alumni-card>div:last-child{flex-direction:row!important;align-self:center}
+  #tab-jobs .job-head{align-items:flex-start}
+}
 
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
