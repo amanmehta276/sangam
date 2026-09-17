@@ -147,3 +147,70 @@ async function subscribeNow() {
 4. Razorpay checkout mein test card use karo: `4111 1111 1111 1111`, koi bhi future expiry, koi bhi CVV
 5. Webhook local test karne ke liye Razorpay CLI ya `ngrok` chahiye hoga (localhost seedha webhook receive nahi kar sakta — Razorpay ko public URL chahiye)
 6. Terminal mein `[DB]` logs aur MongoDB `subscriptions` collection check karo ki status `pending` → `active` ho raha hai
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ab dono documents (PAN + bank details) ready hain, chaliye **poora Razorpay setup flow** end-to-end batata hoon — account banane se lekar live payment tak.
+
+## Poora Flow — Step by Step
+
+### Phase 1 — Account banao (5 min)
+1. `razorpay.com` pe jaake sign up karo — organizational email use karo (jo pehle discuss kiya tha)
+2. Business type select karo: **"Trust / Society / Association"** (aapka NGO/non-profit type)
+3. Basic details bharo — business name exactly PAN jaisa: `ALUMNI ASSOCIATION OF CHHATISGARH INSTITUTE OF TECHNOLOGY RAIPUR`
+
+### Phase 2 — Test mode mein development (abhi turant kar sakte ho)
+4. Dashboard → Settings → API Keys → **Generate Test Key** (KYC ki zaroorat nahi is step ke liye)
+5. Test keys `.env` mein daalo, poora code test karo (jo humne pehle banaya)
+
+### Phase 3 — KYC Submission (real business details ke saath)
+
+Dashboard → Account & Settings → Business Settings mein ye fields bharo:
+
+| Field | Value |
+|---|---|
+| PAN Number | `AAWAA9259N` |
+| Business Name | `ALUMNI ASSOCIATION OF CHHATISGARH INSTITUTE OF TECHNOLOGY RAIPUR` |
+| Date of Incorporation | `30/04/2026` |
+| Bank Account Number | `50200125101989` |
+| IFSC Code | `HDFC0000152` |
+| Account holder name | Bilkul PAN jaisa naam hona chahiye (bank account bhi isi organization ke naam pe hona chahiye, kisi individual ke naam pe nahi) |
+
+**Documents upload karne honge:**
+- e-PAN card (jo dikhaya) ✅
+- Trust/Society/Association registration certificate
+- Cancelled cheque ya bank statement (isi account number `50200125101989` ka, taaki bank details verify ho)
+- Authorized signatory ka ID proof (jo Razorpay account operate karega)
+- GST certificate (chunki aap GST-registered ho)
+
+### Phase 4 — Verification wait (2-3 din)
+6. Razorpay team documents verify karegi — PAN name, bank account name, aur registration certificate ka naam **match hona chahiye exactly**
+7. Approve hone pe **live keys** (`rzp_live_...`) milenge
+
+### Phase 5 — Plan banao aur go live
+8. Dashboard → Subscriptions → Plans → Create Plan → ₹116.82/month (`11682` paise)
+9. Milega `plan_id` → isko `payment.py` aur `payment.js` dono mein daalo (jahan abhi `plan_REPLACE_WITH_REAL_ID` likha hai)
+10. Webhook set karo: `https://sangam-z93f.onrender.com/api/payment/webhook`
+11. `.env` mein test keys ko **live keys** se replace karo
+12. Ek real transaction test karo (chota amount) — settlement bank account `50200125101989` mein 1-2 din mein aayega
+
+### Phase 6 — Settlement cycle (ongoing)
+Har successful payment ke baad, paisa (Razorpay fee minus) automatically **HDFC account `...101989`** mein transfer hota rahega — daily/weekly settlement cycle (Razorpay dashboard mein configure kar sakte ho).
+
+---
+
+**Abhi turant kya kar sakte ho:** Test mode mein poora code test karo (KYC ka wait kiye bina), aur parallel mein KYC documents submit kar do. Jab dono ready ho, bas keys switch karni hain.
+
+Kaunsa step abhi start karna hai — KYC submission, ya pehle test mode mein poora flow verify karna?
