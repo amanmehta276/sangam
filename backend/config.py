@@ -3,13 +3,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _backend_path(value):
+    return value if os.path.isabs(value) else os.path.join(BASE_DIR, value)
+
 class Config:
     SECRET_KEY       = os.getenv("SECRET_KEY", "change-me")
     MONGO_URI        = os.getenv("MONGO_URI")
-    ROLL_DB_PATH     = os.getenv("ROLL_DB_PATH", "data/students.csv")
+    ROLL_DB_PATH     = _backend_path(os.getenv("ROLL_DB_PATH", "data/students.csv"))
     OTP_MODE         = os.getenv("OTP_MODE", "console")   # console | sms | email
     OTP_EXPIRY       = int(os.getenv("OTP_EXPIRY", 300))  # seconds
-    UPLOAD_FOLDER    = os.getenv("UPLOAD_FOLDER", "uploads")
+    UPLOAD_FOLDER    = _backend_path(os.getenv("UPLOAD_FOLDER", "uploads"))
     MAX_FILE_MB      = int(os.getenv("MAX_FILE_MB", 10))
     MAX_CONTENT_LEN  = MAX_FILE_MB * 1024 * 1024
     PORT             = int(os.getenv("PORT", 5000))

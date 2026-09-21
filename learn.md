@@ -214,3 +214,87 @@ Har successful payment ke baad, paisa (Razorpay fee minus) automatically **HDFC 
 **Abhi turant kya kar sakte ho:** Test mode mein poora code test karo (KYC ka wait kiye bina), aur parallel mein KYC documents submit kar do. Jab dono ready ho, bas keys switch karni hain.
 
 Kaunsa step abhi start karna hai — KYC submission, ya pehle test mode mein poora flow verify karna?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+I’m checking the dashboard auth guard and the membership/auth entry points because the redirect loop is likely caused by a stale login/session check or a bad redirect target.
+
+Read , lines 1 to 120
+
+Read , lines 1 to 220
+
+Read 
+
+Read 
+
+Read 
+
+## Reason
+
+Haan, yeh current logic intentionally redirect karta hai.
+
+In `dashboard.js:38-47`, ye guard hai:
+
+- agar `Auth.isLoggedIn()` false hai
+- tab `window.location.href = "auth.html"`
+
+Aur fir `dashboard.js:60-74` me ye bhi hai:
+
+- `AuthAPI.me()` call hota hai
+- agar 401 mila, matlab token invalid/expired
+- `Auth.clear();`
+- phir redirect to auth page
+
+So dashboard khulne ke baad auth open hona normal hai agar:
+
+1. token missing hai
+2. token expired hai
+3. backend `/api/auth/me` response 401 de raha hai
+4. login flow me token save nahi ho raha
+
+---
+
+## Check karne ka exact point
+
+Aap ye check karo:
+
+- browser devtools > Application > Local Storage
+- `sangam_token` aur `sangam_user` visible hain ya nahi
+
+Agar dono missing hain, to dashboard auth page me redirect hoga hi.
+
+Also check `api.js:7-16`:
+- API URL is correct or not
+- if backend unreachable, `AuthAPI.me()` fail hoga and redirect triggers
+
+---
+
+## Short answer
+
+Ye problem likely is not dashboard ka bug, balki auth guard ka behavior hai.
+
+Agar aapko “testing ke liye dashboard bina login bhi open ho” chahiye, to:
+- `dashboard.js:38-47` me ye guard remove kar do
+
+Agar aapko actual login flow sahi chahiye, to:
+- login ke baad token store hona chahiye
+- backend `/api/auth/me` 200 return karna chahiye
+- phir dashboard open hona chahiye
+
+> Meaning: current behavior is “dashboard protected by auth”, not “dashboard open without login”.
+
+If you want, next I can directly tell you which exact 2 lines to remove for testing, or fix the login-token issue.

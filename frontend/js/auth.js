@@ -1,9 +1,24 @@
 /* ============================================================
-   auth.js — Sangam Auth Flow
-   Depends on: api.js (loaded before this)
-   Screens: s-splash → s-login → s-login-otp
-            s-splash → s-signup → s-signup-otp
+   auth.js — Sangam Auth (no OTP)
+   Signup : name + branch + batch + roll no + password -> Sangam ID generated, logged in
+   Login  : Sangam ID + password -> logged in
+   Depends on: api.js (only for the `Auth` token helper)
    ============================================================ */
+
+const AUTH_API_BASE = API_BASE;   // single source of truth: js/api.js (change the backend URL only there)
+
+const SANGAM_ID_RE = /^[A-Z]{2,6}\d{4,10}$/;
+
+async function authPost(path, body) {
+  const res  = await fetch(`${AUTH_API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw { status: res.status, message: data.message || data.error || "Request failed", data };
+  return data;
+}
 
 /* ── Screen navigation ─────────────────────────────────── */
 function showScreen(id) {
@@ -47,221 +62,131 @@ function setLoading(btnId, loading, text = "") {
   }
 }
 
-/* ── OTP input helpers ──────────────────────────────────── */
-function otpNext(el, idx, prefix) {
-  el.value = el.value.replace(/\D/g, "").slice(0, 1);
-  if (el.value) el.classList.add("filled");
-  else el.classList.remove("filled");
-
-  if (el.value) {
-    const cells = document.querySelectorAll(`.${prefix}-otp-cell`);
-    if (cells[idx + 1]) cells[idx + 1].focus();
-  }
-}
-
-function otpBack(el, e) {
-  if (e.key === "Backspace" && !el.value) {
-    const cells = [...el.parentElement.querySelectorAll(".otp-cell")];
-    const idx = cells.indexOf(el);
-    if (idx > 0) cells[idx - 1].focus();
-  }
-}
-
-function getOtpValue(className) {
-  return [...document.querySelectorAll(`.${className}`)]
-    .map(c => c.value.trim())
-    .join("");
-}
-
-function clearOtp(className) {
-  document.querySelectorAll(`.${className}`).forEach(c => {
-    c.value = "";
-    c.classList.remove("filled");
-  });
-}
+const ARROW = `<i class="ti ti-arrow-right" style="font-size:14px"></i>`;
 
 /* ═══════════════════════════════════════════════════
-   LOGIN — Step 1: Roll + Name
+   LOGIN — Sangam ID only
 ═══════════════════════════════════════════════════ */
-async function doCheckRoll() {
-  const roll = (document.getElementById("login-roll")?.value || "").trim().toUpperCase();
-  const name = (document.getElementById("login-name")?.value || "").trim();
+async function doLogin() {
+  const roll     = (document.getElementById("login-roll")?.value || "").trim().toUpperCase();
+  const password = document.getElementById("login-password")?.value || "";
 
   hideError("login-error");
   document.getElementById("login-notfound")?.classList.add("hidden");
 
-  if (!roll || !name) {
-    showError("login-error", "Please enter your roll number and name.");
+  if (!roll || !password) {
+    showError("login-error", "Please enter your Sangam ID and password.");
+    return;
+  }
+  if (!SANGAM_ID_RE.test(roll)) {
+    showError("login-error", "Invalid Sangam ID. Format: BRANCH + YEAR + ROLL (e.g. CSE22101)");
     return;
   }
 
-  setLoading("btn-check-roll", true);
+  setLoading("btn-login", true);
 
   try {
-    const res = await AuthAPI.checkRoll(roll, name);
-
-    // Show masked mobile
-    const masked = document.getElementById("login-mobile-masked");
-    if (masked) masked.textContent = res.mobile_masked || "XXXXXXXXXX";
-
-    // Dev OTP banner
-    if (res.dev_otp) {
-      const banner = document.getElementById("login-dev-otp-banner");
-      if (banner) {
-        banner.textContent = `DEV OTP: ${res.dev_otp}`;
-        banner.classList.remove("hidden");
-      }
-    }
-
-    clearOtp("login-otp-cell");
-    showScreen("s-login-otp");
-
-  } catch (err) {
-    const msg = err?.message || "Something went wrong";
-    if (err?.data?.error === "not_registered") {
-      document.getElementById("login-notfound")?.classList.remove("hidden");
-    } else {
-      showError("login-error", msg);
-    }
-  } finally {
-    setLoading("btn-check-roll", false, `Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   LOGIN — Step 2: OTP verify
-═══════════════════════════════════════════════════ */
-async function doLoginVerify() {
-  const roll = (document.getElementById("login-roll")?.value || "").trim().toUpperCase();
-  const otp  = getOtpValue("login-otp-cell");
-
-  hideError("login-otp-error");
-
-  if (otp.length < 6) {
-    showError("login-otp-error", "Enter the 6-digit OTP.");
-    return;
-  }
-
-  setLoading("btn-login-verify", true);
-
-  try {
-    const res = await AuthAPI.login(roll, otp);
+    const res = await authPost("/auth/login", { roll_number: roll, password });
     Auth.setToken(res.token);
     Auth.setUser(res.user);
     authToast("Welcome back! 👋", "success");
-    setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 700);
   } catch (err) {
-    showError("login-otp-error", err?.message || "Wrong OTP. Try again.");
+    if (err?.data?.error === "not_registered") {
+      document.getElementById("login-notfound")?.classList.remove("hidden");
+    } else {
+      showError("login-error", err?.message || "Something went wrong");
+    }
   } finally {
-    setLoading("btn-login-verify", false, `Verify & Sign In <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+    setLoading("btn-login", false, `Sign In ${ARROW}`);
   }
 }
 
 /* ═══════════════════════════════════════════════════
-   SIGNUP — Step 1: Roll + Name + Mobile
+   SIGNUP — name + branch + Sangam ID
 ═══════════════════════════════════════════════════ */
-async function doVerifyRoll() {
-  const roll   = (document.getElementById("signup-roll")?.value   || "").trim().toUpperCase();
-  const name   = (document.getElementById("signup-name")?.value   || "").trim();
-  const mobile = (document.getElementById("signup-mobile")?.value || "").trim();
+function buildSangamId(branch, batch, rollNo) {
+  if (!branch || !/^\d{4}$/.test(batch) || !/^\d{1,4}$/.test(rollNo)) return "";
+  return `${branch}${batch.slice(2)}${rollNo.padStart(3, "0")}`;
+}
+
+function updateSangamId() {
+  const branch = document.getElementById("signup-branch")?.value || "";
+  const batch  = (document.getElementById("signup-batch")?.value  || "").trim();
+  const rollNo = (document.getElementById("signup-rollno")?.value || "").trim();
+  const el = document.getElementById("sangam-id-preview");
+  if (el) el.textContent = `Your Sangam ID: ${buildSangamId(branch, batch, rollNo) || "—"}`;
+}
+
+async function doSignup() {
+  const name     = (document.getElementById("signup-name")?.value   || "").trim();
+  const branch   = (document.getElementById("signup-branch")?.value || "").trim();
+  const batch    = (document.getElementById("signup-batch")?.value  || "").trim();
+  const rollNo   = (document.getElementById("signup-rollno")?.value || "").trim();
+  const password = document.getElementById("signup-password")?.value || "";
 
   hideError("signup-error");
 
-  if (!roll || !name) {
-    showError("signup-error", "Roll number and name are required.");
+  if (!name || !branch || !batch || !rollNo || !password) {
+    showError("signup-error", "Name, branch, batch, roll number and password are required.");
     return;
   }
-
-  setLoading("btn-verify-roll", true);
-
-  try {
-    const res = await AuthAPI.signup(roll, name, mobile);
-
-    // Prefill info strip
-    const av = document.getElementById("signup-av");
-    if (av) av.textContent = (res.name || name)[0].toUpperCase();
-
-    const dispName = document.getElementById("signup-display-name");
-    if (dispName) dispName.textContent = res.name || name;
-
-    const dispInfo = document.getElementById("signup-student-info");
-    if (dispInfo) dispInfo.textContent = `${res.branch || ""} · Batch ${res.batch_year || ""} · ${res.role || "student"}`;
-
-    const masked = document.getElementById("signup-mobile-masked");
-    if (masked) masked.textContent = res.mobile_masked || "XXXXXXXXXX";
-
-    // Dev OTP
-    if (res.dev_otp) {
-      const banner = document.getElementById("signup-dev-otp-banner");
-      if (banner) {
-        banner.textContent = `DEV OTP: ${res.dev_otp}`;
-        banner.classList.remove("hidden");
-      }
-    }
-
-    clearOtp("signup-otp-cell");
-    showScreen("s-signup-otp");
-
-  } catch (err) {
-    const msg = err?.message || "Something went wrong";
-    if (err?.data?.error === "already_registered") {
-      showError("signup-error", "Account already exists. Please sign in.");
-      setTimeout(() => showScreen("s-login"), 2000);
-    } else {
-      showError("signup-error", msg);
-    }
-  } finally {
-    setLoading("btn-verify-roll", false, `Verify & Continue <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+  if (!/^\d{4}$/.test(batch) || +batch < 2000 || +batch > 2100) {
+    showError("signup-error", "Enter a valid batch year (e.g. 2022).");
+    return;
   }
-}
-
-/* ═══════════════════════════════════════════════════
-   SIGNUP — Step 2: OTP → create account
-═══════════════════════════════════════════════════ */
-async function doSignup() {
-  const roll   = (document.getElementById("signup-roll")?.value   || "").trim().toUpperCase();
-  const name   = (document.getElementById("signup-name")?.value   || "").trim();
-  const mobile = (document.getElementById("signup-mobile")?.value || "").trim();
-  const otp    = getOtpValue("signup-otp-cell");
-
-  hideError("signup-otp-error");
-
-  if (otp.length < 6) {
-    showError("signup-otp-error", "Enter the 6-digit OTP.");
+  if (!/^\d{1,4}$/.test(rollNo)) {
+    showError("signup-error", "Enter a valid roll number (digits only).");
+    return;
+  }
+  if (password.length < 6) {
+    showError("signup-error", "Password must be at least 6 characters.");
     return;
   }
 
   setLoading("btn-signup", true);
 
   try {
-    const res = await AuthAPI.verifySignup(roll, otp, name, mobile);
+    const res = await authPost("/auth/signup", { name, branch, batch_year: batch, roll_no: rollNo, password });
     Auth.setToken(res.token);
     Auth.setUser(res.user);
-    authToast("Account created! Welcome 🎉", "success");
-    setTimeout(() => { window.location.href = "dashboard.html"; }, 900);
+    authToast(`Account created! Your Sangam ID: ${res.user.roll_number}`, "success");
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 2500);
   } catch (err) {
-    showError("signup-otp-error", err?.message || "Wrong OTP. Try again.");
+    if (err?.data?.error === "already_registered") {
+      showError("signup-error", "Account already exists. Please sign in.");
+      setTimeout(() => showScreen("s-login"), 1800);
+    } else {
+      showError("signup-error", err?.message || "Something went wrong");
+    }
   } finally {
-    setLoading("btn-signup", false, `Create Account <i class="ti ti-arrow-right" style="font-size:14px"></i>`);
+    setLoading("btn-signup", false, `Create Account ${ARROW}`);
   }
 }
 
-/* ── Resend OTP ─────────────────────────────────────────── */
-async function resendOtp(type) {
-  if (type === "login") {
-    await doCheckRoll();
-    clearOtp("login-otp-cell");
-    authToast("OTP resent!", "info");
-  } else {
-    await doVerifyRoll();
-    clearOtp("signup-otp-cell");
-    authToast("OTP resent!", "info");
-  }
-}
+/* ── Enter key submits the active screen ───────────────── */
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const active = document.querySelector(".auth-screen.active");
+  if (active?.id === "s-login")  doLogin();
+  if (active?.id === "s-signup") doSignup();
+});
 
-/* ── Redirect if already logged in ─────────────────────── */
-document.addEventListener("DOMContentLoaded", () => {
-  if (Auth.isLoggedIn()) {
-    window.location.href = "dashboard.html";
+/* ── If already logged in AND the token is still valid -> dashboard ──
+   (a stale token, e.g. user deleted / token expired, is cleared instead of bouncing
+   between auth <-> dashboard) */
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!Auth.isLoggedIn()) return;
+  try {
+    const res = await fetch(`${AUTH_API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${Auth.getToken()}` },
+    });
+    if (res.ok) {
+      window.location.href = "dashboard.html";
+    } else if (res.status >= 400 && res.status < 500) {
+      Auth.clear();          // 401/403/404 -> token no longer valid, sign in again
+    }
+  } catch (e) {
+    /* backend unreachable: stay on this page */
   }
 });

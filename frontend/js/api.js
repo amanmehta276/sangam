@@ -3,16 +3,10 @@
    Load this BEFORE auth.js and dashboard.js
    ============================================================ */
 
-// ── Backend URL — change this to your Render URL in production
-// Change ONLY here — API_ORIGIN below is derived from this automatically,
-// so dashboard.js/profile.js no longer need their own hardcoded copy.
-const API_BASE = (function() {
-  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    return "https://sangam-z93f.onrender.com/api";
-  }
-  // Production — apna Render URL yahan daalo
-  return "https://sangam-z93f.onrender.com/api";
-})();
+// ── Backend URL ──────────────────────────────────────────
+// Use the hosted API for local previews and production so both use
+// the same authentication and database backend.
+const API_BASE = "https://sangam-z93f.onrender.com/api";
 
 // Backend root without the /api suffix — used for Socket.IO connect and
 // for turning "/uploads/..." paths returned by the backend into full URLs.

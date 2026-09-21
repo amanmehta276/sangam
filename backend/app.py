@@ -5,7 +5,6 @@ Run: python app.py
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-from routes.payment import payment_bp
 
 from config import cfg
 
@@ -31,6 +30,7 @@ from routes.jobs          import jobs_bp
 from routes.chat          import chat_bp
 from routes.notifications import notifs_bp
 from routes.admin         import admin_bp
+from routes.membership    import membership_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
@@ -39,7 +39,7 @@ app.register_blueprint(jobs_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(notifs_bp)
 app.register_blueprint(admin_bp)
-app.register_blueprint(payment_bp)
+app.register_blueprint(membership_bp)
 
 # ── Health check ──────────────────────────────────────────
 @app.route("/api/health")

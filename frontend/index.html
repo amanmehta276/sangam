@@ -514,6 +514,19 @@ img{max-width:100%;display:block}
 .footer-brand{color:#fff}
 .footer-link,.footer-copy{color:rgba(255,255,255,.68)}
 .footer-link:hover{color:#fff}
+
+/* ─── GOVERNING BODY ─── */
+.gb-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px}
+.gb-card{flex:0 0 calc(25% - 15px);background:var(--white);border:1px solid var(--border-light);border-radius:var(--r-md);padding:32px 20px;text-align:center;transition:background .2s,box-shadow .2s}
+.gb-card:hover{background:var(--off);box-shadow:0 6px 20px rgba(74,14,14,.08)}
+.gb-avatar{position:relative;width:96px;height:96px;border-radius:50%;margin:0 auto 16px;background:var(--accent-light);border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.gb-avatar span{font-family:'Playfair Display',serif;font-size:28px;color:var(--accent)}
+.gb-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.gb-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:6px}
+.gb-role{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
+@media(max-width:1024px){.gb-card{flex:0 0 calc(33.333% - 14px)}}
+@media(max-width:800px){.gb-card{flex:0 0 calc(50% - 10px)}}
+@media(max-width:480px){.gb-card{flex:0 0 100%}}
 </style>
 </head>
 <body>
@@ -530,6 +543,7 @@ img{max-width:100%;display:block}
     <a class="sidebar-item" href="#association" onclick="closeSidebar()"><i class="ti ti-users" style="font-size:16px"></i>Association</a>
     <a class="sidebar-item" href="#branches" onclick="closeSidebar()"><i class="ti ti-books" style="font-size:16px"></i>Branches</a>
     <a class="sidebar-item" href="#events" onclick="closeSidebar()"><i class="ti ti-calendar" style="font-size:16px"></i>Events</a>
+    <a class="sidebar-item" href="pages/membership.html"><i class="ti ti-id-badge-2" style="font-size:16px"></i>Membership</a>
     <div class="sidebar-section">Info</div>
     <a class="sidebar-item" href="#about-dev" onclick="closeSidebar()"><i class="ti ti-code" style="font-size:16px"></i>VyomTech</a>
   </nav>
@@ -551,6 +565,7 @@ img{max-width:100%;display:block}
       <a class="nav-link" href="#branches">Branches</a>
       <a class="nav-link" href="#association">Alumni</a>
       <a class="nav-link" href="#events">Events</a>
+      <a class="nav-link" href="pages/membership.html">Membership</a>
     </div>
     <div class="nav-right">
       <a class="nav-signin" href="pages/auth.html">Sign In</a>
@@ -609,6 +624,55 @@ img{max-width:100%;display:block}
 </section>
 
 <hr class="divider">
+
+<!-- ── GOVERNING BODY ── -->
+<section class="section" id="committee">
+  <div class="inner">
+    <div class="section-eyebrow">Alumni Association</div>
+    <h2 class="section-title">Governing <em>body</em></h2>
+    <p class="section-desc">The elected executive committee of the Alumni Association of CGIT Raipur.</p>
+    <div class="gb-grid">
+      <div class="gb-card">
+        <div class="gb-avatar"><span>AS</span><img src="team/abhay-shukla.jpg" alt="Mr. Abhay Shukla" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Abhay Shukla</div>
+        <div class="gb-role">President</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>DP</span><img src="team/dewashri-pansari.jpg" alt="Miss Dewashri Pansari" onerror="this.remove()"></div>
+        <div class="gb-name">Miss Dewashri Pansari</div>
+        <div class="gb-role">Vice President</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>KD</span><img src="team/kranti-kumar-dhruw.jpg" alt="Mr. Kranti Kumar Dhruw" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Kranti Kumar Dhruw</div>
+        <div class="gb-role">General Secretary</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>UP</span><img src="team/umashanker-patel.jpg" alt="Mr. Umashanker Patel" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Umashanker Patel</div>
+        <div class="gb-role">Joint Secretary</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>IC</span><img src="team/ishwar-singh-chandra.jpg" alt="Mr. Ishwar Singh Chandra" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Ishwar Singh Chandra</div>
+        <div class="gb-role">Treasurer</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>KP</span><img src="team/kunal-pansari.jpg" alt="Mr. Kunal Pansari" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Kunal Pansari</div>
+        <div class="gb-role">Executive Member</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>DC</span><img src="team/deepali-chandrakar.jpg" alt="Mrs. Deepali Chandrakar" onerror="this.remove()"></div>
+        <div class="gb-name">Mrs. Deepali Chandrakar</div>
+        <div class="gb-role">Executive Member</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
 
 <!-- ── ABOUT ── -->
 <section class="section section-alt" id="about">
@@ -719,6 +783,7 @@ img{max-width:100%;display:block}
         <p class="assoc-desc">Tech talks, webinars, and the annual alumni meet</p>
       </div>
     </div>
+    <div style="margin-top:32px"><a class="btn-primary" href="pages/membership.html">Become a Member <i class="ti ti-arrow-right" style="font-size:14px"></i></a></div>
   </div>
 </section>
 

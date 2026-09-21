@@ -11,7 +11,7 @@
 <link rel="icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <style>
 html,body{height:100%;overflow:hidden}
@@ -207,6 +207,10 @@ html,body{height:100%;overflow:hidden}
       <i class="ti ti-user" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
       My Profile
     </a>
+    <a class="sidebar-item" href="membership.html">
+      <i class="ti ti-crown" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
+      Membership
+    </a>
     <a class="sidebar-item" href="#" onclick="logout()">
       <i class="ti ti-logout" style="font-size:16px;width:20px;color:rgba(255,255,255,0.4)"></i>
       Logout
@@ -298,7 +302,7 @@ html,body{height:100%;overflow:hidden}
     <div class="filter-grid">
       <div class="fcard" onclick="filterAlumniBy('branch','CSE')"><span class="fi"><i class="ti ti-cpu"></i></span><span class="fl">CSE</span></div>
       <div class="fcard" onclick="filterAlumniBy('branch','EEE')"><span class="fi"><i class="ti ti-bolt"></i></span><span class="fl">EEE</span></div>
-      <div class="fcard" onclick="filterAlumniBy('branch','ECE')"><span class="fi"><i class="ti ti-antenna"></i></span><span class="fl">ECE</span></div>
+      <div class="fcard" onclick="filterAlumniBy('branch','ETC')"><span class="fi"><i class="ti ti-antenna"></i></span><span class="fl">ETC</span></div>
       <div class="fcard" onclick="filterAlumniBy('role','alumni')"><span class="fi"><i class="ti ti-school"></i></span><span class="fl">Alumni</span></div>
       <div class="fcard" onclick="filterAlumniBy('role','teacher')"><span class="fi"><i class="ti ti-chalkboard"></i></span><span class="fl">Teachers</span></div>
       <div class="fcard" onclick="filterAlumniBy('referral','1')"><span class="fi"><i class="ti ti-file-check"></i></span><span class="fl">Referrals</span></div>
@@ -453,7 +457,7 @@ html,body{height:100%;overflow:hidden}
           <!-- Membership -->
           <div class="pcard" id="membership-card">
             <div class="pcard-header">
-              <div class="pcard-title">Sangam Membership</div>
+              <div class="pcard-title">Association Membership</div>
               <span class="membership-badge" id="membership-badge" style="display:none">
                 <i class="ti ti-crown" style="font-size:11px"></i> Member
               </span>
@@ -461,29 +465,27 @@ html,body{height:100%;overflow:hidden}
 
             <div id="membership-offer">
               <div class="pcard-body" style="margin-bottom:12px">
-                Unlock priority job alerts, alumni contact details, and event passes.
+                Join the Alumni Association of CGIT Raipur and support mentorship, scholarships and placement drives.
               </div>
               <div class="membership-price-row">
                 <div>
-                  <div class="membership-price">₹116.82<span>/month</span></div>
-                  <div class="membership-price-sub">₹99 + 18% GST</div>
+                  <div class="membership-price">From ₹1,500<span>/year</span></div>
+                  <div class="membership-price-sub">General · Lifetime ₹5,000 · Patron ₹11,000</div>
                 </div>
                 <button class="pcard-generate-btn membership-btn" onclick="subscribeMembership()" style="width:auto;padding:10px 18px">
-                  <i class="ti ti-crown" style="font-size:14px"></i> Get Membership
+                  <i class="ti ti-crown" style="font-size:14px"></i> Become a Member
                 </button>
               </div>
             </div>
 
             <div id="membership-active" style="display:none">
-              <div class="pcard-body" style="margin-bottom:12px">
-                You're a Sangam Member. Thanks for supporting the community!
+              <div class="pcard-body" id="membership-active-text" style="margin-bottom:12px">
+                You're a member of the Alumni Association. Thank you!
               </div>
-              <button class="pcard-generate-btn" style="background:transparent;border:1px solid var(--border-dk);color:rgba(255,255,255,0.5)" onclick="cancelMembership()">
-                Cancel Membership
+              <button class="pcard-generate-btn" style="background:transparent;border:1px solid var(--border-dk);color:rgba(255,255,255,0.5)" onclick="subscribeMembership()">
+                View / Renew / Upgrade
               </button>
             </div>
-
-            <div class="pcard-hint" id="membership-hint" style="display:none">Payment processing… this can take a few seconds.</div>
           </div>
 
           <!-- About -->

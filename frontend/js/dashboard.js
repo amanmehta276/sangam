@@ -62,14 +62,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (saved) currentUser = {...currentUser,...saved};
   } catch(e){}
 
-  try {
-    currentUser = await AuthAPI.me();
-    Auth.setUser(currentUser);
-  } catch (e) {
-    if (e?.status === 401) {
-      Auth.clear();
-      window.location.href = "auth.html";
-      return;
+  if (Auth.isLoggedIn()) {
+    try {
+      currentUser = await AuthAPI.me();
+      Auth.setUser(currentUser);
+    } catch (e) {
+      if (e?.status === 401) {
+        Auth.clear();
+        window.location.href = "auth.html";
+        return;
+      }
     }
   }
 
