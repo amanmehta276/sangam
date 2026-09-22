@@ -1100,7 +1100,25 @@ async function loadIndexEvents() {
   }
 }
 
+// Ticker: pull from the admin-managed announcements (public, no login needed)
+async function loadTicker() {
+  const ticker = document.getElementById("ticker-track");
+  if (!ticker) return;
+  try {
+    const res = await fetch(`${API_BASE}/announcements/ticker`);
+    const items = await res.json();
+    if (!items.length) return; // keep the static fallback lines already in the HTML
+    const html = items.map(i =>
+      `<span class="ticker-item"><i class="ti ti-bell"></i>${i.text}</span>`
+    ).join("");
+    ticker.innerHTML = html + html; // duplicate for seamless loop
+  } catch (e) {
+    console.warn("Ticker load failed, showing static fallback");
+  }
+}
+
 // Call karo
+loadTicker();
 loadIndexEvents();
 </script>
 </body>
