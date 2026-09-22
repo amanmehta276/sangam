@@ -222,6 +222,10 @@ html,body{height:100%;overflow:hidden}
         <i class="ti ti-shield-check" style="font-size:16px;width:20px;color:var(--purple-3)"></i>
         Admin Panel
       </a>
+      <a class="sidebar-item" href="admin-ticker.html">
+        <i class="ti ti-news" style="font-size:16px;width:20px;color:var(--purple-3)"></i>
+        Home Ticker
+      </a>
     </div>
   </nav>
   <div class="sidebar-footer">Made with care by VyomTech</div>
@@ -749,6 +753,17 @@ html,body{height:100%;overflow:hidden}
 <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:900" onclick="closeModal()"></div>
 <div id="modal-content" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:910;background:var(--ink-2);border:1px solid var(--border-dk);border-radius:16px 16px 0 0;padding:18px;height:90vh;overflow-y:auto"></div>
 <script src="../js/api.js"></script>
+<script>
+  // Show the Admin section in the sidebar if this user's role is "admin".
+  // The role comes from Auth.getUser() — set at login/signup, no extra request needed.
+  (function () {
+    const u = Auth.getUser();
+    if (u && u.role === "admin") {
+      const el = document.getElementById("admin-sidebar-link");
+      if (el) el.style.display = "";
+    }
+  })();
+</script>
 <script src="../js/sidebar.js"></script>
 <script src="../js/profile.js"></script>
 <script src="../js/payment.js"></script>

@@ -278,6 +278,9 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     <div class="nav-item" onclick="showPanel('notifications',this)">
       <i class="ti ti-bell"></i> Notifications
     </div>
+    <div class="nav-item" onclick="showPanel('ticker',this)">
+      <i class="ti ti-news"></i> Home Ticker
+    </div>
 
     <div class="nav-section">System</div>
     <div class="nav-item" onclick="showPanel('csv',this)">
@@ -695,7 +698,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
         </div>
         <div class="form-group">
           <label class="form-label">Venue</label>
-          <input type="text" id="ev-venue" class="form-input" placeholder="e.g. CIT Campus Auditorium">
+          <input type="text" id="ev-venue" class="form-input" placeholder="e.g. CGIT Campus Auditorium">
         </div>
         <div class="form-group">
           <label class="form-label">Registration Link (optional)</label>
@@ -757,6 +760,34 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
           <i class="ti ti-bell" style="font-size:14px"></i> Send Notification
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ HOME TICKER ══ -->
+  <div class="admin-panel" id="panel-ticker">
+    <div class="section-hd">
+      <div><div class="section-title">Home Ticker</div><div class="section-sub">Scrolling lines shown at the top of the home page — no login needed to see them</div></div>
+    </div>
+    <div class="form-card">
+      <div class="form-grid cols-1">
+        <div class="form-group">
+          <label class="form-label">New Line</label>
+          <input type="text" id="tk-text" class="form-input" placeholder="e.g. Placement drive registrations open till Friday" maxlength="200">
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="topbar-btn btn-primary" onclick="tickerAdd()">
+          <i class="ti ti-plus" style="font-size:14px"></i> Add to Ticker
+        </button>
+      </div>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Text</th><th>Status</th><th>Added by</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="ticker-tbody">
+          <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-3)">Loading…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -929,7 +960,7 @@ function showPanel(name, navEl) {
   const titles = {
     dashboard:"Dashboard", users:"User Management", posts:"Feed Posts",
     jobs:"Jobs & Internships", broadcast:"Broadcast Message",
-    events:"Events", notifications:"Notifications", csv:"CSV / Roll Numbers", settings:"Settings"
+    events:"Events", notifications:"Notifications", ticker:"Home Ticker", csv:"CSV / Roll Numbers", settings:"Settings"
   };
   document.getElementById("panel-title").textContent = titles[name] || name;
 
@@ -939,6 +970,7 @@ function showPanel(name, navEl) {
   if (name === "jobs")       loadJobsAdmin();
   if (name === "events")     loadEvents();
   if (name === "broadcast")  loadBroadcastHistory();
+  if (name === "ticker")     loadTickerAdmin();
 
   if (window.innerWidth < 768) toggleSidebar(false);
 }
@@ -1370,6 +1402,91 @@ function clearEvent() {
   editingEventIdx = -1;
   const btn = document.querySelector("#panel-events .form-foot .btn-primary");
   if (btn) btn.innerHTML = `<i class="ti ti-calendar-plus" style="font-size:14px"></i> Create Event`;
+}
+
+/* ── Home Ticker ───────────────────────────────────────── */
+async function loadTickerAdmin() {
+  try {
+    const items = await _adminGet("/announcements");
+    const tbody = document.getElementById("ticker-tbody");
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-3)">No ticker lines yet — add one above.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(it => `
+      <tr data-id="${it.id}">
+        <td>
+          <span class="tk-view" style="font-size:13px">${esc(it.text)}</span>
+          <input class="tk-edit form-input" style="display:none;margin-top:4px" value="${esc(it.text)}">
+        </td>
+        <td>${it.active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Hidden</span>'}</td>
+        <td style="font-size:12px">${esc(it.created_by || "—")}</td>
+        <td style="font-size:11px;color:var(--text-3)">${formatDate(it.created_at)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="tickerToggleEdit(this)" title="Edit"><i class="ti ti-edit"></i></button>
+            <button class="act-btn" onclick="tickerToggleActive('${it.id}', ${!it.active})" title="${it.active ? "Hide" : "Show"}">
+              <i class="ti ${it.active ? "ti-eye-off" : "ti-eye"}"></i>
+            </button>
+            <button class="act-btn danger" onclick="tickerDelete('${it.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>`).join("");
+  } catch { showToast("Could not load ticker items", "error"); }
+}
+
+async function tickerAdd() {
+  const input = document.getElementById("tk-text");
+  const text = input.value.trim();
+  if (!text) { showToast("Enter some text first", "error"); return; }
+  try {
+    await _adminPost("/announcements", { text });
+    input.value = "";
+    showToast("Added to ticker ✓", "success");
+    loadTickerAdmin();
+  } catch(e) { showToast(e.message || "Could not add", "error"); }
+}
+
+function tickerToggleEdit(btn) {
+  const row  = btn.closest("tr");
+  const view = row.querySelector(".tk-view");
+  const edit = row.querySelector(".tk-edit");
+  const editing = edit.style.display !== "none";
+  if (!editing) {
+    view.style.display = "none";
+    edit.style.display = "block";
+    edit.focus();
+    btn.innerHTML = `<i class="ti ti-device-floppy"></i>`;
+    btn.setAttribute("onclick", "tickerSaveEdit(this)");
+  }
+}
+
+async function tickerSaveEdit(btn) {
+  const row  = btn.closest("tr");
+  const id   = row.dataset.id;
+  const text = row.querySelector(".tk-edit").value.trim();
+  if (!text) { showToast("Text can't be empty", "error"); return; }
+  try {
+    await _adminPut(`/announcements/${id}`, { text });
+    showToast("Updated ✓", "success");
+    loadTickerAdmin();
+  } catch(e) { showToast(e.message || "Could not save", "error"); }
+}
+
+async function tickerToggleActive(id, active) {
+  try {
+    await _adminPut(`/announcements/${id}`, { active });
+    loadTickerAdmin();
+  } catch { showToast("Could not update", "error"); }
+}
+
+async function tickerDelete(id) {
+  if (!confirm("Delete this ticker line?")) return;
+  try {
+    await _adminDelete(`/announcements/${id}`);
+    showToast("Deleted", "success");
+    loadTickerAdmin();
+  } catch { showToast("Could not delete", "error"); }
 }
 
 /* ── Broadcast ─────────────────────────────────────────── */
