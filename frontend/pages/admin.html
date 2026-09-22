@@ -1482,18 +1482,19 @@ async function uploadCSV() {
 }
 
 async function addSingleStudent() {
-  const roll   = document.getElementById("add-roll")?.value.trim().toUpperCase();
-  const name   = document.getElementById("add-name")?.value.trim();
-  const branch = document.getElementById("add-branch")?.value;
-  const batch  = document.getElementById("add-batch")?.value;
-  const mobile = document.getElementById("add-mobile")?.value.trim();
-  const role   = document.getElementById("add-role")?.value;
+  const valueOf = (id) => document.getElementById(id)?.value?.trim() || "";
+  const roll   = valueOf("add-roll").toUpperCase();
+  const name   = valueOf("add-name");
+  const branch = document.getElementById("add-branch")?.value || "";
+  const batch  = valueOf("add-batch");
+  const mobile = valueOf("add-mobile");
+  const role   = document.getElementById("add-role")?.value || "student";
   if (!roll || !name) { showToast("Roll number and name required", "error"); return; }
   try {
     await _adminPost("/admin/add-student", { roll_number: roll, name, branch, batch_year: batch, mobile, role });
     showToast(`${name} added! ✓`, "success");
     ["add-roll","add-name","add-batch","add-mobile"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
-  } catch { showToast("Could not add student", "error"); }
+  } catch (error) { showToast(error.message || "Could not add student", "error"); }
 }
 
 /* ── Modal ─────────────────────────────────────────────── */
