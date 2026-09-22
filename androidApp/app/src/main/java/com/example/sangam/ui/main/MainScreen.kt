@@ -86,7 +86,7 @@ fun MainScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "© 2026 VyomTech. All rights reserved.",
+                            text = "© 2026 VyomsTech. All rights reserved.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = White.copy(alpha = 0.68f),
                             fontSize = 12.sp
