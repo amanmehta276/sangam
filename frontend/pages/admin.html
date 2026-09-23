@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sangam Admin</title>
-<link rel="icon" href="../favicon_io/favicon-16x16.png">
+<link rel="icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -280,6 +280,10 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
     <div class="nav-item" onclick="showPanel('ticker',this)">
       <i class="ti ti-news"></i> Home Ticker
+    </div>
+    <div class="nav-item" onclick="showPanel('bankpay',this)">
+      <i class="ti ti-building-bank"></i> Membership Payments
+      <span class="nav-badge" id="badge-bankpay">0</span>
     </div>
 
     <div class="nav-section">System</div>
@@ -791,6 +795,21 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:no
     </div>
   </div>
 
+  <!-- ══ MEMBERSHIP PAYMENTS (bank transfer verification) ══ -->
+  <div class="admin-panel" id="panel-bankpay">
+    <div class="section-hd">
+      <div><div class="section-title">Membership Payments</div><div class="section-sub">Bank transfers awaiting verification — check your bank statement for the amount + reference before approving</div></div>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Student</th><th>Plan</th><th>Amount</th><th>Reference</th><th>Submitted</th><th>Actions</th></tr></thead>
+        <tbody id="bankpay-tbody">
+          <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ══ CSV ══ -->
   <div class="admin-panel" id="panel-csv">
     <div class="section-hd">
@@ -960,7 +979,7 @@ function showPanel(name, navEl) {
   const titles = {
     dashboard:"Dashboard", users:"User Management", posts:"Feed Posts",
     jobs:"Jobs & Internships", broadcast:"Broadcast Message",
-    events:"Events", notifications:"Notifications", ticker:"Home Ticker", csv:"CSV / Roll Numbers", settings:"Settings"
+    events:"Events", notifications:"Notifications", ticker:"Home Ticker", bankpay:"Membership Payments", csv:"CSV / Roll Numbers", settings:"Settings"
   };
   document.getElementById("panel-title").textContent = titles[name] || name;
 
@@ -971,6 +990,7 @@ function showPanel(name, navEl) {
   if (name === "events")     loadEvents();
   if (name === "broadcast")  loadBroadcastHistory();
   if (name === "ticker")     loadTickerAdmin();
+  if (name === "bankpay")    loadBankPayAdmin();
 
   if (window.innerWidth < 768) toggleSidebar(false);
 }
@@ -1487,6 +1507,51 @@ async function tickerDelete(id) {
     showToast("Deleted", "success");
     loadTickerAdmin();
   } catch { showToast("Could not delete", "error"); }
+}
+
+/* ── Membership Payments (bank transfer verification) ──── */
+async function loadBankPayAdmin() {
+  try {
+    const items = await _adminGet("/membership/bank-transfer/pending");
+    setText("badge-bankpay", items.length);
+    const tbody = document.getElementById("bankpay-tbody");
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">No pending transfers</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(it => `
+      <tr data-id="${it.id}">
+        <td><div class="table-name">${esc(it.roll_number)}</div></td>
+        <td><span class="badge badge-purple">${esc(it.plan_name)}</span></td>
+        <td style="font-weight:600;color:#fff">₹${it.amount.toLocaleString("en-IN")}</td>
+        <td style="font-family:monospace;font-size:12px">${esc(it.utr)}</td>
+        <td style="font-size:11px;color:var(--text-3)">${formatDate(it.submitted_at)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="bankPayApprove('${it.id}')" title="Approve"><i class="ti ti-check"></i></button>
+            <button class="act-btn danger" onclick="bankPayReject('${it.id}')" title="Reject"><i class="ti ti-x"></i></button>
+          </div>
+        </td>
+      </tr>`).join("");
+  } catch { showToast("Could not load pending payments", "error"); }
+}
+
+async function bankPayApprove(id) {
+  if (!confirm("Confirm you've checked the bank statement and this payment is real?")) return;
+  try {
+    await _adminPost(`/membership/bank-transfer/${id}/approve`, {});
+    showToast("Approved — membership activated ✓", "success");
+    loadBankPayAdmin();
+  } catch(e) { showToast(e.message || "Could not approve", "error"); }
+}
+
+async function bankPayReject(id) {
+  const reason = prompt("Reason for rejecting (optional):") || "";
+  try {
+    await _adminPost(`/membership/bank-transfer/${id}/reject`, { reason });
+    showToast("Rejected", "success");
+    loadBankPayAdmin();
+  } catch(e) { showToast(e.message || "Could not reject", "error"); }
 }
 
 /* ── Broadcast ─────────────────────────────────────────── */
