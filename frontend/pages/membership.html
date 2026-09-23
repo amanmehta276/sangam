@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Membership — Sangam · CGIT Raipur</title>
-<link rel="icon" href="../favicon_io/favicon-16x16.png">
+<link rel="icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -53,6 +53,24 @@ h1 em{color:var(--accent);font-weight:400}
 .hist td{padding:10px 12px;border-top:1px solid var(--border)}
 .note{font-size:12px;color:var(--text-3);margin-top:28px}
 @media(max-width:800px){.grid{grid-template-columns:1fr}}
+
+.pay-tabs{display:flex;gap:8px;margin-bottom:20px}
+.pay-tab{flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-2);background:#fff}
+.pay-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bank-box{border:1px solid var(--border);border-radius:6px;padding:22px;background:var(--light);display:none}
+.bank-box.show{display:block}
+.bank-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+.bank-row:last-child{border-bottom:none}
+.bank-label{color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.bank-val{font-weight:600;color:var(--text);font-family:monospace;font-size:14px}
+.copy-btn{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:2px 8px;background:none;cursor:pointer;margin-left:8px}
+.copy-btn:hover{background:var(--accent);color:#fff}
+.bank-plan-row{display:flex;gap:10px;margin:18px 0 12px}
+.bank-plan-row select{flex:1;padding:10px;border:1px solid var(--border);border-radius:4px;font-size:13px;font-family:inherit}
+.utr-row{display:flex;gap:10px}
+.utr-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:4px;font-size:13px;font-family:inherit}
+.utr-row button{padding:10px 18px}
+.bank-note{font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -71,7 +89,24 @@ h1 em{color:var(--accent);font-weight:400}
   <div class="status" id="status"></div>
   <div class="msg" id="msg"></div>
 
+  <div class="pay-tabs">
+    <div class="pay-tab on" id="tab-online" onclick="switchPayTab('online')">Pay Online</div>
+    <div class="pay-tab" id="tab-bank" onclick="switchPayTab('bank')">Bank Transfer</div>
+  </div>
+
   <div class="grid" id="plans"><p style="color:var(--text-3)">Loading plans…</p></div>
+
+  <div class="bank-box" id="bank-box">
+    <div id="bank-details-rows"><p style="color:var(--text-3)">Loading bank details…</p></div>
+    <div class="bank-plan-row">
+      <select id="bank-plan"></select>
+    </div>
+    <div class="utr-row">
+      <input type="text" id="bank-utr" placeholder="UPI / UTR / transaction reference number">
+      <button class="btn" onclick="submitBankTransfer()">Submit</button>
+    </div>
+    <p class="bank-note">Pay the exact amount for your chosen plan to the account above via UPI or NEFT, then submit the reference number. The association will verify and activate your membership — usually within a day.</p>
+  </div>
 
   <div class="hist" id="hist" style="display:none">
     <h2>Payment history</h2>
@@ -92,19 +127,11 @@ if (!token()) location.href = "auth.html";
 async function memApi(path, opts = {}) {
   const res = await fetch(`${MEM_API}${path}`, {
     ...opts,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token() ? { "Authorization": `Bearer ${token()}` } : {}),
-    },
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token()}` },
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401) {
-    localStorage.removeItem("sangam_token");
-    localStorage.removeItem("sangam_user");
-    location.href = "auth.html";
-    return;
-  }
+  if (res.status === 401 || res.status === 404) { localStorage.removeItem("sangam_token"); location.href = "auth.html"; }
   if (!res.ok) throw { status: res.status, message: data.message || data.error || "Request failed", data };
   return data;
 }
@@ -148,6 +175,56 @@ async function refresh() {
   return me.membership;
 }
 
+function switchPayTab(which) {
+  document.getElementById("tab-online").classList.toggle("on", which === "online");
+  document.getElementById("tab-bank").classList.toggle("on", which === "bank");
+  document.getElementById("plans").style.display = which === "online" ? "grid" : "none";
+  document.getElementById("bank-box").classList.toggle("show", which === "bank");
+}
+
+async function loadBankDetails() {
+  const [bank, plans] = await Promise.all([
+    fetch(`${MEM_API}/membership/bank-details`).then(r => r.json()),
+    fetch(`${MEM_API}/membership/plans`).then(r => r.json()),
+  ]);
+
+  const rows = [
+    ["Account Name", bank.account_name],
+    ["Account Number", bank.account_number],
+    ["IFSC", bank.ifsc],
+    ["Bank & Branch", `${bank.bank}, ${bank.branch}`],
+  ];
+  document.getElementById("bank-details-rows").innerHTML = rows.map(([label, val]) => `
+    <div class="bank-row">
+      <span class="bank-label">${label}</span>
+      <span class="bank-val">${val} <button class="copy-btn" onclick="copyBankVal(this,'${val}')">Copy</button></span>
+    </div>`).join("");
+
+  const sel = document.getElementById("bank-plan");
+  sel.innerHTML = plans.map(p => `<option value="${p.id}">${p.name} — ${rupee(p.amount)}</option>`).join("");
+}
+
+function copyBankVal(btn, val) {
+  navigator.clipboard?.writeText(val);
+  const orig = btn.textContent;
+  btn.textContent = "Copied";
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+}
+
+async function submitBankTransfer() {
+  const plan = document.getElementById("bank-plan").value;
+  const utr  = document.getElementById("bank-utr").value.trim();
+  if (!utr) { showMsg("Enter the UPI/UTR reference number.", "err"); return; }
+
+  try {
+    const res = await memApi("/membership/bank-transfer", { method: "POST", body: { plan, utr } });
+    document.getElementById("bank-utr").value = "";
+    showMsg(res.message || "Submitted! We'll verify it shortly.", "ok");
+  } catch (err) {
+    showMsg(err?.message || "Could not submit.", "err");
+  }
+}
+
 async function loadPlans() {
   const plans = await fetch(`${MEM_API}/membership/plans`).then(r => r.json());
   $("plans").innerHTML = plans.map(p => `
@@ -161,11 +238,6 @@ async function loadPlans() {
 }
 
 async function buy(planId, btn) {
-  if (!token()) {
-    location.href = "auth.html";
-    return;
-  }
-
   $("msg").className = "msg";
   const label = btn.textContent;
   btn.disabled = true; btn.textContent = "Please wait…";
@@ -202,10 +274,7 @@ async function buy(planId, btn) {
 }
 
 (async () => {
-  try {
-    await loadPlans();
-    await refresh();
-  }
+  try { await loadPlans(); await refresh(); await loadBankDetails(); }
   catch (e) { showMsg(e?.message || "Could not load membership info.", "err"); }
 })();
 </script>
