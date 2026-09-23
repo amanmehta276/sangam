@@ -75,6 +75,20 @@ def get_stats():
         "jobs":     jobs_col.count_documents({}),
     })
 
+
+# ── List all users ──────────────────────────────────────────
+@admin_bp.route("/users", methods=["GET"])
+@_admin_required
+def list_users():
+    limit = int(request.args.get("limit", 100))
+    users = list(
+        users_col.find({}, {"password": 0}).sort("created_at", -1).limit(limit)
+    )
+    for u in users:
+        u["id"] = str(u.pop("_id"))
+    return jsonify(users)
+
+
 # ── Update user role/trust ─────────────────────────────────
 # FIXED: route ab /api/admin/users/:id/admin-update hai
 @admin_bp.route("/users/<uid>/admin-update", methods=["PUT"])
