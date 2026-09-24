@@ -305,6 +305,8 @@ img{max-width:100%;display:block}
 .dev-role{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;padding-bottom:18px;border-bottom:1px solid var(--border)}
 .dev-quote{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;font-style:italic;font-weight:300}
 
+
+
 /* ─── FOOTER ─────────────────────────────────────────────── */
 .footer{background:var(--ink-2);border-top:1px solid var(--border);padding:40px 0}
 .footer-inner{
@@ -646,10 +648,11 @@ body.embedded .brand-bar{margin-top:0}
 
 <!-- ── BRAND BAR ── -->
 <div class="brand-bar">
-  <img src="icons/sangam-logo.png" alt="Sangam logo" class="brand-bar-logo">
-  <!-- <div class="brand-bar-name">San<em>gam</em></div> -->
-   <div class="brand-bar-name">CGIT <em>RAIPUR</em></div>
+  <img src="./cgitlogo.jpg" alt="CGIT Raipur logo" class="brand-bar-logo brand-logo-college" onerror="this.style.display='none'">
+  <div class="brand-bar-name">CGIT <em>RAIPUR</em></div>
+  <img src="icons/sangam-logo.png" alt="Sangam logo" class="brand-bar-logo brand-logo-sangam">
 </div>
+ 
 
 <!-- ── TICKER: latest events & updates ── -->
 <div class="ticker-wrap">
@@ -1001,6 +1004,345 @@ body.embedded .brand-bar{margin-top:0}
     <div class="footer-copy">© 2026 Sangam · Chhattisgarh Institute of Technology · Made by VyomsTech</div>
   </div>
 </footer>
+
+<!--
+=====================================================================
+ BRANCH INFO POPUP — index.html ke #branches section ke liye
+
+ Branch card (CSE, EEE, ET&T, ME, CE, DS) pe click → popup khulta hai:
+   • Branch intro
+   • Numbers: students, yearly intake, faculty, labs, established, placement
+   • HOD (photo, naam, qualification, email)
+   • Faculty list (naam, designation, specialization)
+   • Labs & facilities
+   • "Full branch page" button (card ke purane href pe)
+
+ Lagane ka tarika (HTML me koi card edit nahi karna):
+   1) PART 1 (<style>) ko </head> se just pehle paste karo.
+   2) PART 2 (<script>) ko </body> se just pehle paste karo.
+   3) Script ke upar BRANCHES me apna real data bharo.
+      null / khaali list = "—" ya "coming soon" dikhega.
+      (Maine HOD/faculty ke naam aur numbers guess nahi kiye.)
+
+ Faculty add karna:
+   faculty: [
+     { name:'Dr. Name Surname', role:'Professor', area:'Machine Learning', photo:'team/xyz.jpg' },
+     { name:'Mr. Name Surname', role:'Assistant Professor', area:'Databases' }
+   ]
+=====================================================================
+-->
+
+<!-- ============================ PART 1: CSS ============================ -->
+<style>
+#bi-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(40,6,6,.72);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:16px;
+}
+#bi-overlay.open{display:flex}
+.bi-panel{
+  width:100%;max-width:680px;max-height:90vh;max-height:90dvh;
+  overflow-y:auto;background:#fff;color:var(--text);
+  border-radius:var(--r-md);box-shadow:0 20px 60px rgba(0,0,0,.45);
+  animation:bi-pop .22s ease;
+}
+@keyframes bi-pop{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.bi-head{
+  position:sticky;top:0;z-index:2;
+  display:flex;align-items:center;gap:16px;padding:22px 24px;
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#fff;
+}
+.bi-icon{
+  width:52px;height:52px;flex-shrink:0;border-radius:12px;
+  background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:#F4C7C7;
+}
+.bi-code{font-family:'Playfair Display',serif;font-size:24px;line-height:1.1}
+.bi-full{font-size:13px;color:rgba(255,255,255,.75);margin-top:3px}
+.bi-x{
+  margin-left:auto;flex-shrink:0;width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.14);color:#fff;font-size:18px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.bi-x:hover{background:rgba(255,255,255,.26)}
+.bi-body{padding:24px}
+.bi-intro{font-size:14px;line-height:1.75;color:var(--text-2);margin-bottom:22px}
+.bi-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border-light);border:1px solid var(--border-light);
+  border-radius:var(--r-md);overflow:hidden;margin-bottom:26px;
+}
+.bi-stat{background:#fff;padding:16px 10px;text-align:center}
+.bi-stat-val{font-family:'Playfair Display',serif;font-size:24px;color:var(--text);line-height:1.1}
+.bi-stat-val.empty{color:var(--text-3);opacity:.5}
+.bi-stat-lbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-top:6px}
+.bi-sec{
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);margin:0 0 12px;display:flex;align-items:center;gap:10px;
+}
+.bi-sec::before{content:'';width:18px;height:1px;background:var(--accent)}
+.bi-hod{
+  display:flex;align-items:center;gap:16px;padding:16px;margin-bottom:26px;
+  background:var(--accent-light);border:1px solid var(--border-light);border-radius:var(--r-md);
+}
+.bi-av{
+  position:relative;width:64px;height:64px;flex-shrink:0;border-radius:50%;overflow:hidden;
+  background:#fff;border:2px solid var(--border-light);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:20px;color:var(--accent);
+}
+.bi-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.bi-av.sm{width:44px;height:44px;font-size:14px}
+.bi-name{font-weight:600;font-size:15px;color:var(--text)}
+.bi-name.empty{color:var(--text-3);font-weight:400;font-style:italic}
+.bi-meta{font-size:12px;color:var(--text-3);line-height:1.6;margin-top:2px;word-break:break-word}
+.bi-meta a{color:var(--accent)}
+.bi-fac{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px}
+.bi-fac-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border-light);border-radius:var(--r-md)}
+.bi-empty{grid-column:1/-1;padding:18px;text-align:center;font-size:13px;color:var(--text-3);border:1px dashed var(--border-light);border-radius:var(--r-md)}
+.bi-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.bi-chip{font-size:12px;padding:6px 12px;border-radius:999px;background:var(--accent-light);color:var(--accent);border:1px solid var(--border-light)}
+.bi-actions{display:flex;gap:10px;flex-wrap:wrap}
+.bi-actions .btn-primary,.bi-actions .bi-close-btn{flex:1;justify-content:center;text-align:center}
+.bi-close-btn{
+  font-size:13px;color:var(--accent);border:1px solid var(--border);
+  padding:11px 20px;border-radius:var(--r);cursor:pointer;
+}
+.branch-card{cursor:pointer}
+@media(max-width:560px){
+  #bi-overlay{padding:0;align-items:flex-end}
+  .bi-panel{max-width:100%;border-radius:16px 16px 0 0}
+  .bi-head{padding:18px 16px}
+  .bi-body{padding:18px 16px}
+  .bi-stats{grid-template-columns:repeat(2,1fr)}
+  .bi-fac{grid-template-columns:1fr}
+}
+</style>
+
+
+<style>
+/* Brand bar: 2 logos + naam, fully responsive */
+.brand-bar{
+  height:auto;
+  min-height:128px;
+  padding:14px clamp(12px,3vw,32px);
+  gap:clamp(10px,2.5vw,28px);
+  flex-wrap:nowrap;
+}
+.brand-bar .brand-bar-logo{
+  height:clamp(48px,9vw,84px);
+  width:clamp(48px,9vw,84px);
+  border-radius:clamp(10px,2vw,18px);
+  padding:clamp(3px,.6vw,6px);
+  object-fit:contain;          /* college logo ka shape na kate */
+  background:#fff;
+  flex-shrink:0;
+}
+.brand-bar .brand-bar-name{
+  font-size:clamp(22px,5vw,54px);
+  line-height:1.05;
+  white-space:nowrap;
+  text-align:center;
+  min-width:0;
+}
+ 
+/* Tablet / phone */
+@media(max-width:640px){
+  .brand-bar{min-height:104px;padding:12px 12px}
+}
+ 
+/* Very small phones: naam do line me, logos thode aur chhote */
+@media(max-width:380px){
+  .brand-bar{min-height:96px;gap:8px;padding:10px 8px}
+  .brand-bar .brand-bar-logo{height:44px;width:44px}
+  .brand-bar .brand-bar-name{font-size:20px;white-space:normal}
+}
+ 
+/* Dashboard iframe (embedded) me pehle jaisa: top offset nahi */
+body.embedded .brand-bar{margin-top:0}
+</style>
+ 
+
+<!-- ============================ PART 2: JS ============================= -->
+<script>
+(function () {
+  // ══════════ EDIT THIS: apna real data yaha bharo ══════════
+  // Key = card ke .branch-code ka text (ET&T me & hi rakhna).
+  var BRANCHES = {
+    'CSE': {
+      icon: 'ti-cpu',
+      full: 'Computer Science & Engineering',
+      intro: 'Software, algorithms, data and systems. Students work on web/app products, AI and data projects, and prepare for the largest share of campus tech recruitment.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    },
+    'EEE': {
+      icon: 'ti-bolt',
+      full: 'Electrical & Electronics Engineering',
+      intro: 'Power systems, electrical machines, control and electronics. A strong pathway into power utilities, PSUs, core electrical companies and automation.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    },
+    'ET&T': {
+      icon: 'ti-antenna',
+      full: 'Electronics & Telecommunication Engineering',
+      intro: 'Communication systems, signal processing, VLSI and embedded hardware. Leads to telecom, electronics manufacturing, IoT and hardware-software roles.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    },
+    'ME': {
+      icon: 'ti-tool',
+      full: 'Mechanical Engineering',
+      intro: 'Design, thermal, manufacturing and machines. Opens core industry, PSUs, automotive, plant operations and CAD/CAM careers.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    },
+    'CE': {
+      icon: 'ti-building-arch',
+      full: 'Civil Engineering',
+      intro: 'Structures, construction, geotechnical, transportation and environmental engineering. Careers in infrastructure, public works, consultancy and construction.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    },
+    'DS': {
+      icon: 'ti-chart-dots-3',
+      full: 'Data Science',
+      intro: 'Statistics, machine learning, data engineering and analytics. Prepares students for data, AI and business-intelligence roles.',
+      stats: { students: null, intake: null, faculty: null, labs: null, established: null, placement: null },
+      hod: { name: null, qual: null, email: null, photo: null },
+      faculty: [],
+      labs: []
+    }
+  };
+  // ═══════════════════════════════════════════════════════
+
+  var STAT_LABELS = [
+    ['students', 'Students'], ['intake', 'Yearly Intake'], ['faculty', 'Faculty'],
+    ['labs', 'Labs'], ['established', 'Established'], ['placement', 'Placement']
+  ];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function initials(name) {
+    if (!name) return '—';
+    var p = name.replace(/^(dr|mr|mrs|miss|ms|prof|shri)\.?\s+/i, '').trim().split(/\s+/);
+    return ((p[0] || '')[0] || '') + ((p.length > 1 ? p[p.length - 1] : '')[0] || '');
+  }
+  function avatar(name, photo, small) {
+    return '<div class="bi-av' + (small ? ' sm' : '') + '"><span>' + esc(initials(name).toUpperCase()) + '</span>' +
+      (photo ? '<img src="' + esc(photo) + '" alt="' + esc(name || '') + '" onerror="this.remove()">' : '') + '</div>';
+  }
+
+  var overlay = document.createElement('div');
+  overlay.id = 'bi-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+  document.body.appendChild(overlay);
+
+  var lastFocus = null;
+
+  function open(key, href) {
+    var b = BRANCHES[key];
+    lastFocus = document.activeElement;
+
+    var stats = STAT_LABELS.map(function (s) {
+      var v = b.stats[s[0]];
+      if ((v === null || v === undefined || v === '') && s[0] === 'faculty' && b.faculty.length) v = b.faculty.length;
+      if ((v === null || v === undefined || v === '') && s[0] === 'labs' && b.labs.length) v = b.labs.length;
+      var has = !(v === null || v === undefined || v === '');
+      return '<div class="bi-stat"><div class="bi-stat-val' + (has ? '' : ' empty') + '">' +
+        (has ? esc(v) : '—') + '</div><div class="bi-stat-lbl">' + s[1] + '</div></div>';
+    }).join('');
+
+    var h = b.hod || {};
+    var hod =
+      '<div class="bi-hod">' + avatar(h.name, h.photo) +
+      '<div><div class="bi-name' + (h.name ? '' : ' empty') + '">' + (h.name ? esc(h.name) : 'To be added') + '</div>' +
+      '<div class="bi-meta">Head of Department' + (h.qual ? ' · ' + esc(h.qual) : '') +
+      (h.email ? '<br><a href="mailto:' + esc(h.email) + '">' + esc(h.email) + '</a>' : '') + '</div></div></div>';
+
+    var fac = b.faculty.length
+      ? b.faculty.map(function (f) {
+          return '<div class="bi-fac-item">' + avatar(f.name, f.photo, true) +
+            '<div><div class="bi-name">' + esc(f.name) + '</div><div class="bi-meta">' +
+            esc(f.role || 'Faculty') + (f.area ? ' · ' + esc(f.area) : '') + '</div></div></div>';
+        }).join('')
+      : '<div class="bi-empty">Faculty list coming soon</div>';
+
+    var labs = b.labs.length
+      ? '<div class="bi-sec">Labs &amp; facilities</div><div class="bi-chips">' +
+        b.labs.map(function (l) { return '<span class="bi-chip">' + esc(l) + '</span>'; }).join('') + '</div>'
+      : '';
+
+    var hasPage = href && href.charAt(0) !== '#';
+
+    overlay.innerHTML =
+      '<div class="bi-panel">' +
+        '<div class="bi-head">' +
+          '<div class="bi-icon"><i class="ti ' + b.icon + '"></i></div>' +
+          '<div><div class="bi-code">' + esc(key) + '</div><div class="bi-full">' + esc(b.full) + '</div></div>' +
+          '<button type="button" class="bi-x" aria-label="Close">✕</button>' +
+        '</div>' +
+        '<div class="bi-body">' +
+          '<p class="bi-intro">' + esc(b.intro) + '</p>' +
+          '<div class="bi-stats">' + stats + '</div>' +
+          '<div class="bi-sec">Head of Department</div>' + hod +
+          '<div class="bi-sec">Faculty</div><div class="bi-fac">' + fac + '</div>' +
+          labs +
+          '<div class="bi-actions">' +
+            (hasPage ? '<a class="btn-primary" href="' + esc(href) + '">Full branch page <i class="ti ti-arrow-right" style="font-size:14px"></i></a>' : '') +
+            '<button type="button" class="bi-close-btn">Close</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    overlay.querySelector('.bi-x').onclick = close;
+    overlay.querySelector('.bi-close-btn').onclick = close;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    overlay.querySelector('.bi-x').focus();
+  }
+
+  function close() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  // Branch card click pakdo (Ctrl/Cmd/Shift/middle click pe purana link chalne do)
+  var grid = document.querySelector('#branches .branch-grid');
+  if (grid) {
+    grid.addEventListener('click', function (e) {
+      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      var card = e.target.closest('.branch-card');
+      if (!card) return;
+      var codeEl = card.querySelector('.branch-code');
+      var key = codeEl && codeEl.textContent.trim();
+      if (!key || !BRANCHES[key]) return;   // data nahi hai to normal link chalega
+      e.preventDefault();
+      open(key, card.getAttribute('href'));
+    });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+  });
+})();
+</script>
 
 <script>
 function toggleSidebar(){
