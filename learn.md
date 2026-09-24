@@ -298,3 +298,54 @@ Agar aapko actual login flow sahi chahiye, to:
 > Meaning: current behavior is “dashboard protected by auth”, not “dashboard open without login”.
 
 If you want, next I can directly tell you which exact 2 lines to remove for testing, or fix the login-token issue.
+
+
+
+
+
+
+
+
+
+
+
+
+Access to fetch at 'https://sangam-z93f.onrender.com/api/admin/users?limit=200' from origin 'https://cgitsangam.netlify.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+sangam-z93f.onrender.com/api/admin/users?limit=200:1  Failed to load resource: net::ERR_FAILED
+installHook.js:1 Dashboard load error: TypeError: Failed to fetch
+    at _adminGet (admin:1627:21)
+    at loadDashboard (admin:1003:25)
+overrideMethod @ installHook.js:1
+admin:1 Access to fetch at 'https://sangam-z93f.onrender.com/api/admin/users?limit=200' from origin 'https://cgitsangam.netlify.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+sangam-z93f.onrender.com/api/admin/users?limit=200:1  Failed to load resource: net::ERR_FAILED
+admin:1 Access to fetch at 'https://sangam-z93f.onrender.com/api/admin/users?limit=200' from origin 'https://cgitsangam.netlify.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+sangam-z93f.onrender.com/api/admin/users?limit=200:1  Failed to load resource: net::ERR_FAILED
+installHook.js:1 Dashboard load error: TypeError: Failed to fetch
+    at _adminGet (admin:1627:21)
+    at loadDashboard (admin:1003:25)
+overrideMethod @ installHook.js:1 
+
+
+
+Ye clear ho gaya — aur ye tumhare admin panel ke connection ka masla nahi hai. Screenshot mein dikh raha hai:
+- **Stats cards sahi data dikha rahe hain** (2 Users, 1 Post) — matlab `/admin/stats` route bilkul sahi kaam kar raha hai, backend se connected hai.
+- Sirf **`/admin/users`** wala ek route fail ho raha hai, wo bhi ek specific error ke saath: *"preflight request doesn't have HTTP ok status"*.
+
+Ye CORS ka asli masla nahi hai (agar CORS block hota to message alag hota — "no Access-Control-Allow-Origin header present"). Iska matlab hai ki **OPTIONS request ko khud hi non-200 response mila** — jyadatar iska matlab hota hai ki wo route backend pe hai hi nahi (404), ya route mein koi bug hai jo crash kar raha hai.
+
+## Turant confirm karne ka tarika
+Naya browser tab kholo aur ye URL seedha paste karo:
+```
+https://sangam-z93f.onrender.com/api/admin/users?limit=200
+```
+(login ke bina, seedha browser mein). Jo bhi result aaye wo bata do:
+- **404 / "Not found"** → route hi exist nahi karta backend mein.
+- **401 / "auth"** → route hai, sirf token chahiye (ye theek hai, matlab OPTIONS preflight mein hi kuch alag issue hai).
+- **500 / server error** → route mein Python error hai.
+
+## Ye kisne banaya
+`/admin/users`, `/admin/stats` jaise routes **`routes/admin.py`** mein hain — ye file maine kabhi nahi dekhi ya banayi. Maine sirf `announcements.py` (Home Ticker) aur `membership.py` (Bank Transfer/Membership Payments) banaye hain, jo dono theek kaam kar rahe hain screenshot ke hisaab se (sidebar mein dikh rahe hain aur error nahi de rahe).
+
+**Sabse zyada chance ye hai:** `/admin/users` route Flask mein explicitly `methods=["GET", "OPTIONS"]` ke saath likha hoga (OPTIONS manually include kiya hoga), jiski wajah se Flask ka automatic CORS-preflight handling skip ho jata hai aur seedha view function chalta hai — jisme `login_required` decorator OPTIONS request pe bhi Authorization header maangta hai, jo browser preflight mein kabhi nahi bhejta. Isse OPTIONS 401 return karta hai, aur browser use CORS failure jaisa dikhata hai.
+
+`routes/admin.py` ka `/admin/users` wala hissa (aur agar ho to `login_required`/`admin_required` decorator ki definition) mujhe bhej do, exact fix bata dunga.
