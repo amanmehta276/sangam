@@ -431,7 +431,7 @@ html,body{height:100%;overflow:hidden}
 
           <!-- Identity card -->
           <div class="pcard">
-            <div class="profile-name" id="profile-name-display">Loading…</div>
+            <div class="profile-name" id="profile-name-display">Loading…<span class="name-star" id="name-star" title="Association Member">★</span></div>
             <div class="profile-headline" id="profile-meta-display">—</div>
             <div class="profile-location" id="profile-location-display">
               <i class="ti ti-map-pin" style="font-size:12px"></i>
@@ -557,24 +557,29 @@ html,body{height:100%;overflow:hidden}
               </div>
             </div>
             <div class="id-card" id="id-card-preview" onclick="generateIDCard()">
-              <div class="id-card-shimmer"></div>
-              <div class="id-card-top">
-                <div class="id-card-college">CGIT · Sangam</div>
-                <div id="card-type-label" class="id-card-type">Student</div>
-              </div>
-              <div class="id-card-mid">
-                <div class="id-card-av" id="card-avatar-letter">A</div>
-                <div id="card-name"  class="id-card-name">Your Name</div>
-                <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
-              </div>
-              <div class="id-card-bottom">
-                <div class="id-card-id-label">Sangam ID</div>
-                <div id="card-id" class="id-card-id">SAG-000000</div>
-                <div id="qr-code-small" class="id-card-qr">
-                  <i class="ti ti-qrcode" style="font-size:26px;opacity:.5"></i>
-                </div>
-              </div>
-            </div>
+              <div class="id-card-ribbon" id="card-ribbon">Guest</div>
+  <div class="id-card-shimmer"></div>
+  <div class="id-card-top">
+    <div class="id-card-college">CGIT · Sangam</div>
+    <div id="card-type-label" class="id-card-type">Student</div>
+  </div>
+  <div class="id-card-mid">
+    <div class="id-card-av" id="card-avatar-letter">A</div>
+    <div id="card-name" class="id-card-name">Your Name</div>
+    <div id="card-batch" class="id-card-batch">CSE · Batch 2024</div>
+  </div>
+  <div class="id-card-plan-row" id="card-plan-row">
+    <span class="id-card-plan-name"><i class="ti ti-crown"></i> <span id="card-plan-name">—</span></span>
+    <span class="id-card-plan-expiry" id="card-plan-expiry"></span>
+  </div>
+  <div class="id-card-bottom">
+    <div class="id-card-id-label">Sangam ID</div>
+    <div id="card-id" class="id-card-id">SAG-000000</div>
+    <div id="qr-code-small" class="id-card-qr">
+      <i class="ti ti-qrcode" style="font-size:26px;opacity:.5"></i>
+    </div>
+  </div>
+</div>
             <button class="pcard-generate-btn" onclick="generateIDCard()">
               <i class="ti ti-qrcode" style="font-size:15px"></i> Generate QR Code
             </button>
