@@ -349,3 +349,1262 @@ https://sangam-z93f.onrender.com/api/admin/users?limit=200
 **Sabse zyada chance ye hai:** `/admin/users` route Flask mein explicitly `methods=["GET", "OPTIONS"]` ke saath likha hoga (OPTIONS manually include kiya hoga), jiski wajah se Flask ka automatic CORS-preflight handling skip ho jata hai aur seedha view function chalta hai — jisme `login_required` decorator OPTIONS request pe bhi Authorization header maangta hai, jo browser preflight mein kabhi nahi bhejta. Isse OPTIONS 401 return karta hai, aur browser use CORS failure jaisa dikhata hai.
 
 `routes/admin.py` ka `/admin/users` wala hissa (aur agar ho to `login_required`/`admin_required` decorator ki definition) mujhe bhej do, exact fix bata dunga.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ── Primary SEO ── -->
+<title>Sangam — Official Alumni &amp; Student Network of CGIT Raipur</title>
+<meta name="description" content="Sangam is the official alumni and student network of Chhattisgarh Institute of Technology (CGIT), Raipur. Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events.">
+<meta name="keywords" content="CGIT Raipur, Chhattisgarh Institute of Technology, CGIT alumni, CGIT Raipur alumni association, Sangam, CGIT placements, CGIT scholarships, engineering college Raipur, CSVTU college Raipur">
+<meta name="robots" content="index, follow">
+<meta name="author" content="VyomsTech">
+<link rel="canonical" href="https://cgitsangam.netlify.app/">
+
+<!-- ── Open Graph (WhatsApp / Facebook / LinkedIn preview) ── -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sangam — CGIT Raipur">
+<meta property="og:title" content="Sangam — Official Alumni &amp; Student Network of CGIT Raipur">
+<meta property="og:description" content="Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events at Chhattisgarh Institute of Technology, Raipur.">
+<meta property="og:url" content="https://cgitsangam.netlify.app/">
+<meta property="og:image" content="https://cgitsangam.netlify.app/icons/sangam-logo.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:locale" content="en_IN">
+
+<!-- ── Twitter Card ── -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sangam — Official Alumni &amp; Student Network of CGIT Raipur">
+<meta name="twitter:description" content="Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events at CGIT Raipur.">
+<meta name="twitter:image" content="https://cgitsangam.netlify.app/icons/sangam-logo.png">
+
+<meta name="theme-color" content="#4A0E0E">
+<link rel="icon" href="favicon_io/favicon-16x16.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+
+<!-- ── Structured data for Google (Organization / EducationalOrganization) ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Chhattisgarh Institute of Technology, Raipur",
+  "alternateName": "CGIT Raipur",
+  "url": "https://cgitsangam.netlify.app/",
+  "logo": "https://cgitsangam.netlify.app/icons/sangam-logo.png",
+  "sameAs": [
+    "https://github.com/amanmehta276"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Sejbahar, Old Dhamtari Road",
+    "addressLocality": "Raipur",
+    "addressRegion": "Chhattisgarh",
+    "postalCode": "492001",
+    "addressCountry": "IN"
+  },
+  "alumni": {
+    "@type": "Organization",
+    "name": "Alumni Association of CGIT Raipur"
+  }
+}
+</script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#4A0E0E;
+  --ink-2:#6B1414;
+  --ink-3:#8B1A1A;
+  --ink-4:#A52A2A;
+  --white:#FFFFFF;
+  --off:#F5F5F5;
+  --surface:#EEEEEE;
+  --border:#8B1A1A;
+  --border-light:#E8D6D6;
+  --text:#4A0E0E;
+  --text-2:#6B1414;
+  --text-3:#8B6A6A;
+  --accent:#8B1A1A;
+  --accent-2:#B22222;
+  --accent-3:#C4453F;
+  --accent-light:#F9F3F3;
+  --accent-dark:#4A0E0E;
+  --r:3px;
+  --r-md:6px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:none}
+img{max-width:100%;display:block}
+
+/* ─── NAVBAR ─────────────────────────────────────────────── */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--ink);border-bottom:1px solid var(--border);
+  height:64px;display:flex;align-items:center;
+}
+.nav-inner{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  width:100%;display:flex;align-items:center;gap:0;
+}
+.nav-brand{
+  font-family:'Playfair Display',serif;
+  font-size:22px;letter-spacing:.5px;color:var(--white);
+  display:flex;align-items:center;gap:12px;
+  border-right:1px solid var(--border);padding-right:24px;margin-right:24px;
+  flex-shrink:0;
+}
+.nav-brand-sub{font-size:12px;color:var(--text-3);font-family:'DM Sans',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;gap:0;flex:1}
+.nav-link{
+  font-size:13px;color:rgba(255,255,255,0.45);padding:0 16px;height:64px;
+  display:flex;align-items:center;border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s;letter-spacing:.02em;white-space:nowrap;
+}
+.nav-link:hover{color:rgba(255,255,255,0.9);border-bottom-color:var(--border)}
+.nav-link.active{color:var(--white);border-bottom-color:var(--accent-2)}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-signin{
+  font-size:13px;font-weight:500;color:rgba(255,255,255,0.6);
+  padding:7px 16px;border:1px solid var(--border);
+  border-radius:var(--r);transition:all .15s;white-space:nowrap;
+}
+.nav-signin:hover{background:var(--ink-3);color:var(--white)}
+.nav-cta{
+  font-size:13px;font-weight:600;color:var(--white);
+  background:var(--accent);padding:7px 16px;
+  border-radius:var(--r);transition:background .15s;white-space:nowrap;
+}
+.nav-cta:hover{background:var(--accent-2)}
+
+/* ─── HERO ───────────────────────────────────────────────── */
+.hero{
+  padding-top:0;
+  background:var(--ink);
+  min-height:580px;
+  display:flex;align-items:center;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-200px;right:-200px;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(107,33,168,.18) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-100px;left:-100px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(29,78,216,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{
+  max-width:1200px;margin:0 auto;padding:72px 24px;
+  display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;
+  position:relative;z-index:1;width:100%;
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:500;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--accent-2);
+  margin-bottom:24px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent-2);flex-shrink:0}
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(40px,5.5vw,76px);
+  color:var(--white);line-height:1.0;letter-spacing:-1.5px;
+  margin-bottom:20px;
+}
+.hero-title em{color:rgba(255,255,255,.3);font-style:italic;font-weight:400}
+.hero-sub{
+  font-size:15px;color:rgba(255,255,255,.4);
+  line-height:1.8;margin-bottom:36px;max-width:380px;font-weight:300;
+}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-primary{
+  font-size:13px;font-weight:600;color:var(--white);
+  background:var(--accent);padding:11px 24px;
+  border-radius:var(--r);transition:background .15s;display:inline-flex;align-items:center;gap:8px;
+  letter-spacing:.02em;
+}
+.btn-primary:hover{background:var(--accent-2)}
+.btn-outline{
+  font-size:13px;font-weight:400;color:rgba(255,255,255,.4);
+  border:1px solid rgba(255,255,255,.12);padding:10px 20px;
+  border-radius:var(--r);transition:all .15s;
+}
+.btn-outline:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8)}
+
+/* Hero stats grid */
+.hero-right{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--border);border:1px solid var(--border);
+  border-radius:var(--r-md);overflow:hidden;
+}
+.hero-stat{
+  padding:28px 24px;background:var(--ink-2);
+  display:flex;flex-direction:column;gap:6px;
+  transition:background .15s;
+}
+.hero-stat:hover{background:var(--ink-3)}
+.hero-stat-label{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase}
+.hero-stat-val{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,3.5vw,40px);color:var(--white);line-height:1;
+}
+.hero-stat-val span{font-size:clamp(14px,2vw,18px);color:var(--accent-2)}
+
+/* ─── SECTIONS ───────────────────────────────────────────── */
+.section{padding:80px 0}
+.section-alt{background:var(--ink);color:var(--white)}
+.inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.section-eyebrow{
+  font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--accent-2);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-eyebrow::before{content:'';width:20px;height:1px;background:var(--accent-2);flex-shrink:0}
+.section-alt .section-eyebrow{color:var(--accent-3)}
+.section-alt .section-eyebrow::before{background:var(--accent-3)}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,4vw,48px);color:var(--text);
+  line-height:1.1;letter-spacing:-.5px;margin-bottom:14px;
+}
+.section-alt .section-title{color:var(--white)}
+.section-title em{color:var(--accent);font-style:italic;font-weight:400}
+.section-alt .section-title em{color:rgba(255,255,255,.3)}
+.section-desc{font-size:15px;color:var(--text-2);line-height:1.8;max-width:520px;margin-bottom:48px;font-weight:300}
+.section-alt .section-desc{color:rgba(255,255,255,.4)}
+
+/* ─── DIVIDERS ───────────────────────────────────────────── */
+.divider{border:none;border-top:1px solid var(--border-light);margin:0}
+.divider-dark{border:none;border-top:1px solid var(--border);margin:0}
+
+/* ─── LEADERSHIP ─────────────────────────────────────────── */
+.leader-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border-light);border:1px solid var(--border-light);
+}
+.leader-card{
+  background:var(--white);padding:40px 32px;
+  transition:background .2s;
+}
+.leader-card:hover{background:var(--off)}
+.leader-avatar{
+  width:88px;height:88px;border-radius:50%;
+  background:var(--surface);overflow:hidden;margin-bottom:20px;
+  border:2px solid var(--border-light);flex-shrink:0;
+}
+.leader-avatar img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.leader-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--text);margin-bottom:4px}
+.leader-role{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-light)}
+.leader-msg{font-size:14px;color:var(--text-2);line-height:1.75;font-style:italic;font-weight:300}
+
+/* ─── ABOUT ──────────────────────────────────────────────── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.info-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);overflow:hidden}
+.info-row{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-label{
+  width:110px;flex-shrink:0;padding:14px 14px;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.3);background:var(--ink-3);
+  border-right:1px solid var(--border);
+  word-break:break-word;
+}
+.info-val{padding:14px 16px;font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;flex:1;min-width:0;word-break:break-word}
+
+/* ─── BRANCHES ───────────────────────────────────────────── */
+.branch-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);
+}
+.branch-card{
+  background:var(--ink-2);padding:40px 16px;text-align:center;
+  transition:background .2s;cursor:pointer;
+}
+.branch-card:hover{background:var(--ink-3)}
+.branch-icon{font-size:28px;margin-bottom:16px;color:var(--accent-3)}
+.branch-code{font-family:'Playfair Display',serif;font-size:24px;color:var(--white);margin-bottom:6px}
+.branch-name{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.5px}
+
+/* ─── ASSOCIATION ────────────────────────────────────────── */
+.assoc-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border-light);border:1px solid var(--border-light);
+}
+.assoc-item{background:var(--white);padding:36px 28px;transition:background .2s}
+.assoc-item:hover{background:var(--off)}
+.assoc-icon{
+  width:44px;height:44px;border-radius:var(--r);
+  background:var(--accent-light);display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;color:var(--accent);
+}
+.assoc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px}
+.assoc-desc{font-size:13px;color:var(--text-3);line-height:1.7;font-weight:300}
+
+/* ─── EVENTS ─────────────────────────────────────────────── */
+.events-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.events-table{border:1px solid var(--border-light);width:100%;border-collapse:collapse;min-width:480px}
+.events-table th{
+  text-align:left;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-3);padding:12px 14px;background:var(--off);border-bottom:1px solid var(--border-light);
+  white-space:nowrap;
+}
+.events-table td{padding:14px;border-bottom:1px solid var(--border-light);font-size:13px;vertical-align:top}
+.events-table tr:last-child td{border-bottom:none}
+.events-table tr:hover td{background:var(--off)}
+.event-date-cell{font-family:'Playfair Display',serif;font-size:18px;color:var(--text);white-space:nowrap;width:70px}
+.event-name{font-weight:600;color:var(--text);margin-bottom:4px;font-size:14px}
+.event-detail{font-size:12px;color:var(--text-3);line-height:1.6}
+.event-badge{
+  display:inline-block;font-size:10px;font-weight:600;
+  padding:3px 9px;border-radius:var(--r);
+  background:var(--accent-light);color:var(--accent);
+  white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;
+}
+.event-badge.green{background:#F0FDF4;color:#166534}
+.event-badge.blue{background:#EFF6FF;color:#1E40AF}
+
+/* Mobile events card layout */
+.event-cards{display:none;flex-direction:column;gap:1px;background:var(--border-light);border:1px solid var(--border-light)}
+.event-card{background:var(--white);padding:18px 16px}
+.event-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.event-card-date{font-family:'Playfair Display',serif;font-size:17px;color:var(--text);flex-shrink:0}
+
+/* ─── DEV SECTION ────────────────────────────────────────── */
+.dev-section{background:var(--ink);color:var(--white);border-top:1px solid var(--border)}
+.dev-inner{
+  max-width:1200px;margin:0 auto;padding:80px 24px;
+  display:grid;grid-template-columns:1fr auto;gap:64px;align-items:center;
+  width:100%;
+}
+.dev-eyebrow{
+  font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--accent-2);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.dev-eyebrow::before{content:'';width:20px;height:1px;background:var(--accent-2);flex-shrink:0}
+.dev-title{
+  font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,44px);color:var(--white);
+  line-height:1.1;margin-bottom:18px;letter-spacing:-.5px;
+}
+.dev-desc{font-size:15px;color:rgba(255,255,255,.4);line-height:1.8;margin-bottom:32px;max-width:440px;font-weight:300}
+.dev-card{
+  background:var(--ink-2);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:36px 32px;
+  text-align:center;width:260px;flex-shrink:0;
+}
+.dev-avatar{
+  width:100px;height:100px;border-radius:50%;
+  background:var(--ink-3);overflow:hidden;
+  margin:0 auto 18px;border:2px solid var(--border);
+}
+.dev-avatar img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.dev-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--white);margin-bottom:4px}
+.dev-role{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.dev-quote{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;font-style:italic;font-weight:300}
+
+/* ─── FOOTER ─────────────────────────────────────────────── */
+.footer{background:var(--ink-2);border-top:1px solid var(--border);padding:40px 0}
+.footer-inner{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+}
+.footer-brand{font-family:'Playfair Display',serif;font-size:20px;color:var(--white)}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-link{font-size:13px;color:rgba(255,255,255,.35);transition:color .15s}
+.footer-link:hover{color:rgba(255,255,255,.8)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.2);width:100%;margin-top:4px}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200}
+.sidebar-overlay.open{display:block}
+.sidebar{
+  position:fixed;top:0;left:0;width:280px;height:100%;
+  background:var(--ink-2);z-index:300;
+  transform:translateX(-100%);transition:transform .25s ease;
+  border-right:1px solid var(--border);overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.sidebar.open{transform:translateX(0)}
+.sidebar-head{
+  padding:18px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sidebar-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--white)}
+.sidebar-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer}
+.sidebar-body{flex:1;padding:12px 0}
+.sidebar-section{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:14px 20px 5px}
+.sidebar-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 20px;font-size:14px;color:rgba(255,255,255,.5);
+  transition:background .12s;cursor:pointer;
+}
+.sidebar-item:hover{background:var(--ink-3);color:var(--white)}
+.sidebar-item.active{color:var(--accent-3);background:rgba(147,51,234,.1)}
+.sidebar-foot{padding:18px 20px;border-top:1px solid var(--border);font-size:12px;color:rgba(255,255,255,.2)}
+.hamburger{
+  display:none;flex-direction:column;gap:5px;
+  width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;
+  flex-shrink:0;
+}
+.hamburger span{display:block;width:18px;height:1.5px;background:rgba(255,255,255,.7);transition:all .2s}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1024px: medium laptops ── */
+@media(max-width:1024px){
+  .hero-inner{gap:40px;padding:60px 24px}
+  .about-grid{gap:48px}
+  .branch-grid{grid-template-columns:repeat(5,1fr)}
+  .dev-inner{gap:40px}
+  .dev-card{width:240px}
+}
+
+/* ── 900px: tablet landscape / small laptop ── */
+@media(max-width:900px){
+  .hamburger{display:flex}
+  .nav-links{display:none}
+  .nav-brand{border-right:none;padding-right:0;margin-right:0}
+  .nav-brand-sub{display:none}
+  .hero-inner{grid-template-columns:1fr;gap:40px;padding:52px 24px 40px}
+  .hero-sub{max-width:100%}
+  .hero-title{font-size:clamp(36px,6vw,60px)}
+  .hero-right{max-width:480px}
+  .about-grid{grid-template-columns:1fr;gap:36px}
+  .branch-grid{grid-template-columns:repeat(3,1fr)}
+  .assoc-grid{grid-template-columns:repeat(2,1fr)}
+  .leader-grid{grid-template-columns:repeat(2,1fr)}
+  .dev-inner{grid-template-columns:1fr;gap:36px}
+  .dev-card{width:100%;max-width:320px}
+}
+
+/* ── 640px: tablet portrait ── */
+@media(max-width:640px){
+  .section{padding:56px 0}
+  .hero-inner{padding:44px 16px 36px}
+  .inner{padding:0 16px}
+  .nav-inner{padding:0 16px}
+  .hero-title{letter-spacing:-1px}
+  .hero-stat{padding:20px 16px}
+  .hero-stat-val{font-size:28px}
+  .hero-stat-label{font-size:10px}
+
+  /* leader: single col */
+  .leader-grid{grid-template-columns:1fr}
+  .leader-card{padding:28px 20px}
+
+  /* branch: 2 col */
+  .branch-grid{grid-template-columns:repeat(2,1fr)}
+  .branch-card{padding:32px 12px}
+
+  /* assoc: 1 col */
+  .assoc-grid{grid-template-columns:1fr}
+  .assoc-item{padding:28px 20px}
+
+  /* about info: hide venue col, tighter */
+  .col-venue{display:none}
+  .about-grid{gap:28px}
+  .info-label{width:100px;padding:12px 12px;font-size:9px;letter-spacing:1px}
+  .info-val{padding:12px 14px;font-size:13px}
+
+  /* events: hide table, show cards */
+  .events-table-wrap{display:none}
+  .event-cards{display:flex}
+
+  .dev-section .dev-inner{padding:56px 16px}
+  .dev-card{padding:28px 20px}
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
+  .footer-links{gap:16px}
+}
+
+/* ── 480px: large phones ── */
+@media(max-width:480px){
+  .hero-right{grid-template-columns:1fr 1fr}
+  .hero-stat{padding:18px 14px}
+  .hero-stat-val{font-size:26px}
+  .hero-actions{gap:10px}
+  .btn-primary,.btn-outline{font-size:12px;padding:10px 18px}
+
+  /* about: stack label above value */
+  .about-grid{gap:28px}
+  .info-row{flex-direction:column}
+  .info-label{width:100%;border-right:none;border-bottom:1px solid var(--border);padding:10px 14px;font-size:9px}
+  .info-val{padding:10px 14px;font-size:13px}
+
+  .branch-grid{grid-template-columns:repeat(2,1fr)}
+  .branch-card{padding:28px 10px}
+  .branch-code{font-size:20px}
+  .branch-name{font-size:10px}
+
+  .section-title{letter-spacing:-.3px}
+  .section-desc{font-size:14px;margin-bottom:32px}
+
+  .dev-desc{font-size:14px}
+  .dev-inner{padding:48px 16px}
+
+  .footer{padding:32px 0}
+  .footer-links{gap:12px}
+  .footer-link{font-size:12px}
+}
+
+/* ── 360px: small phones ── */
+@media(max-width:360px){
+  .nav-brand{font-size:18px}
+  .hero-title{font-size:34px}
+  .hero-stat-val{font-size:22px}
+  .hero-stat-label{font-size:9px;letter-spacing:.5px}
+  .branch-grid{grid-template-columns:1fr 1fr}
+  .section{padding:48px 0}
+}
+
+/* Balanced home rhythm: white base, maroon section highlights. */
+.navbar{background:var(--accent-dark);border-bottom-color:var(--accent)}
+.nav-brand,.nav-link.active{color:#fff}
+.nav-brand-sub,.nav-link{color:rgba(255,255,255,.72)}
+.nav-link:hover{color:#fff;border-bottom-color:var(--accent-3)}
+.nav-signin{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.25)}
+.nav-signin:hover{background:rgba(255,255,255,.1);color:#fff}
+.hero{background:#fff;border-bottom:1px solid var(--border-light)}
+.hero-title{color:var(--text)}
+.hero-title em{color:var(--accent);opacity:.7}
+.hero-sub{color:var(--text-2)}
+.btn-outline{color:var(--accent);border-color:var(--border-2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.hero-right{background:var(--border-light);border-color:var(--border-light)}
+.hero-stat{background:#fff}
+.hero-stat:hover{background:var(--accent-light)}
+.hero-stat-label{color:var(--text-3)}
+.hero-stat-val{color:var(--text)}
+.section-alt{background:var(--accent);color:#fff}
+#leadership{background:var(--accent);color:#fff}
+#leadership .section-title,
+#leadership .section-desc{color:#fff}
+#leadership .section-title em{color:#F4C7C7}
+#leadership .leader-grid{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.22)}
+#leadership .leader-card{background:var(--accent-dark);color:#fff}
+#leadership .leader-name{color:#fff}
+#leadership .leader-msg{color:rgba(255,255,255,.72)}
+#about,#association,#events{background:#fff;color:var(--text)}
+#about .section-title,
+#about .section-desc,
+#about .info-val{color:var(--text-2)}
+#about .section-title{color:var(--text)}
+#about .section-title em{color:var(--accent)}
+#about .info-label{color:var(--text-3);background:var(--off);border-color:var(--border)}
+#about .info-list,#about .info-row{border-color:var(--border)}
+#association .section-title,
+#events .section-title{color:var(--text)}
+#association .section-title em,
+#events .section-title em{color:var(--text-3)}
+#association .section-desc{color:var(--text-2)}
+#branches{background:var(--accent);color:#fff}
+#branches .section-title{color:#fff}
+#branches .section-title em{color:#F4C7C7}
+#branches .branch-grid{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.22)}
+#branches .branch-card{background:var(--accent-dark)}
+#branches .branch-card:hover{background:var(--purple-dk)}
+#branches .branch-code{color:#fff}
+#branches .branch-name{color:rgba(255,255,255,.68)}
+#branches .branch-icon{color:#F4C7C7}
+.footer{background:var(--accent-dark);border-top-color:var(--accent)}
+.footer-brand{color:#fff}
+.footer-link,.footer-copy{color:rgba(255,255,255,.68)}
+.footer-link:hover{color:#fff}
+
+/* ─── GOVERNING BODY ─── */
+.gb-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px}
+.gb-card{flex:0 0 calc(25% - 15px);background:var(--white);border:1px solid var(--border-light);border-radius:var(--r-md);padding:32px 20px;text-align:center;transition:background .2s,box-shadow .2s}
+.gb-card:hover{background:var(--off);box-shadow:0 6px 20px rgba(74,14,14,.08)}
+.gb-avatar{position:relative;width:96px;height:96px;border-radius:50%;margin:0 auto 16px;background:var(--accent-light);border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.gb-avatar span{font-family:'Playfair Display',serif;font-size:28px;color:var(--accent)}
+.gb-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.gb-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:6px}
+.gb-role{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
+@media(max-width:1024px){.gb-card{flex:0 0 calc(33.333% - 14px)}}
+@media(max-width:800px){.gb-card{flex:0 0 calc(50% - 10px)}}
+@media(max-width:480px){.gb-card{flex:0 0 100%}}
+
+/* ─── BRAND BAR (2x navbar height, sits right below navbar) ─── */
+.brand-bar{
+  background-image: none;
+  margin-top:64px; /* push below fixed navbar */
+  height:128px;
+  background:linear-gradient(135deg,var(--accent-dark) 0%,var(--ink-2) 55%,var(--accent-dark) 100%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  gap:20px;position:relative;overflow:hidden;
+}
+.brand-bar::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.05),transparent 60%);
+  pointer-events:none;
+}
+.brand-bar-logos{display:flex;align-items:center;gap:16px;position:relative;z-index:1;flex-shrink:0}
+.brand-bar-logo{
+  height:76px;width:76px;border-radius:16px;object-fit:cover;
+  background:#fff;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  flex-shrink:0;
+}
+.brand-bar-divider{width:1px;height:56px;background:rgba(255,255,255,.22)}
+.brand-bar-text{position:relative;z-index:1;text-align:left}
+.brand-bar-name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(30px,4.4vw,48px);color:#fff;letter-spacing:.5px;line-height:1;
+}
+.brand-bar-name em{color:var(--accent-3);font-style:italic;font-weight:400}
+.brand-bar-sub{
+  margin-top:8px;font-size:12px;color:rgba(255,255,255,.55);
+  letter-spacing:1px;text-transform:uppercase;
+}
+
+/* ─── TICKER (scrolling events/updates) ─── */
+.ticker-wrap{
+  background:var(--accent);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;height:38px;overflow:hidden;
+  white-space:nowrap;
+}
+.ticker-label{
+  flex-shrink:0;height:100%;display:flex;align-items:center;gap:6px;
+  padding:0 16px;background:var(--accent-dark);color:#fff;
+  font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  position:relative;z-index:2;
+}
+.ticker-track-wrap{flex:1;overflow:hidden;position:relative;height:100%;display:flex;align-items:center}
+.ticker-track{
+  display:inline-flex;align-items:center;gap:0;white-space:nowrap;
+  animation:tickerScroll 28s linear infinite;
+  padding-left:100%;
+}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-item{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;color:#fff;font-weight:500;padding:0 40px;
+}
+.ticker-item .ti{color:#F4C7C7;font-size:9px}
+@keyframes tickerScroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-100%)}
+}
+@media(max-width:640px){
+  .brand-bar{height:auto;min-height:104px;margin-top:64px;gap:12px;padding:14px 16px;flex-wrap:wrap}
+  .brand-bar-logo{height:52px;width:52px;border-radius:12px;padding:4px}
+  .brand-bar-divider{height:40px}
+  .brand-bar-sub{display:none}
+  .brand-bar-name{font-size:26px}
+  .ticker-label{padding:0 12px;font-size:9.5px}
+  .ticker-item{font-size:11.5px;padding:0 28px}
+}
+
+/* Embedded mode (loaded inside dashboard iframe): navbar is hidden,
+   so the brand-bar no longer needs the 64px offset that was reserving
+   space for it. Without this, a blank 64px gap appears at the top. */
+body.embedded .brand-bar{margin-top:0}
+@media(max-width:640px){
+  body.embedded .brand-bar{margin-top:0}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <div class="sidebar-logo">Sangam</div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="ti ti-x"></i></button>
+  </div>
+  <nav class="sidebar-body">
+    <div class="sidebar-section">College</div>
+    <a class="sidebar-item active" href="#about" onclick="closeSidebar()"><i class="ti ti-building-bank" style="font-size:16px"></i>About College</a>
+    <a class="sidebar-item" href="#association" onclick="closeSidebar()"><i class="ti ti-users" style="font-size:16px"></i>Association</a>
+    <a class="sidebar-item" href="#branches" onclick="closeSidebar()"><i class="ti ti-books" style="font-size:16px"></i>Branches</a>
+    <a class="sidebar-item" href="#events" onclick="closeSidebar()"><i class="ti ti-calendar" style="font-size:16px"></i>Events</a>
+    <a class="sidebar-item" href="pages/membership.html"><i class="ti ti-id-badge-2" style="font-size:16px"></i>Membership</a>
+    <div class="sidebar-section">Info</div>
+    <a class="sidebar-item" href="#about-dev" onclick="closeSidebar()"><i class="ti ti-code" style="font-size:16px"></i>VyomsTech</a>
+  </nav>
+  <div class="sidebar-foot">Made with care by VyomsTech</div>
+</aside>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-brand">
+      Sangam
+      <span class="nav-brand-sub">CGIT Raipur</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" href="#">Home</a>
+      <a class="nav-link" href="#about">College</a>
+      <a class="nav-link" href="#branches">Branches</a>
+      <a class="nav-link" href="#association">Alumni</a>
+      <a class="nav-link" href="#events">Events</a>
+      <a class="nav-link" href="pages/membership.html">Membership</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-signin" href="pages/auth.html">Sign In</a>
+      <a class="nav-cta" href="pages/auth.html">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── BRAND BAR ── -->
+<div class="brand-bar">
+  <div class="brand-bar-logos">
+    <img src="cgitlogo.jpg" alt="CGIT Raipur" class="brand-bar-logo"
+      onerror="this.outerHTML='<div class=\'brand-bar-logo\' style=\'display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:28px\'><i class=\'ti ti-building-bank\'></i></div>'">
+    <div class="brand-bar-divider"></div>
+    <img src="icons/sangam-logo.png" alt="Sangam logo" class="brand-bar-logo">
+  </div>
+  <div class="brand-bar-text">
+    <div class="brand-bar-name">CGIT <em>RAIPUR</em></div>
+    <div class="brand-bar-sub">Chhattisgarh Institute of Technology · Alumni &amp; Student Network</div>
+  </div>
+</div>
+
+<!-- ── TICKER: latest events & updates ── -->
+<div class="ticker-wrap">
+  <div class="ticker-label"><i class="ti ti-bell-ringing-2"></i> Latest</div>
+  <div class="ticker-track-wrap">
+    <div class="ticker-track" id="ticker-track">
+      <span class="ticker-item"><i class="ti ti-calendar-event"></i>Annual Alumni Meet 2026 — 15 Nov, CGIT Campus Auditorium</span>
+      <span class="ticker-item"><i class="ti ti-briefcase"></i>Campus Placement Drive — TCS &amp; Infosys — registration closes Oct 20</span>
+      <span class="ticker-item"><i class="ti ti-school"></i>Alumni Scholarship Applications Open — last date Oct 30</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Official Alumni Network · CGIT Raipur</div>
+      <h1 class="hero-title">Where knowledge<br><em>connects us all</em></h1>
+      <p class="hero-sub">Sangam is the official student and alumni network of Chhattisgarh Institute of Technology — connecting graduates, students, and opportunities.</p>
+      <div class="hero-actions">
+        <a href="pages/auth.html" class="btn-primary">Join the Network <i class="ti ti-arrow-right" style="font-size:14px"></i></a>
+        <a href="#about" class="btn-outline">Learn more</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat"><span class="hero-stat-label">Current students</span><span class="hero-stat-val">1,000<span>+</span></span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Alumni network</span><span class="hero-stat-val">6,000<span>+</span></span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Branches</span><span class="hero-stat-val">6</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Placement rate</span><span class="hero-stat-val">95<span>%</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LEADERSHIP ── -->
+<section class="section" id="leadership">
+  <div class="inner">
+    <div class="section-eyebrow">Leadership</div>
+    <h2 class="section-title">Message from our <em>leaders</em></h2>
+    <div class="leader-grid">
+      <div class="leader-card">
+        <div class="leader-avatar"><img src="cm.jpg" alt="Vishnu Deo Sai" onerror="this.style.display='none'"></div>
+        <div class="leader-name">Shri Vishnu Deo Sai</div>
+        <div class="leader-role">Chief Minister, Chhattisgarh</div>
+        <p class="leader-msg">"Education is the foundation of a progressive society. Sangam bridges the gap between knowledge and opportunity for our youth."</p>
+      </div>
+      <div class="leader-card">
+        <div class="leader-avatar"><img src="tm.jpg" alt="Guru Khushwant Saheb" onerror="this.style.display='none'"></div>
+        <div class="leader-name">Shri Guru Khushwant Saheb</div>
+        <div class="leader-role">Technical Education Minister</div>
+        <p class="leader-msg">"We are committed to building world-class institutions and empowering students with the resources they need to excel."</p>
+      </div>
+      <div class="leader-card">
+        <div class="leader-avatar"><img src="principal.jpg" alt="Dr. M.R. Khan" onerror="this.style.display='none'"></div>
+        <div class="leader-name">Dr. M.R. Khan</div>
+        <div class="leader-role">Principal, CGIT Raipur</div>
+        <p class="leader-msg">"Sangam is our effort to keep our alumni and students forever connected. Knowledge truly connects us all."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── GOVERNING BODY ── -->
+<section class="section" id="committee">
+  <div class="inner">
+    <div class="section-eyebrow">Alumni Association</div>
+    <h2 class="section-title">Governing <em>body</em></h2>
+    <p class="section-desc">The elected executive committee of the Alumni Association of CGIT Raipur.</p>
+    <div class="gb-grid">
+      <div class="gb-card">
+        <div class="gb-avatar"><span>AS</span><img src="team/abhay-shukla.jpg" alt="Mr. Abhay Shukla" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Abhay Shukla</div>
+        <div class="gb-role">President</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>DP</span><img src="team/dewashri-pansari.jpg" alt="Miss Dewashri Pansari" onerror="this.remove()"></div>
+        <div class="gb-name">Miss Dewashri Pansari</div>
+        <div class="gb-role">Vice President</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>KD</span><img src="team/kranti-kumar-dhruw.jpg" alt="Mr. Kranti Kumar Dhruw" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Kranti Kumar Dhruw</div>
+        <div class="gb-role">General Secretary</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>UP</span><img src="team/umashanker-patel.jpg" alt="Mr. Umashanker Patel" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Umashanker Patel</div>
+        <div class="gb-role">Joint Secretary</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>IC</span><img src="team/ishwar-singh-chandra.jpg" alt="Mr. Ishwar Singh Chandra" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Ishwar Singh Chandra</div>
+        <div class="gb-role">Treasurer</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>KP</span><img src="team/kunal-pansari.jpg" alt="Mr. Kunal Pansari" onerror="this.remove()"></div>
+        <div class="gb-name">Mr. Kunal Pansari</div>
+        <div class="gb-role">Executive Member</div>
+      </div>
+      <div class="gb-card">
+        <div class="gb-avatar"><span>DC</span><img src="team/deepali-chandrakar.jpg" alt="Mrs. Deepali Chandrakar" onerror="this.remove()"></div>
+        <div class="gb-name">Mrs. Deepali Chandrakar</div>
+        <div class="gb-role">Executive Member</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ── ABOUT ── -->
+<section class="section section-alt" id="about">
+  <div class="inner">
+    <div class="about-grid">
+      <div class="about-content">
+        <div class="section-eyebrow">About</div>
+        <h2 class="section-title">Chhattisgarh Institute<br>of <em>Technology</em></h2>
+        <p class="section-desc">Formerly known as Government Engineering College Raipur, CGIT was established in 2006 and is a premier engineering institution in Chhattisgarh, affiliated to CSVTU. With over 5,000 students across 8 branches, we are committed to excellence in technical education and research.</p>
+      </div>
+      <div>
+        <div class="info-list">
+          <div class="info-row">
+            <div class="info-label">Address</div>
+            <div class="info-val">Sejbahar, Raipur, Chhattisgarh — 492001</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Phone</div>
+            <div class="info-val">+91 771 2234567</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-val">cgitraipur.alumni@gecrraipur.ac.in</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Affiliation</div>
+            <div class="info-val">CSVTU · AICTE Approved</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Est.</div>
+            <div class="info-val">2006</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider-dark">
+
+<!-- ── BRANCHES ── -->
+<section class="section section-alt" id="branches">
+  <div class="inner">
+    <div class="section-eyebrow">Academics</div>
+    <h2 class="section-title">Our <em>branches</em></h2>
+    <div class="branch-grid">
+      <a class="branch-card" href="branches/cse.html">
+        <div class="branch-icon"><i class="ti ti-cpu"></i></div>
+        <div class="branch-code">CSE</div>
+        <div class="branch-name">Computer Science</div>
+      </a>
+      <a class="branch-card" href="branches/eee.html">
+        <div class="branch-icon"><i class="ti ti-bolt"></i></div>
+        <div class="branch-code">EEE</div>
+        <div class="branch-name">Electrical Engg.</div>
+      </a>
+      <a class="branch-card" href="branches/etc.html">
+        <div class="branch-icon"><i class="ti ti-antenna"></i></div>
+        <div class="branch-code">ET&amp;T</div>
+        <div class="branch-name">Electronics &amp; Comm.</div>
+      </a>
+      <a class="branch-card" href="branches/me.html">
+        <div class="branch-icon"><i class="ti ti-tool"></i></div>
+        <div class="branch-code">ME</div>
+        <div class="branch-name">Mechanical Engg.</div>
+      </a>
+      <a class="branch-card" href="branches/ce.html">
+        <div class="branch-icon"><i class="ti ti-building-arch"></i></div>
+        <div class="branch-code">CE</div>
+        <div class="branch-name">Civil Engineering</div>
+      </a>
+      <a class="branch-card" href="#branches">
+        <div class="branch-icon"><i class="ti ti-chart-dots-3"></i></div>
+        <div class="branch-code">DS</div>
+        <div class="branch-name">Data Science</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── ASSOCIATION ── -->
+<section class="section" id="association">
+  <div class="inner">
+    <div class="section-eyebrow">Alumni Cell</div>
+    <h2 class="section-title">Alumni <em>Association</em></h2>
+    <p class="section-desc">The CGIT Alumni Association connects thousands of graduates across India and globally. We organise annual meets, mentorship programs, scholarship funds, and placement drives to ensure current students have every advantage possible.</p>
+    <div class="assoc-grid">
+      <div class="assoc-item">
+        <div class="assoc-icon"><i class="ti ti-users" style="font-size:20px"></i></div>
+        <div class="assoc-name">Mentorship</div>
+        <p class="assoc-desc">One-on-one guidance from senior alumni across industries</p>
+      </div>
+      <div class="assoc-item">
+        <div class="assoc-icon"><i class="ti ti-briefcase" style="font-size:20px"></i></div>
+        <div class="assoc-name">Placement</div>
+        <p class="assoc-desc">Direct referrals from alumni in top companies nationwide</p>
+      </div>
+      <div class="assoc-item">
+        <div class="assoc-icon"><i class="ti ti-school" style="font-size:20px"></i></div>
+        <div class="assoc-name">Scholarships</div>
+        <p class="assoc-desc">Merit and need-based scholarships funded by alumni</p>
+      </div>
+      <div class="assoc-item">
+        <div class="assoc-icon"><i class="ti ti-calendar-event" style="font-size:20px"></i></div>
+        <div class="assoc-name">Events</div>
+        <p class="assoc-desc">Tech talks, webinars, and the annual alumni meet</p>
+      </div>
+    </div>
+    <div style="margin-top:32px"><a class="btn-primary" href="pages/membership.html">Become a Member <i class="ti ti-arrow-right" style="font-size:14px"></i></a></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── EVENTS ── -->
+<section class="section" id="events">
+  <div class="inner">
+    <div class="section-eyebrow">Upcoming</div>
+    <h2 class="section-title">Events &amp; <em>updates</em></h2>
+
+    <!-- Desktop table -->
+    <div class="events-table-wrap">
+      <table class="events-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Event</th>
+            <th class="col-venue">Venue</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="event-date-cell">15 Nov</td>
+            <td>
+              <div class="event-name">Annual Alumni Meet 2026</div>
+              <div class="event-detail">Join 500+ alumni for networking, talks, and the CGIT Awards.</div>
+            </td>
+            <td class="col-venue event-venue">CGIT Campus Auditorium<br><span style="color:var(--text-3)">10 AM – 5 PM</span></td>
+            <td><span class="event-badge">Event</span></td>
+          </tr>
+          <tr>
+            <td class="event-date-cell">24 Oct</td>
+            <td>
+              <div class="event-name">Campus Placement Drive — TCS &amp; Infosys</div>
+              <div class="event-detail">Final year students with 6.5+ CGPA. Registration closes Oct 20.</div>
+            </td>
+            <td class="col-venue event-venue">Seminar Hall<br><span style="color:var(--text-3)">9 AM</span></td>
+            <td><span class="event-badge green">Placement</span></td>
+          </tr>
+          <tr>
+            <td class="event-date-cell">01 Oct</td>
+            <td>
+              <div class="event-name">Alumni Scholarship Applications Open</div>
+              <div class="event-detail">Applications for 2026 batch. Last date: Oct 30.</div>
+            </td>
+            <td class="col-venue event-venue">scholarship@cit.ac.in</td>
+            <td><span class="event-badge blue">Scholarship</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards (shown below 640px) -->
+    <div class="event-cards">
+      <div class="event-card">
+        <div class="event-card-head">
+          <div>
+            <div class="event-card-date">15 Nov</div>
+            <div class="event-name" style="margin-top:6px">Annual Alumni Meet 2026</div>
+          </div>
+          <span class="event-badge">Event</span>
+        </div>
+        <div class="event-detail">Join 500+ alumni for networking, talks, and the CGIT Awards.</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:8px">CGIT Campus Auditorium · 10 AM – 5 PM</div>
+      </div>
+      <div class="event-card">
+        <div class="event-card-head">
+          <div>
+            <div class="event-card-date">24 Oct</div>
+            <div class="event-name" style="margin-top:6px">Campus Placement Drive — TCS &amp; Infosys</div>
+          </div>
+          <span class="event-badge green">Placement</span>
+        </div>
+        <div class="event-detail">Final year students with 6.5+ CGPA. Registration closes Oct 20.</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:8px">Seminar Hall · 9 AM</div>
+      </div>
+      <div class="event-card">
+        <div class="event-card-head">
+          <div>
+            <div class="event-card-date">01 Oct</div>
+            <div class="event-name" style="margin-top:6px">Alumni Scholarship Applications Open</div>
+          </div>
+          <span class="event-badge blue">Scholarship</span>
+        </div>
+        <div class="event-detail">Applications for 2026 batch. Last date: Oct 30.</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:8px">scholarship@cit.ac.in</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── DEV ── -->
+<section class="dev-section" id="about-dev">
+  <div class="dev-inner">
+    <div>
+      <div class="dev-eyebrow">Developers</div>
+      <h2 class="dev-title">Built by VyomsTech</h2>
+      <p class="dev-desc">VyomsTech is a student-led development company founded at CGIT Raipur, building open-source tools for the college community. Sangam is our flagship project — open to contributions.</p>
+      <a href="https://github.com/amanmehta276" class="btn-primary" style="display:inline-flex">
+        <i class="ti ti-brand-github" style="font-size:16px"></i>
+        View on GitHub
+      </a>
+    </div>
+    <div class="dev-card">
+      <div class="dev-avatar"><img src="aman.jpg" alt="Aman Mehta" onerror="this.style.display='none'"></div>
+      <div class="dev-name">Aman Mehta</div>
+      <div class="dev-role">Developer, Sangam</div>
+      <p class="dev-quote">"Sangam is a platform that brings together the alumni and students of CGIT, fostering a community of learning and growth."</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Sangam</div>
+    <div class="footer-links">
+      <a class="footer-link" href="#about">About</a>
+      <a class="footer-link" href="#branches">Branches</a>
+      <a class="footer-link" href="#events">Events</a>
+      <a class="footer-link" href="pages/auth.html">Sign In</a>
+      <a class="footer-link" href="#about-dev">VyomsTech</a>
+    </div>
+    <div class="footer-copy">© 2026 Sangam · Chhattisgarh Institute of Technology · Made by VyomsTech</div>
+  </div>
+</footer>
+
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+  document.body.style.overflow=document.getElementById('sidebar').classList.contains('open')?'hidden':'';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});
+
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? "http://localhost:5000/api"
+  : "https://sangam-z93f.onrender.com/api";
+const Auth={
+  getToken:()=>localStorage.getItem("sangam_token"),
+  setToken:(t)=>localStorage.setItem("sangam_token",t),
+  getUser:()=>JSON.parse(localStorage.getItem("sangam_user")||"null"),
+  setUser:(u)=>localStorage.setItem("sangam_user",JSON.stringify(u)),
+  clear:()=>{localStorage.removeItem("sangam_token");localStorage.removeItem("sangam_user")},
+  isLoggedIn:()=>!!localStorage.getItem("sangam_token"),
+};
+async function apiCall(path,options={}){
+  const token=Auth.getToken();
+  const res=await fetch(`${API_BASE}${path}`,{headers:{"Content-Type":"application/json",...(token?{"Authorization":`Bearer ${token}`}:{}),...(options.headers||{})},...options,body:options.body?JSON.stringify(options.body):undefined});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw{status:res.status,message:data.error||"Request failed",data};
+  return data;
+}
+
+(function(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const embedded=params.get('embedded')==='1';
+    if(embedded){
+      document.querySelector('.footer').style.display='none';
+      document.querySelector('.navbar').style.display='none';
+      document.body.style.paddingTop='0';
+      document.body.classList.add('embedded');
+    }
+  }catch(e){}
+})();
+
+// Ek hi function events + ticker dono update karta hai, taaki dono race na karein.
+// Priority: agar user logged in hai aur dynamic posts mil jaate hain, wahi use hoga
+// (ticker + table + mobile cards teeno). Warna admin ticker endpoint try hota hai
+// (login zaroori nahi). Dono fail ho jaayein to static HTML fallback wahi rehta hai.
+async function refreshLiveContent() {
+  const ticker = document.getElementById("ticker-track");
+  const token = Auth.getToken();
+
+  // 1) Logged-in user ke liye dynamic event posts (ticker + table + cards, sab ek saath)
+  if (token) {
+    try {
+      const res = await fetch(`${API_BASE}/posts?type=event&limit=5`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const posts = await res.json();
+      if (posts.length) {
+        if (ticker) {
+          const items = posts.map(p => {
+            const title = p.content.split("\n")[0];
+            return `<span class="ticker-item"><i class="ti ti-calendar-event"></i>${title}</span>`;
+          }).join("");
+          ticker.innerHTML = items + items; // duplicate for seamless loop
+        }
+
+        const tbody = document.querySelector(".events-table tbody");
+        if (tbody) {
+          tbody.innerHTML = posts.map(p => {
+            const date = new Date(p.created_at);
+            const dateStr = date.toLocaleDateString("en-IN", {day:"numeric", month:"short"});
+            return `<tr>
+              <td class="event-date-cell">${dateStr}</td>
+              <td>
+                <div class="event-name">${p.content.split("\n")[0]}</div>
+                <div class="event-detail">${p.content.split("\n").slice(1,3).join(" ")}</div>
+              </td>
+              <td class="col-venue event-venue">${p.content.split("\n")[3] || "—"}</td>
+              <td><span class="event-badge">${p.tags?.[0] || "Event"}</span></td>
+            </tr>`;
+          }).join("");
+        }
+
+        const cards = document.querySelector(".event-cards");
+        if (cards) {
+          cards.innerHTML = posts.map(p => {
+            const date = new Date(p.created_at);
+            const dateStr = date.toLocaleDateString("en-IN", {day:"numeric", month:"short"});
+            return `<div class="event-card">
+              <div class="event-card-head">
+                <div>
+                  <div class="event-card-date">${dateStr}</div>
+                  <div class="event-name" style="margin-top:6px">${p.content.split("\n")[0]}</div>
+                </div>
+                <span class="event-badge">${p.tags?.[0] || "Event"}</span>
+              </div>
+              <div class="event-detail">${p.content.split("\n").slice(1,3).join(" ")}</div>
+            </div>`;
+          }).join("");
+        }
+        return; // events se hi ticker bhar gaya, admin ticker call ki zaroorat nahi
+      }
+    } catch(e) {
+      console.warn("Dynamic events load failed, falling back to ticker/static");
+    }
+  }
+
+  // 2) Fallback: public admin-managed ticker (login zaroori nahi)
+  if (ticker) {
+    try {
+      const res = await fetch(`${API_BASE}/announcements/ticker`);
+      const items = await res.json();
+      if (items.length) {
+        const html = items.map(i =>
+          `<span class="ticker-item"><i class="ti ti-bell"></i>${i.text}</span>`
+        ).join("");
+        ticker.innerHTML = html + html; // duplicate for seamless loop
+      }
+      // items.length === 0 ho to static fallback HTML jaisa hai waisa hi rehta hai
+    } catch (e) {
+      console.warn("Ticker load failed, showing static fallback");
+    }
+  }
+}
+
+refreshLiveContent();
+</script>
+</body>
+</html>

@@ -3,10 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sangam — CGIT Raipur</title>
+
+<!-- ── Primary SEO ── -->
+<title>Sangam — Official Alumni &amp; Student Network of CGIT Raipur</title>
+<meta name="description" content="Sangam is the official alumni and student network of Chhattisgarh Institute of Technology (CGIT), Raipur. Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events.">
+<meta name="keywords" content="CGIT Raipur, Chhattisgarh Institute of Technology, CGIT alumni, CGIT Raipur alumni association, Sangam, CGIT placements, CGIT scholarships, engineering college Raipur, CSVTU college Raipur">
+<meta name="robots" content="index, follow">
+<meta name="author" content="VyomsTech">
+<link rel="canonical" href="https://cgitsangam.netlify.app/">
+
+<!-- ── Open Graph (WhatsApp / Facebook / LinkedIn preview) ── -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sangam — CGIT Raipur">
+<meta property="og:title" content="Sangam — Official Alumni &amp; Student Network of CGIT Raipur">
+<meta property="og:description" content="Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events at Chhattisgarh Institute of Technology, Raipur.">
+<meta property="og:url" content="https://cgitsangam.netlify.app/">
+<meta property="og:image" content="https://cgitsangam.netlify.app/icons/sangam-logo.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:locale" content="en_IN">
+
+<!-- ── Twitter Card ── -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sangam — Official Alumni &amp; Student Network of CGIT Raipur">
+<meta name="twitter:description" content="Connect with 6,000+ alumni, find mentorship, placements, scholarships, and campus events at CGIT Raipur.">
+<meta name="twitter:image" content="https://cgitsangam.netlify.app/icons/sangam-logo.png">
+
+<meta name="theme-color" content="#4A0E0E">
 <link rel="icon" href="favicon_io/favicon-16x16.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+
+<!-- ── Structured data for Google (Organization / EducationalOrganization) ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Chhattisgarh Institute of Technology, Raipur",
+  "alternateName": "CGIT Raipur",
+  "url": "https://cgitsangam.netlify.app/",
+  "logo": "https://cgitsangam.netlify.app/icons/sangam-logo.png",
+  "sameAs": [
+    "https://github.com/amanmehta276"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Sejbahar, Old Dhamtari Road",
+    "addressLocality": "Raipur",
+    "addressRegion": "Chhattisgarh",
+    "postalCode": "492001",
+    "addressCountry": "IN"
+  },
+  "alumni": {
+    "@type": "Organization",
+    "name": "Alumni Association of CGIT Raipur"
+  }
+}
+</script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -530,15 +583,18 @@ img{max-width:100%;display:block}
 @media(max-width:800px){.gb-card{flex:0 0 calc(50% - 10px)}}
 @media(max-width:480px){.gb-card{flex:0 0 100%}}
 
-/* ─── BRAND BAR (2x navbar height, sits right below navbar) ─── */
+/* ─── BRAND BAR (2 logos + name, sits right below navbar) ─── */
 .brand-bar{
-  background-image: none;
   margin-top:64px; /* push below fixed navbar */
-  height:128px;
+  height:auto;
+  min-height:128px;
   background:linear-gradient(135deg,var(--accent-dark) 0%,var(--ink-2) 55%,var(--accent-dark) 100%);
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  gap:20px;position:relative;overflow:hidden;
+  flex-wrap:nowrap;
+  gap:clamp(10px,2.5vw,28px);
+  padding:14px clamp(12px,3vw,32px);
+  position:relative;overflow:hidden;
 }
 .brand-bar::before{
   content:'';position:absolute;inset:0;
@@ -546,13 +602,19 @@ img{max-width:100%;display:block}
   pointer-events:none;
 }
 .brand-bar-logo{
-  height:84px;width:84px;border-radius:18px;object-fit:cover;
-  background:#fff;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  height:clamp(48px,9vw,84px);
+  width:clamp(48px,9vw,84px);
+  border-radius:clamp(10px,2vw,18px);
+  object-fit:contain;
+  background:#fff;
+  padding:clamp(3px,.6vw,6px);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
   position:relative;z-index:1;flex-shrink:0;
 }
 .brand-bar-name{
   font-family:'Playfair Display',serif;
-  font-size:clamp(34px,5vw,54px);color:#fff;letter-spacing:.5px;
+  font-size:clamp(22px,5vw,54px);color:#fff;letter-spacing:.5px;
+  line-height:1.05;white-space:nowrap;text-align:center;min-width:0;
   position:relative;z-index:1;
 }
 .brand-bar-name em{color:var(--accent-3);font-style:italic;font-weight:400}
@@ -586,19 +648,21 @@ img{max-width:100%;display:block}
   to{transform:translateX(-100%)}
 }
 @media(max-width:640px){
-  .brand-bar{height:104px;margin-top:64px;gap:14px}
+  .brand-bar{min-height:104px;margin-top:64px;gap:14px;padding:12px 12px}
   .brand-bar-logo{height:64px;width:64px;border-radius:14px}
   .ticker-label{padding:0 12px;font-size:9.5px}
   .ticker-item{font-size:11.5px;padding:0 28px}
+}
+@media(max-width:380px){
+  .brand-bar{min-height:96px;gap:8px;padding:10px 8px}
+  .brand-bar-logo{height:44px;width:44px}
+  .brand-bar-name{font-size:20px;white-space:normal}
 }
 
 /* Embedded mode (loaded inside dashboard iframe): navbar is hidden,
    so the brand-bar no longer needs the 64px offset that was reserving
    space for it. Without this, a blank 64px gap appears at the top. */
 body.embedded .brand-bar{margin-top:0}
-@media(max-width:640px){
-  body.embedded .brand-bar{margin-top:0}
-}
 </style>
 </head>
 <body>
@@ -1005,32 +1069,6 @@ body.embedded .brand-bar{margin-top:0}
   </div>
 </footer>
 
-<!--
-=====================================================================
- BRANCH INFO POPUP — index.html ke #branches section ke liye
-
- Branch card (CSE, EEE, ET&T, ME, CE, DS) pe click → popup khulta hai:
-   • Branch intro
-   • Numbers: students, yearly intake, faculty, labs, established, placement
-   • HOD (photo, naam, qualification, email)
-   • Faculty list (naam, designation, specialization)
-   • Labs & facilities
-   • "Full branch page" button (card ke purane href pe)
-
- Lagane ka tarika (HTML me koi card edit nahi karna):
-   1) PART 1 (<style>) ko </head> se just pehle paste karo.
-   2) PART 2 (<script>) ko </body> se just pehle paste karo.
-   3) Script ke upar BRANCHES me apna real data bharo.
-      null / khaali list = "—" ya "coming soon" dikhega.
-      (Maine HOD/faculty ke naam aur numbers guess nahi kiye.)
-
- Faculty add karna:
-   faculty: [
-     { name:'Dr. Name Surname', role:'Professor', area:'Machine Learning', photo:'team/xyz.jpg' },
-     { name:'Mr. Name Surname', role:'Assistant Professor', area:'Databases' }
-   ]
-=====================================================================
--->
 
 <!-- ============================ PART 1: CSS ============================ -->
 <style>
@@ -1118,50 +1156,6 @@ body.embedded .brand-bar{margin-top:0}
   .bi-fac{grid-template-columns:1fr}
 }
 </style>
-
-
-<style>
-/* Brand bar: 2 logos + naam, fully responsive */
-.brand-bar{
-  height:auto;
-  min-height:128px;
-  padding:14px clamp(12px,3vw,32px);
-  gap:clamp(10px,2.5vw,28px);
-  flex-wrap:nowrap;
-}
-.brand-bar .brand-bar-logo{
-  height:clamp(48px,9vw,84px);
-  width:clamp(48px,9vw,84px);
-  border-radius:clamp(10px,2vw,18px);
-  padding:clamp(3px,.6vw,6px);
-  object-fit:contain;          /* college logo ka shape na kate */
-  background:#fff;
-  flex-shrink:0;
-}
-.brand-bar .brand-bar-name{
-  font-size:clamp(22px,5vw,54px);
-  line-height:1.05;
-  white-space:nowrap;
-  text-align:center;
-  min-width:0;
-}
- 
-/* Tablet / phone */
-@media(max-width:640px){
-  .brand-bar{min-height:104px;padding:12px 12px}
-}
- 
-/* Very small phones: naam do line me, logos thode aur chhote */
-@media(max-width:380px){
-  .brand-bar{min-height:96px;gap:8px;padding:10px 8px}
-  .brand-bar .brand-bar-logo{height:44px;width:44px}
-  .brand-bar .brand-bar-name{font-size:20px;white-space:normal}
-}
- 
-/* Dashboard iframe (embedded) me pehle jaisa: top offset nahi */
-body.embedded .brand-bar{margin-top:0}
-</style>
- 
 
 <!-- ============================ PART 2: JS ============================= -->
 <script>
