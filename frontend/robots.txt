@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pages/dashboard.html
+Disallow: /pages/admin.html
+Disallow: /pages/admin-ticker.html
+
+Sitemap: https://cgitsangam.netlify.app/sitemap.xml
