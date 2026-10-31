@@ -80,9 +80,21 @@ def get_stats():
 @admin_bp.route("/users", methods=["GET"])
 @_admin_required
 def list_users():
-    limit = int(request.args.get("limit", 100))
+    try:
+        limit = min(max(int(request.args.get("limit", 100)), 1), 200)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid limit"}), 400
+    filt = {}
+    role = (request.args.get("role") or "").strip().lower()
+    branch = (request.args.get("branch") or "").strip().upper()
+    if role:
+        if role not in {"student", "alumni", "teacher", "admin"}:
+            return jsonify({"error": "Invalid role"}), 400
+        filt["role"] = role
+    if branch:
+        filt["branch"] = branch
     users = list(
-        users_col.find({}, {"password": 0}).sort("created_at", -1).limit(limit)
+        users_col.find(filt, {"password": 0}).sort("created_at", -1).limit(limit)
     )
     for u in users:
         u["id"] = str(u.pop("_id"))
@@ -98,13 +110,20 @@ def admin_update_user(uid):
     allow = ["role", "trust_level", "name", "mobile", "branch", "batch_year"]
     update = {k: data[k] for k in allow if k in data}
     update["updated_at"] = datetime.datetime.utcnow()
+    if "role" in update and update["role"] not in {"student", "alumni", "teacher", "admin"}:
+        return jsonify({"error": "Invalid role"}), 400
+    if "trust_level" in update and update["trust_level"] not in {"new", "partial", "verified"}:
+        return jsonify({"error": "Invalid trust level"}), 400
     try:
-        users_col.update_one({"_id": ObjectId(uid)}, {"$set": update})
-        user = users_col.find_one({"_id": ObjectId(uid)}, {"password": 0})
-        user["id"] = str(user.pop("_id"))
-        return jsonify(user)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        oid = ObjectId(uid)
+    except Exception:
+        return jsonify({"error": "Invalid user id"}), 400
+    result = users_col.update_one({"_id": oid}, {"$set": update})
+    if result.matched_count == 0:
+        return jsonify({"error": "User not found"}), 404
+    user = users_col.find_one({"_id": oid}, {"password": 0})
+    user["id"] = str(user.pop("_id"))
+    return jsonify(user)
 
 # ── Delete user ────────────────────────────────────────────
 # FIXED: route ab /api/admin/users/:id hai
@@ -112,10 +131,13 @@ def admin_update_user(uid):
 @_admin_required
 def admin_delete_user(uid):
     try:
-        users_col.delete_one({"_id": ObjectId(uid)})
-        return jsonify({"ok": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        oid = ObjectId(uid)
+    except Exception:
+        return jsonify({"error": "Invalid user id"}), 400
+    result = users_col.delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({"ok": True})
 
 # ── Broadcast ──────────────────────────────────────────────
 @admin_bp.route("/broadcast", methods=["POST"])

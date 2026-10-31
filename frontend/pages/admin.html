@@ -1044,7 +1044,7 @@ async function loadDashboard() {
       ? recent.map(p => `
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <div style="width:28px;height:28px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0">
-              ${(p.author?.name || "?")[0]}
+              ${esc((p.author?.name || "?")[0])}
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:600;color:#fff">${esc(p.author?.name || "?")} posted</div>
@@ -1094,7 +1094,7 @@ function renderUsers(users) {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
-          <div class="table-av">${(u.name||"?")[0]}</div>
+          <div class="table-av">${esc((u.name||"?")[0])}</div>
           <div><div class="table-name">${esc(u.name||"—")}</div><div class="table-meta">${esc(u.email||u.mobile||"—")}</div></div>
         </div>
       </td>
@@ -1107,7 +1107,7 @@ function renderUsers(users) {
         <div class="action-btns">
           <button class="act-btn" onclick="openUserModal('${u.id}')" title="Edit"><i class="ti ti-edit"></i></button>
           <button class="act-btn" onclick="verifyUser('${u.id}','${u.trust_level||"new"}')" title="Verify"><i class="ti ti-badge-check"></i></button>
-          <button class="act-btn danger" onclick="deleteUser('${u.id}','${esc(u.name||"")}')"><i class="ti ti-trash"></i></button>
+          <button class="act-btn danger" onclick="deleteUser('${u.id}')"><i class="ti ti-trash"></i></button>
         </div>
       </td>
     </tr>`).join("");
@@ -1166,7 +1166,8 @@ async function verifyUser(uid, current) {
   } catch { showToast("Could not update trust", "error"); }
 }
 
-async function deleteUser(uid, name) {
+async function deleteUser(uid) {
+  const name = allUsers.find(user => user.id === uid)?.name || "this user";
   if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
   try {
     // FIXED: /admin/users/ prefix
@@ -1578,8 +1579,11 @@ async function sendBroadcast() {
   try {
     const res = await _adminPost("/admin/broadcast", { title, body, target, notif_type: type });
     showToast(`Broadcast sent to ${res.sent_to} users! ✓`, "success");
-  } catch {
-    showToast("Broadcast queued (backend offline)", "info");
+  } catch(e) {
+    showToast(e.message || "Could not send broadcast", "error");
+    btn.innerHTML = `<i class="ti ti-send" style="font-size:14px"></i> Send Broadcast`;
+    btn.disabled = false;
+    return;
   }
 
   broadcastHistory.unshift({ title, body, target, type, sent_at: new Date().toISOString() });
@@ -1738,7 +1742,11 @@ async function _adminDelete(path) {
 }
 
 /* ── Utils ─────────────────────────────────────────────── */
-function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+}
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 function formatDate(iso) { if (!iso) return "—"; return new Date(iso).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); }
 function timeAgo(iso) { if(!iso)return""; const d=(Date.now()-new Date(iso))/1000; if(d<60)return"just now"; if(d<3600)return Math.floor(d/60)+"m ago"; if(d<86400)return Math.floor(d/3600)+"h ago"; return Math.floor(d/86400)+"d ago"; }

@@ -111,7 +111,12 @@ def login():
     if not user.get("password"):
         return jsonify({"error": "no_password", "message": "This account has no password set. Please contact admin."}), 403
 
-    if not check_password_hash(user["password"], password):
+    try:
+        password_matches = check_password_hash(user["password"], password)
+    except (TypeError, ValueError):
+        password_matches = False
+
+    if not password_matches:
         return jsonify({"error": "wrong_password", "message": "Wrong password. Try again."}), 401
 
     token = create_token(str(user["_id"]), roll, user.get("role", "student"))

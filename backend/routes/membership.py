@@ -261,7 +261,10 @@ def webhook():
     if not hmac.compare_digest(expected, sig):
         return jsonify({"error": "Invalid signature"}), 400
 
-    event = json.loads(raw or b"{}")
+    try:
+        event = json.loads(raw or b"{}")
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid webhook payload"}), 400
     if event.get("event") in ("payment.captured", "order.paid"):
         ent = (event.get("payload", {}).get("payment", {}) or {}).get("entity", {}) or {}
         pay = payments_col.find_one({"order_id": ent.get("order_id")})
@@ -292,6 +295,12 @@ def submit_bank_transfer():
     user = users_col.find_one({"_id": ObjectId(uid)})
     if not user:
         return jsonify({"error": "User not found"}), 404
+
+    if cur:
+        cur_rank = PLANS.get(cur["plan"], {}).get("rank", 0)
+        if plan["rank"] < cur_rank or (plan["rank"] == cur_rank and plan_id != "general"):
+            return jsonify({"error": "already_member",
+                            "message": f"You are already a {PLANS[cur['plan']]['name']}."}), 409
 
     # Don't let the same reference be submitted twice
     if payments_col.find_one({"utr": utr}):
